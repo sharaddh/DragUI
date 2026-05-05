@@ -8,7 +8,7 @@ export default function ComponentBuilder({ token, onSuccess }) {
     label: "",
     category: "",
     description: "",
-    code: "",
+    template: "", // path or template reference
     installSteps: "",
     props: [],
   });
@@ -27,7 +27,7 @@ export default function ComponentBuilder({ token, onSuccess }) {
   };
 
   const handleCodeChange = (e) => {
-    setFormData(prev => ({ ...prev, code: e.target.value }));
+    // Remove handleCodeChange, not needed
   };
 
   const handleInstallChange = (e) => {
@@ -65,9 +65,12 @@ export default function ComponentBuilder({ token, onSuccess }) {
     e.preventDefault();
 
     try {
+      // Only send allowed fields
+      const { name, label, category, description, template, installSteps, props } = formData;
+      const payload = { name, label, category, description, template, installSteps, props };
       const response = await axios.post(
         "http://localhost:5000/api/admin/components/create",
-        formData,
+        payload,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -79,7 +82,7 @@ export default function ComponentBuilder({ token, onSuccess }) {
         label: "",
         category: "",
         description: "",
-        code: "",
+        template: "",
         installSteps: "",
         props: [],
       });
@@ -324,10 +327,7 @@ npm install @heroicons/react"
         {step === "review" && (
           <div className="space-y-4">
             <div className="bg-white p-4 rounded-lg space-y-3">
-              <div>
-                <div className="text-xs text-slate-500 uppercase">Name</div>
-                <div className="font-semibold">{formData.name}</div>
-              </div>
+              
               <div>
                 <div className="text-xs text-slate-500 uppercase">Category</div>
                 <div className="font-semibold">{formData.category}</div>

@@ -11,7 +11,7 @@ router.post(
   adminAuth,
   async (req, res) => {
     try {
-      const { name, label, category, description, code, installSteps, props } = req.body;
+      const { name, label, category, description, template, installSteps, props } = req.body;
 
       if (!name || !category) {
         return res.status(400).json({ message: "Name and category are required" });
@@ -22,10 +22,9 @@ router.post(
         label: label || name,
         category,
         description: description || "",
-        code: code || "",
         installSteps: installSteps || "",
         props: props || [],
-        path: `${category}/${name}`,
+        path: template || `${category}/${name}`,
       });
 
       res.status(201).json({
