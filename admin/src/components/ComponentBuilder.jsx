@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import axios from "axios";
 
 export default function ComponentBuilder({ token, onSuccess }) {
-  const [step, setStep] = useState("basic"); // basic, code, props, review
+  const [step, setStep] = useState("basic");
   const [formData, setFormData] = useState({
     name: "",
     label: "",
     category: "",
     description: "",
-    template: "", // path or template reference
+    template: "", 
     installSteps: "",
     props: [],
   });
