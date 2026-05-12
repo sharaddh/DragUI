@@ -52,30 +52,33 @@ export const useBuilderStore = create((set, get) => ({
 
   selectComponent: (id) => set({ selectedId: id }),
 
- addComponent: (parentId, component) => {
-  console.log("🔥 addComponent called:", { parentId, component });
-  
-  const newTree = JSON.parse(JSON.stringify(get().tree));
+  addComponent: (parentId, component) => {
+    const newTree = JSON.parse(JSON.stringify(get().tree));
 
-  function add(node) {
-    if (node.id === parentId) {
-      console.log("✅ Found parent node, adding component");
-      node.children.push(component);
-      return true;
+    let added = false;
+
+    function add(node) {
+      if (node.id === parentId) {
+        node.children.push(component);
+        added = true;
+        return true;
+      }
+
+      for (let child of node.children) {
+        if (add(child)) return true;
+      }
+
+      return false;
     }
 
-    for (let child of node.children) {
-      if (add(child)) return true;
+    add(newTree);
+
+    if (!added) {
+      newTree.children.push(component);
     }
 
-    return false;
-  }
-
-  const success = add(newTree);
-  console.log("🔥 addComponent result:", { success, treeAfter: newTree });
-
-  set({ tree: newTree });
-},
+    set({ tree: newTree });
+  },
 
   // 🔥 UPDATE PROPS
   updateProps: (id, newProps) => {

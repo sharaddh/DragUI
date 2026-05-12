@@ -42,7 +42,6 @@ export default function Sidebar() {
   const registry = useRegistry();
   const addComponent = useBuilderStore((s) => s.addComponent);
   
-  // Filter out invalid entries
   const validRegistry = registry.filter((comp) => comp && comp.type);
   console.log("📦 Sidebar registry:", { total: registry.length, valid: validRegistry.length, items: validRegistry });
 

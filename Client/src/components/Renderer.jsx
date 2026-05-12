@@ -6,12 +6,13 @@ export default function Renderer({ node }) {
   const { selectedId, selectComponent } = useBuilderStore();
   const { setNodeRef, isOver } = useDroppable({ id: node.id });
 
+  const isRoot = node.id === "root";
+  const isUnknown = !components[node.type];
   const Comp = components[node.type] || "div";
-  
-  console.log("🎨 Rendering node:", { type: node.type, id: node.id, Comp: Comp?.name || "div" });
 
   const handleClick = (e) => {
     e.stopPropagation();
+    if (isRoot) return;
     selectComponent(node.id);
   };
 
@@ -60,8 +61,12 @@ export default function Renderer({ node }) {
     ...cleanCssProps,
     outline: selectedId === node.id ? "2px solid #06b6d4" : "none",
     backgroundColor: isOver && node.type === "Container" ? "#e0f2fe" : cleanCssProps.backgroundColor,
-    cursor: "pointer",
+    cursor: isRoot ? "default" : "pointer",
     userSelect: "none",
+    minHeight: isUnknown ? "64px" : undefined,
+    minWidth: isUnknown ? "120px" : undefined,
+    border: isUnknown ? "1px dashed #f59e0b" : cleanCssProps.border,
+    padding: isUnknown ? "12px" : undefined,
   };
 
   // Filter out CSS props from regular props to avoid DOM attribute warnings
@@ -80,6 +85,9 @@ export default function Renderer({ node }) {
         selectedId === node.id ? "outline-2" : ""
       } ${isOver && node.type === "Container" ? "outline-2 outline-cyan-400" : ""}`}
     >
+      {isUnknown && !node.children?.length ? (
+        <div className="text-xs text-slate-500">Unknown component: {node.type}</div>
+      ) : null}
       {node.children?.map((child) => (
         <Renderer key={child.id} node={child} />
       ))}

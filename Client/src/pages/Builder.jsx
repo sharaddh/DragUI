@@ -17,6 +17,11 @@ export default function Builder() {
   
   // Configure sensors for drag detection
   const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(MouseSensor, {
       activationConstraint: {
         distance: 8,
@@ -25,36 +30,30 @@ export default function Builder() {
   );
 
   const handleDragStart = ({ active }) => {
-    console.log("🚀 handleDragStart:", active);
-    setActiveDrag(active.data.current);
+    const payload = active.data?.current || active.data || null;
+    setActiveDrag(payload);
   };
 
   const handleDragEnd = ({ active, over }) => {
     setActiveDrag(null);
 
-    console.log("🔥 handleDragEnd called:", { active, over });
+    const payload = active.data?.current || active.data;
+    const fallbackType = active.id?.startsWith("tool-") ? active.id.split("tool-")[1].split("-")[0] : null;
+    const type = payload?.type || fallbackType;
+    const props = payload?.props || {};
 
-    if (!over) {
-      console.log("❌ No over detected");
+    const parentId = over?.id === "canvas" ? "root" : over?.id || "root";
+
+    console.log("🔥 handleDragEnd", { activeId: active.id, over, type, parentId, payload });
+
+    if (!type) {
       return;
     }
-
-    const payload = active.data.current;
-    console.log("🔥 Payload:", payload);
-    
-    if (!payload || !payload.type) {
-      console.log("❌ Invalid payload");
-      return;
-    }
-
-    // Allow drops to canvas or any container
-    const parentId = over.id === "canvas" ? "root" : over.id;
-    console.log("🔥 Adding component to parent:", parentId);
 
     addComponent(parentId, {
       id: Date.now().toString(),
-      type: payload.type,
-      props: { ...payload.props },
+      type,
+      props: { ...props },
       children: [],
     });
   };

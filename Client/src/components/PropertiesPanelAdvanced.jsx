@@ -12,7 +12,7 @@ export default function PropertiesPanelAdvanced() {
     borders: false,
   });
 
-  if (!selectedId) {
+  if (!selectedId || selectedId === "root") {
     return (
       <aside className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="text-center py-8 text-slate-500">
