@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { DndContext, DragOverlay, PointerSensor, MouseSensor, useSensor, useSensors } from "@dnd-kit/core";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import Canvas from "../components/Canvas";
@@ -17,8 +17,10 @@ export default function Builder() {
   
   // Configure sensors for drag detection
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      distance: 8,
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
     })
   );
 
