@@ -24,7 +24,8 @@ router.post(
         description: description || "",
         installSteps: installSteps || "",
         props: props || [],
-        path: template || `${category}/${name}`,
+        code: template || "",
+        path: `${category}/${name}`,
       });
 
       res.status(201).json({

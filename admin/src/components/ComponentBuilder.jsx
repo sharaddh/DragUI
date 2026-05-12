@@ -102,7 +102,7 @@ export default function ComponentBuilder({ token, onSuccess }) {
         label: "",
         category: "",
         description: "",
-        template: "",
+        code: "",
         installSteps: "",
         props: [],
       });

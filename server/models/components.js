@@ -15,7 +15,7 @@ const componentSchema = new mongoose.Schema({
   category: String,
   description: String,
   path: String, // template path
-  // code: String, // JSX code (removed, do not store raw code)
+  code: String, // JSX code
   installSteps: String, // Installation instructions
   props: [propSchema],
   files: [String],
