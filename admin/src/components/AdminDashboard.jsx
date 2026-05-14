@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { LiveProvider, LivePreview } from "react-live";
 import ComponentBuilder from "./ComponentBuilder";
 import "./AdminDashboard.css";
 
@@ -71,6 +72,17 @@ const AdminDashboard = ({ token, onLogout }) => {
                 <div className="components-grid">
                   {components.map((component) => (
                     <div key={component._id} className="component-card">
+                      <div className="component-preview">
+                        {component.code ? (
+                          <LiveProvider code={component.code} scope={{ React }}>
+                            <div className="preview-container">
+                              <LivePreview />
+                            </div>
+                          </LiveProvider>
+                        ) : (
+                          <div className="preview-placeholder">No preview available</div>
+                        )}
+                      </div>
                       <h3>{component.label || component.name}</h3>
                       <p>
                         <strong>Type:</strong> {component.type}

@@ -1,6 +1,8 @@
+import React from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { useRegistry } from "../hooks/useRegistry";
 import { useBuilderStore } from "../store/useBuilderStore";
+import { components } from "../DropUi/index";
 
 function ToolItem({ comp, index }) {
   if (!comp || !comp.type) {
@@ -18,6 +20,8 @@ function ToolItem({ comp, index }) {
   
   console.log("🎯 ToolItem created:", { type: comp.type, id: `tool-${comp.type}-${index}`, hasListeners: !!listeners });
 
+  const Comp = components[comp.type];
+
   return (
     <div
       ref={setNodeRef}
@@ -30,10 +34,17 @@ function ToolItem({ comp, index }) {
           : undefined,
         opacity: isDragging ? 0.7 : 1,
       }}
-      className="mb-3 cursor-grab rounded-xl border border-slate-200 bg-slate-50 p-3 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-100"
+      className="mb-3 cursor-grab rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-100"
     >
-      <div className="font-semibold text-slate-800">{comp.label}</div>
-      <div className="mt-1 text-xs text-slate-500">Drag to canvas</div>
+      <div className="flex flex-col items-center">
+        <div className="w-full h-20 flex items-center justify-center border border-gray-200 rounded bg-gray-50 overflow-hidden">
+          {Comp ? <Comp {...comp.defaultProps} /> : <div>Preview not available</div>}
+        </div>
+        <div className="mt-2 text-center">
+          <div className="font-semibold text-slate-800">{comp.label}</div>
+          <div className="text-xs text-slate-500">Drag to canvas</div>
+        </div>
+      </div>
     </div>
   );
 }
