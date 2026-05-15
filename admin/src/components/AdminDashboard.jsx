@@ -17,6 +17,7 @@ const AdminDashboard = ({ token, onLogout }) => {
     try {
       const response = await axios.get(
         "http://localhost:5000/api/admin/components",
+        "http://localhost:5000/api/admin/components",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
