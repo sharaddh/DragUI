@@ -43,20 +43,20 @@ export default function Renderer({ node }) {
     "flexWrap",
   ]);
 
-  const { style: nodeCustomStyle, children, className, ...rawProps } = node.props || {};
+  const { style: nodeCustomStyle, className, ...rawProps } = node.props || {};
   const cssProps = {};
   const domProps = {};
 
   Object.entries(rawProps).forEach(([key, value]) => {
     if (CSS_STYLE_KEYS.has(key)) {
-      cssProps[key] = value;
+      cssProps[key] = key === "fontSize" ? mapFontSize(value) : value;
     } else {
       domProps[key] = value;
     }
   });
 
   const cleanCssProps = Object.fromEntries(
-    Object.entries(cssProps).filter(([_, v]) => v !== undefined)
+    Object.entries(cssProps).filter(([, value]) => value !== undefined)
   );
 
   const style = {
