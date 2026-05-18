@@ -1,8 +1,23 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { LiveProvider, LivePreview } from "react-live";
+import { LiveProvider, LivePreview, LiveError } from "react-live";
 import ComponentBuilder from "./ComponentBuilder";
 import "./AdminDashboard.css";
+
+const getComponentName = (code) => {
+  const functionMatch = code?.match(/function\s+([A-Za-z0-9_]+)/);
+  const constMatch = code?.match(/const\s+([A-Za-z0-9_]+)\s*=\s*/);
+  const arrowMatch = code?.match(/([A-Za-z0-9_]+)\s*=\s*\(.*\)\s*=>/);
+  return (functionMatch || constMatch || arrowMatch)?.[1] || "ComponentPreview";
+};
+
+const wrapPreviewCode = (code) => {
+  const trimmed = code?.trim();
+  if (!trimmed) return "";
+  if (trimmed.includes("render(")) return trimmed;
+  const name = getComponentName(trimmed);
+  return `${trimmed}\n\nrender(<${name} />);`;
+};
 
 const AdminDashboard = ({ token, onLogout }) => {
   const [components, setComponents] = useState([]);
@@ -74,9 +89,10 @@ const AdminDashboard = ({ token, onLogout }) => {
                     <div key={component._id} className="component-card">
                       <div className="component-preview">
                         {component.code ? (
-                          <LiveProvider code={component.code} scope={{ React }}>
+                          <LiveProvider code={wrapPreviewCode(component.code)} scope={{ React }} noInline>
                             <div className="preview-container">
                               <LivePreview />
+                              <LiveError className="preview-error" />
                             </div>
                           </LiveProvider>
                         ) : (

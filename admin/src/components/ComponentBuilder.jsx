@@ -2,6 +2,32 @@ import React, { useState } from "react";
 import axios from "axios";
 import { LiveProvider, LiveEditor, LiveError, LivePreview } from "react-live";
 
+const defaultCode = `function ComponentPreview({ title = "Component title", description = "A live preview of your component." }) {
+  return (
+    <div style={{ padding: 24, borderRadius: 24, background: "#eff6ff", color: "#0f172a", border: "1px solid #c7d2fe" }}>
+      <h2 style={{ margin: 0, fontSize: 22 }}>{title}</h2>
+      <p style={{ margin: "12px 0 0", color: "#475569" }}>{description}</p>
+    </div>
+  );
+}`;
+
+const defaultPreviewCode = `${defaultCode}\n\nrender(<ComponentPreview />);`;
+
+function getComponentName(code) {
+  const functionMatch = code.match(/function\s+([A-Za-z0-9_]+)/);
+  const constMatch = code.match(/const\s+([A-Za-z0-9_]+)\s*=\s*/);
+  const arrowMatch = code.match(/([A-Za-z0-9_]+)\s*=\s*\(.*\)\s*=>/);
+  return (functionMatch || constMatch || arrowMatch)?.[1] || "ComponentPreview";
+}
+
+function getPreviewCode(code) {
+  const trimmed = code?.trim();
+  if (!trimmed) return defaultPreviewCode;
+  if (trimmed.includes("render(")) return trimmed;
+  const name = getComponentName(trimmed);
+  return `${trimmed}\n\nrender(<${name} />);`;
+}
+
 export default function ComponentBuilder({ token, onSuccess }) {
   const [step, setStep] = useState("basic");
   const [formData, setFormData] = useState({
@@ -9,7 +35,7 @@ export default function ComponentBuilder({ token, onSuccess }) {
     label: "",
     category: "",
     description: "",
-    code: "", 
+    code: defaultCode,
     installSteps: "",
     props: [],
   });
@@ -102,7 +128,7 @@ export default function ComponentBuilder({ token, onSuccess }) {
         label: "",
         category: "",
         description: "",
-        code: "",
+        code: defaultCode,
         installSteps: "",
         props: [],
       });
@@ -114,10 +140,10 @@ export default function ComponentBuilder({ token, onSuccess }) {
   };
 
   return (
-    <div className="bg-slate-50 rounded-3xl p-6 border border-slate-200">
+    <div className="builder-panel">
       <h2 className="text-2xl font-bold mb-6">Create New Component</h2>
 
-      <div className="flex gap-2 mb-6">
+      <div className="builder-step-buttons">
         {["basic", "code", "props", "review"].map((s) => (
           <button
             key={s}
@@ -207,19 +233,20 @@ export default function ComponentBuilder({ token, onSuccess }) {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-semibold mb-2">Component Code (JSX)</label>
-              <LiveProvider code={formData.code} scope={{ React }}>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
+              <LiveProvider code={getPreviewCode(formData.code)} scope={{ React }} noInline>
+                <div className="code-step-grid">
+                  <div className="editor-panel">
                     <LiveEditor
+                      code={formData.code}
                       onChange={handleCodeChange}
                       className="w-full rounded-lg border border-slate-300 p-4 font-mono text-sm"
-                      style={{ minHeight: "300px" }}
+                      style={{ minHeight: "320px", background: "#f8fafc" }}
                     />
-                    <LiveError className="text-red-500 mt-2" />
+                    <LiveError className="preview-error" />
                   </div>
-                  <div>
+                  <div className="live-preview-card">
                     <label className="block text-sm font-semibold mb-2">Live Preview</label>
-                    <div className="border border-slate-300 rounded-lg p-4 bg-white min-h-[300px]">
+                    <div className="border border-slate-300 rounded-2xl p-4 bg-white flex items-center justify-center" style={{ minHeight: "320px" }}>
                       <LivePreview />
                     </div>
                   </div>
