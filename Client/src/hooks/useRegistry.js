@@ -13,6 +13,7 @@ export function useRegistry() {
           const mapped = res.data.map((comp) => ({
             type: comp.name,
             label: comp.label,
+            template: comp.code || comp.template || "",
             defaultProps: comp.props?.reduce((acc, prop) => {
               acc[prop.name] = prop.default || "";
               return acc;
@@ -23,7 +24,7 @@ export function useRegistry() {
             }, {}) || {},
           }));
 
-          setRegistry(mapped);
+          setRegistry([...localRegistry, ...mapped]);
           return;
         }
 

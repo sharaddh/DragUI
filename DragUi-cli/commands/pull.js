@@ -73,14 +73,14 @@ function ensureDropUiPackage() {
 
 export function Button({ children, text, className = '', ...props }) {
   return React.createElement('button', {
-    className: \`rounded-lg bg-cyan-500 px-4 py-2 text-white \${className}\`,
+    className: 'rounded-lg bg-cyan-500 px-4 py-2 text-white ' + className,
     ...props
   }, text || children);
 }
 
 export function Container({ children, className = '', ...props }) {
   return React.createElement('div', {
-    className: \`rounded-3xl border border-slate-200 bg-white p-4 \${className}\`,
+    className: 'rounded-3xl border border-slate-200 bg-white p-4 ' + className,
     ...props
   }, children);
 }
@@ -134,6 +134,7 @@ const Renderer = ({ node }) => {
   if (!node) return null;
 
   const Comp = componentRegistry[node.type] || 'div';
+  const isKnownComponent = !!componentRegistry[node.type];
 
   // Separate CSS props from DOM props
   const cssProps = {};
@@ -155,6 +156,11 @@ const Renderer = ({ node }) => {
       style={style}
       className={node.props?.className || ''}
     >
+      {!isKnownComponent ? (
+        <div style={{ padding: 12, border: '1px dashed #f59e0b', borderRadius: 16, background: '#fef3c7', marginBottom: 12, color: '#92400e', fontSize: 14 }}>
+          Custom component: {node.type}
+        </div>
+      ) : null}
       {node.children?.map((child) => (
         <Renderer key={child.id} node={child} />
       ))}

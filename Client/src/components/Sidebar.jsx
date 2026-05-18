@@ -4,6 +4,26 @@ import { useRegistry } from "../hooks/useRegistry";
 import { useBuilderStore } from "../store/useBuilderStore";
 import { components } from "../DropUi/index";
 
+function DynamicToolPreview({ label, props }) {
+  const previewProps = props || {};
+  return (
+    <div className="w-full h-full flex flex-col items-center justify-center px-3 text-xs text-slate-500">
+      <div className="font-semibold text-slate-800 text-left w-full truncate">{label}</div>
+      {Object.keys(previewProps).length > 0 ? (
+        <div className="mt-2 text-left w-full space-y-1 text-[11px] text-slate-600">
+          {Object.entries(previewProps).slice(0, 3).map(([key, value]) => (
+            <div key={key} className="truncate">
+              <span className="font-semibold">{key}:</span> {String(value)}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="mt-2 text-slate-400">Custom component preview</div>
+      )}
+    </div>
+  );
+}
+
 function ToolItem({ comp, index }) {
   if (!comp || !comp.type) {
     console.warn("⚠️ Invalid component:", comp);
@@ -15,6 +35,8 @@ function ToolItem({ comp, index }) {
     data: {
       type: comp.type,
       props: comp.defaultProps,
+      template: comp.template,
+      label: comp.label,
     },
   });
   
@@ -38,7 +60,7 @@ function ToolItem({ comp, index }) {
     >
       <div className="flex flex-col items-center">
         <div className="w-full h-20 flex items-center justify-center border border-gray-200 rounded bg-gray-50 overflow-hidden">
-          {Comp ? <Comp {...comp.defaultProps} /> : <div>Preview not available</div>}
+          {Comp ? <Comp {...comp.defaultProps} /> : <DynamicToolPreview label={comp.label} props={comp.defaultProps} />}
         </div>
         <div className="mt-2 text-center">
           <div className="font-semibold text-slate-800">{comp.label}</div>
@@ -75,6 +97,7 @@ export default function Sidebar() {
                 addComponent("root", {
                   id: Date.now().toString(),
                   type: comp.type,
+                  template: comp.template,
                   props: { ...comp.defaultProps },
                   children: [],
                 })

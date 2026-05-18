@@ -53,6 +53,7 @@ export default function Builder() {
     addComponent(parentId, {
       id: Date.now().toString(),
       type,
+      template: payload.template,
       props: { ...props },
       children: [],
     });

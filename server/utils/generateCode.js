@@ -38,7 +38,22 @@ ${children}
       return `<Button ${generateProps(node.props)} />`;
     }
 
-    return "";
+    // HANDLE CONTAINER
+    if (node.type === "Container") {
+      imports.add("Container");
+      const children = node.children?.map(renderNode).join("\n") || "";
+      return `<Container ${generateProps(node.props)}>${children}</Container>`;
+    }
+
+    // FALLBACK FOR CUSTOM COMPONENTS
+    const children = node.children?.map(renderNode).join("\n") || "";
+    const styleProps = getStyleObject(node.props);
+    const styleAttr = styleProps ? ` style={${styleProps}}` : "";
+
+    return `<div className=\"${node.props?.className || ""}\"${styleAttr}>
+      <div style=\"padding:12px;border:1px dashed #f59e0b;background:#fef3c7;margin-bottom:12px;\">Custom component: ${node.type}</div>
+      ${children}
+    </div>`;
   }
 
   function getStyleObject(props = {}) {
