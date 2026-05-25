@@ -55,6 +55,8 @@ export const useBuilderStore = create((set, get) => ({
   selectComponent: (id) => set({ selectedId: id }),
 
   addComponent: (parentId, component) => {
+    get().saveHistory();
+
     const newTree = JSON.parse(JSON.stringify(get().tree));
 
     let added = false;
@@ -118,7 +120,8 @@ export const useBuilderStore = create((set, get) => ({
     const newTree = clone(get().tree);
     remove(newTree);
 
-    set({ tree: newTree, selectedId: null });
+    const selectedId = get().selectedId === id ? null : get().selectedId;
+    set({ tree: newTree, selectedId });
   },
 
   // 🔥 DUPLICATE
@@ -126,6 +129,7 @@ export const useBuilderStore = create((set, get) => ({
     get().saveHistory();
 
     const newTree = clone(get().tree);
+    let newSelectedId = null;
 
     function duplicate(node) {
       node.children.forEach((child, index) => {
@@ -133,6 +137,7 @@ export const useBuilderStore = create((set, get) => ({
           const copy = clone(child);
           copy.id = Date.now().toString();
           node.children.splice(index + 1, 0, copy);
+          newSelectedId = copy.id;
         } else {
           duplicate(child);
         }
@@ -140,6 +145,6 @@ export const useBuilderStore = create((set, get) => ({
     }
 
     duplicate(newTree);
-    set({ tree: newTree });
+    set({ tree: newTree, selectedId: newSelectedId || get().selectedId });
   },
 }));
