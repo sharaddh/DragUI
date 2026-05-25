@@ -17,36 +17,38 @@ export const useBuilderStore = create((set, get) => ({
 
   // 🔥 SAVE HISTORY
   saveHistory: () => {
-    const { history, tree } = get();
+    const { history, tree, selectedId } = get();
     set({
-      history: [...history, clone(tree)],
+      history: [...history, { tree: clone(tree), selectedId }],
       future: [],
     });
   },
 
   undo: () => {
-    const { history, tree, future } = get();
+    const { history, tree, selectedId, future } = get();
     if (history.length === 0) return;
 
     const prev = history[history.length - 1];
 
     set({
-      tree: prev,
+      tree: prev.tree,
+      selectedId: prev.selectedId,
       history: history.slice(0, -1),
-      future: [clone(tree), ...future],
+      future: [{ tree: clone(tree), selectedId }, ...future],
     });
   },
 
   redo: () => {
-    const { future, history, tree } = get();
+    const { future, history, tree, selectedId } = get();
     if (future.length === 0) return;
 
     const next = future[0];
 
     set({
-      tree: next,
+      tree: next.tree,
+      selectedId: next.selectedId,
       future: future.slice(1),
-      history: [...history, clone(tree)],
+      history: [...history, { tree: clone(tree), selectedId }],
     });
   },
 
