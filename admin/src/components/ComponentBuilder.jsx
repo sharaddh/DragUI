@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { LiveProvider, LiveEditor, LiveError, LivePreview } from "react-live";
 
@@ -43,20 +43,67 @@ export default function ComponentBuilder({ token, onSuccess }) {
   const [currentProp, setCurrentProp] = useState({
     name: "",
     label: "",
-    type: "text", // text, color, select, number, boolean, alignment, fontSize
+    type: "text",
     default: "",
     options: [],
   });
 
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  const [isSaved, setIsSaved] = useState(true);
+
+  // Keyboard shortcuts handler
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ctrl/Cmd + S - Save
+      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+        e.preventDefault();
+        setIsSaved(true);
+      }
+      // Ctrl/Cmd + K - Show shortcuts
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        setShowShortcuts(!showShortcuts);
+      }
+      // Ctrl/Cmd + Enter - Submit
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        if (step === "review") {
+          handleSubmit();
+        }
+      }
+      // Arrow keys to navigate steps
+      if (e.key === "ArrowRight" && e.ctrlKey) {
+        e.preventDefault();
+        const steps = ["basic", "code", "props", "review"];
+        const currentIndex = steps.indexOf(step);
+        if (currentIndex < steps.length - 1) {
+          setStep(steps[currentIndex + 1]);
+        }
+      }
+      if (e.key === "ArrowLeft" && e.ctrlKey) {
+        e.preventDefault();
+        const steps = ["basic", "code", "props", "review"];
+        const currentIndex = steps.indexOf(step);
+        if (currentIndex > 0) {
+          setStep(steps[currentIndex - 1]);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [step, showShortcuts]);
+
   const handleBasicChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setIsSaved(false);
   };
 
   const handleCodeChange = (code) => {
     setFormData(prev => ({ ...prev, code }));
-    // Automatically extract props from code
     extractPropsFromCode(code);
+    setIsSaved(false);
   };
 
   const extractPropsFromCode = (code) => {
@@ -78,6 +125,7 @@ export default function ComponentBuilder({ token, onSuccess }) {
 
   const handleInstallChange = (e) => {
     setFormData(prev => ({ ...prev, installSteps: e.target.value }));
+    setIsSaved(false);
   };
 
   const addProp = () => {
@@ -98,6 +146,7 @@ export default function ComponentBuilder({ token, onSuccess }) {
       default: "",
       options: [],
     });
+    setIsSaved(false);
   };
 
   const removeProp = (index) => {
@@ -105,10 +154,10 @@ export default function ComponentBuilder({ token, onSuccess }) {
       ...prev,
       props: prev.props.filter((_, i) => i !== index),
     }));
+    setIsSaved(false);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
 
     try {
       // Only send allowed fields
