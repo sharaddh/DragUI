@@ -1,98 +1,64 @@
+/* =====================================================
+   ADMIN DASHBOARD STYLES
+   ===================================================== */
+
 .admin-dashboard {
   min-height: 100vh;
-  background-color: #f5f7fa;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #1e1e1e;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  color: #e0e0e0;
 }
 
 .admin-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #2d2d2d;
   color: white;
-  padding: 20px 30px;
+  padding: 16px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #3e3e42;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .admin-header h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .logout-btn {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 2px solid white;
-  padding: 8px 20px;
-  border-radius: 5px;
+  background: transparent;
+  color: #e0e0e0;
+  border: 1px solid #5c5c5c;
+  padding: 6px 16px;
+  border-radius: 4px;
   cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s;
+  font-weight: 500;
+  font-size: 12px;
+  transition: all 0.2s;
 }
 
 .logout-btn:hover {
-  background: white;
-  color: #667eea;
+  background: #3e3e42;
+  border-color: #7c7c7c;
+  color: #ffffff;
 }
 
 .admin-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  padding: 30px;
-  max-width: 1400px;
-  margin: 0 auto;
+  display: flex;
+  gap: 0;
+  padding: 0;
+  height: calc(100vh - 53px);
 }
 
 .builder-panel {
-  background: #ffffff;
-  border-radius: 24px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.06);
-  padding: 32px;
-}
-
-.builder-step-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-}
-
-.code-step-grid {
-  display: grid;
-  grid-template-columns: 1.7fr 1fr;
-  gap: 1.25rem;
-}
-
-.editor-panel {
-  min-height: 320px;
-  border: 1px solid #cbd5e1;
-  border-radius: 18px;
-  background: #f8fafc;
-  overflow: hidden;
-}
-
-.live-preview-card {
-  border: 1px solid #cbd5e1;
-  border-radius: 18px;
-  background: #ffffff;
-  min-height: 320px;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-}
-
-.live-preview-card label {
-  margin-bottom: 0.75rem;
-  color: #334155;
-  font-weight: 600;
-}
-
-.preview-error {
-  color: #dc2626;
-  margin-top: 0.75rem;
-  font-size: 0.9rem;
+  flex: 1;
+  background: transparent;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  padding: 0;
 }
 
 .preview-container {
