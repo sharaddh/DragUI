@@ -48,11 +48,10 @@ const AdminDashboard = ({ token, onLogout }) => {
         await axios.delete(`http://localhost:5000/api/admin/component/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setSuccess("Component deleted successfully!");
         fetchComponents();
-        setTimeout(() => setSuccess(""), 3000);
       } catch (err) {
-        setError(err.response?.data?.message || "Error deleting component");
+        console.error("Error deleting component:", err);
+        alert("Error deleting component: " + (err.response?.data?.message || err.message));
       }
     }
   };
@@ -60,78 +59,22 @@ const AdminDashboard = ({ token, onLogout }) => {
   return (
     <div className="admin-dashboard">
       <header className="admin-header">
-        <h1>Admin Dashboard</h1>
+        <h1>🚀 Admin Dashboard</h1>
         <button onClick={onLogout} className="logout-btn">
           Logout
         </button>
       </header>
 
       <div className="admin-content">
-        {!showBuilder ? (
-          <>
-            <div className="mb-6">
-              <button
-                onClick={() => setShowBuilder(true)}
-                className="px-6 py-3 bg-cyan-500 text-white rounded-lg font-semibold hover:bg-cyan-600"
-              >
-                + Create New Component
-              </button>
-            </div>
-
-            <div className="components-list-section">
-              <h2>Components Library ({components.length})</h2>
-
-              {components.length === 0 ? (
-                <p className="no-components">No components created yet</p>
-              ) : (
-                <div className="components-grid">
-                  {components.map((component) => (
-                    <div key={component._id} className="component-card">
-                      <div className="component-preview">
-                        {component.code ? (
-                          <LiveProvider code={wrapPreviewCode(component.code)} scope={{ React }} noInline>
-                            <div className="preview-container">
-                              <LivePreview />
-                              <LiveError className="preview-error" />
-                            </div>
-                          </LiveProvider>
-                        ) : (
-                          <div className="preview-placeholder">No preview available</div>
-                        )}
-                      </div>
-                      <h3>{component.label || component.name}</h3>
-                      <p>
-                        <strong>Type:</strong> {component.type}
-                      </p>
-                      <p>
-                        <strong>Category:</strong> {component.category}
-                      </p>
-                      {component.props && component.props.length > 0 && (
-                        <p>
-                          <strong>Props:</strong> {component.props.length}
-                        </p>
-                      )}
-                      <button
-                        onClick={() => handleDelete(component._id)}
-                        className="delete-btn"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </>
-        ) : (
-          <>
+        {showBuilder ? (
+          <div className="builder-full-screen">
             <button
               onClick={() => setShowBuilder(false)}
-              className="mb-6 px-6 py-3 bg-slate-500 text-white rounded-lg font-semibold hover:bg-slate-600"
+              className="back-to-library-btn"
+              title="Ctrl+Escape to go back"
             >
               ← Back to Library
             </button>
-
             <ComponentBuilder
               token={token}
               onSuccess={() => {
@@ -139,7 +82,67 @@ const AdminDashboard = ({ token, onLogout }) => {
                 setShowBuilder(false);
               }}
             />
-          </>
+          </div>
+        ) : (
+          <div className="library-view">
+            <div className="library-header">
+              <h2>📚 Components Library</h2>
+              <button
+                onClick={() => setShowBuilder(true)}
+                className="create-btn"
+              >
+                + New Component
+              </button>
+            </div>
+
+            {components.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">📦</div>
+                <h3>No components yet</h3>
+                <p>Create your first component to get started</p>
+                <button
+                  onClick={() => setShowBuilder(true)}
+                  className="create-btn"
+                >
+                  Create First Component
+                </button>
+              </div>
+            ) : (
+              <div className="components-grid">
+                {components.map((component) => (
+                  <div key={component._id} className="component-card">
+                    <div className="component-preview">
+                      {component.code ? (
+                        <LiveProvider code={wrapPreviewCode(component.code)} scope={{ React }} noInline>
+                          <div className="preview-container">
+                            <LivePreview />
+                            <LiveError className="preview-error" />
+                          </div>
+                        </LiveProvider>
+                      ) : (
+                        <div className="preview-placeholder">No preview</div>
+                      )}
+                    </div>
+                    <div className="component-info">
+                      <h3>{component.label || component.name}</h3>
+                      <div className="component-meta">
+                        <span className="meta-tag">{component.category}</span>
+                        {component.props && component.props.length > 0 && (
+                          <span className="meta-tag">{component.props.length} props</span>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleDelete(component._id)}
+                      className="delete-btn"
+                    >
+                      🗑️ Delete
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>

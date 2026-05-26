@@ -61,6 +61,251 @@
   padding: 0;
 }
 
+/* Library View */
+.library-view {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  background: #1e1e1e;
+}
+
+.library-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.library-header h2 {
+  margin: 0;
+  font-size: 28px;
+  color: #e0e0e0;
+  font-weight: 600;
+}
+
+.create-btn {
+  background: #13a10e;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.create-btn:hover {
+  background: #0d7a0a;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.7;
+}
+
+.empty-state h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  color: #e0e0e0;
+}
+
+.empty-state p {
+  margin: 0 0 24px;
+  font-size: 14px;
+  color: #858585;
+}
+
+.components-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.component-card {
+  background: #252526;
+  border: 1px solid #3e3e42;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.component-card:hover {
+  border-color: #007acc;
+  box-shadow: 0 0 0 1px rgba(0, 122, 204, 0.2);
+}
+
+.component-preview {
+  height: 150px;
+  background: #1e1e1e;
+  border-bottom: 1px solid #3e3e42;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+
+.preview-placeholder {
+  color: #6a6a6a;
+  font-size: 12px;
+}
+
+.component-info {
+  padding: 12px;
+  border-bottom: 1px solid #3e3e42;
+}
+
+.component-info h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #e0e0e0;
+}
+
+.component-meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.meta-tag {
+  display: inline-block;
+  background: #3c3c3c;
+  color: #858585;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-weight: 500;
+}
+
+.delete-btn {
+  width: 100%;
+  background: transparent;
+  color: #f48771;
+  border: none;
+  border-top: 1px solid #3e3e42;
+  padding: 10px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.delete-btn:hover {
+  background: rgba(244, 135, 113, 0.1);
+}
+
+/* Builder Full Screen */
+.builder-full-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.back-to-library-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #3c3c3c;
+  color: #e0e0e0;
+  border: 1px solid #3e3e42;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 100;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.back-to-library-btn:hover {
+  background: #3e3e42;
+  border-color: #555555;
+  color: #ffffff;
+}
+
+/* Admin Dashboard */
+.admin-dashboard {
+  min-height: 100vh;
+  background-color: #1e1e1e;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  color: #e0e0e0;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-header {
+  background: #2d2d2d;
+  color: white;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #3e3e42;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.admin-header h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.logout-btn {
+  background: transparent;
+  color: #e0e0e0;
+  border: 1px solid #5c5c5c;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background: #3e3e42;
+  border-color: #7c7c7c;
+  color: #ffffff;
+}
+
+.admin-content {
+  flex: 1;
+  display: flex;
+  gap: 0;
+  padding: 0;
+  background: #1e1e1e;
+  overflow: hidden;
+}
+
 .preview-container {
   min-height: 150px;
   border: 1px solid #d1d5db;
