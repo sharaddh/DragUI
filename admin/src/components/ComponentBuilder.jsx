@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { LiveProvider, LiveEditor, LiveError, LivePreview } from "react-live";
+import "./ComponentBuilder.css";
 
 const defaultCode = `function ComponentPreview({ title = "Component title", description = "A live preview of your component." }) {
   return (
