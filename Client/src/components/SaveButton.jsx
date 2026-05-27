@@ -36,9 +36,9 @@ export default function SaveButton({ projectName }) {
     <button
       type="button"
       onClick={save}
-      className="rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600"
+      className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
     >
-      Save
+      Save project
     </button>
   );
 }

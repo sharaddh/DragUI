@@ -14,9 +14,9 @@ export default function PropertiesPanelAdvanced() {
 
   if (!selectedId || selectedId === "root") {
     return (
-      <aside className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+      <aside className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="text-center py-8 text-slate-500">
-          <p>Select a component to edit properties</p>
+          <p className="text-sm font-medium">Select a component to edit properties</p>
         </div>
       </aside>
     );
@@ -47,14 +47,15 @@ export default function PropertiesPanelAdvanced() {
   };
 
   return (
-    <aside className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-y-auto max-h-[calc(100vh-200px)]">
-      {/* Header */}
-      <div className="sticky top-0 bg-slate-50 p-4 border-b border-slate-200">
-        <h2 className="text-lg font-bold text-slate-900">Design</h2>
-        <p className="text-xs text-slate-500">{selected.type}</p>
+    <aside className="rounded-4xl border border-slate-200 bg-white shadow-sm overflow-y-auto max-h-[calc(100vh-200px)]">
+      <div className="sticky top-0 bg-slate-50 p-5 border-b border-slate-200">
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold text-slate-900">Design</h2>
+          <p className="text-sm text-slate-500">Edit properties for {selected.type}</p>
+        </div>
       </div>
 
-      <div className="p-4 space-y-2">
+      <div className="p-5 space-y-4">
         {/* TEXT CONTENT */}
         <PropertySection
           title="Text Content"
@@ -488,17 +489,17 @@ export default function PropertiesPanelAdvanced() {
 
 function PropertySection({ title, section, expanded, onToggle, children }) {
   return (
-    <div className="border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+    <div className="border border-slate-200 rounded-3xl overflow-hidden bg-slate-50">
       <button
         onClick={() => onToggle(section)}
-        className="w-full flex items-center justify-between py-3 px-3 hover:bg-slate-100 transition bg-slate-50"
+        className="w-full flex items-center justify-between gap-3 py-3 px-4 text-left transition hover:bg-slate-100 bg-slate-50"
       >
         <span className="font-semibold text-sm text-slate-900">{title}</span>
-        <span className={`text-slate-500 transition transform ${expanded ? "rotate-180" : ""}`}>
+        <span className={`text-slate-500 transition-transform ${expanded ? "rotate-180" : ""}`}>
           ▼
         </span>
       </button>
-      {expanded && <div className="px-3 pb-4 bg-white border-t border-slate-200">{children}</div>}
+      {expanded && <div className="px-4 pb-4 bg-white border-t border-slate-200">{children}</div>}
     </div>
   );
 }
