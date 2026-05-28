@@ -3,6 +3,7 @@ import { useDraggable } from "@dnd-kit/core";
 import { useRegistry } from "../hooks/useRegistry";
 import { useBuilderStore } from "../store/useBuilderStore";
 import { components } from "../DropUi/index";
+import { CSS_STYLE_KEYS } from "../utils/cssProps";
 
 function DynamicToolPreview({ label, props }) {
   const previewProps = props || {};
@@ -24,6 +25,8 @@ function DynamicToolPreview({ label, props }) {
   );
 }
 
+const MemoDynamicToolPreview = React.memo(DynamicToolPreview);
+
 function ToolItem({ comp, index }) {
   if (!comp || !comp.type) {
     console.warn("⚠️ Invalid component:", comp);
@@ -41,32 +44,6 @@ function ToolItem({ comp, index }) {
   });
 
   const Comp = components[comp.type];
-
-  const CSS_STYLE_KEYS = new Set([
-    "color",
-    "backgroundColor",
-    "fontSize",
-    "textAlign",
-    "fontWeight",
-    "padding",
-    "margin",
-    "width",
-    "height",
-    "display",
-    "border",
-    "borderRadius",
-    "boxShadow",
-    "minHeight",
-    "maxHeight",
-    "minWidth",
-    "maxWidth",
-    "gap",
-    "flexDirection",
-    "justifyContent",
-    "alignItems",
-    "alignContent",
-    "flexWrap",
-  ]);
 
   const cleanProps = {};
   Object.entries(comp.defaultProps || {}).forEach(([key, value]) => {
@@ -90,7 +67,7 @@ function ToolItem({ comp, index }) {
     >
       <div className="flex flex-col gap-3">
         <div className="flex h-24 items-center justify-center overflow-hidden rounded-3xl border border-slate-200 bg-slate-50">
-          {Comp ? <Comp {...cleanProps} /> : <DynamicToolPreview label={comp.label} props={cleanProps} />}
+          {Comp ? <Comp {...cleanProps} /> : <MemoDynamicToolPreview label={comp.label} props={cleanProps} />}
         </div>
         <div className="space-y-1">
           <div className="text-sm font-semibold text-slate-900">{comp.label}</div>
