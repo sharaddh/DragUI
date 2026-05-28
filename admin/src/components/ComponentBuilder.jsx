@@ -51,6 +51,14 @@ export default function ComponentBuilder({ token, onSuccess }) {
 
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [isSaved, setIsSaved] = useState(true);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+
+  useEffect(() => {
+    // revoke object URLs on unmount
+    return () => {
+      selectedFiles.forEach((f) => URL.revokeObjectURL(f.preview));
+    };
+  }, [selectedFiles]);
 
   // Keyboard shortcuts handler
   useEffect(() => {
@@ -129,6 +137,20 @@ export default function ComponentBuilder({ token, onSuccess }) {
     setIsSaved(false);
   };
 
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    const withPreview = files.map((f) => ({ file: f, preview: f.type.startsWith('image/') ? URL.createObjectURL(f) : null }));
+    setSelectedFiles((prev) => [...prev, ...withPreview]);
+    setIsSaved(false);
+  };
+
+  const removeFile = (index) => {
+    const toRemove = selectedFiles[index];
+    if (toRemove && toRemove.preview) URL.revokeObjectURL(toRemove.preview);
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    setIsSaved(false);
+  };
+
   const addProp = () => {
     if (!currentProp.name) {
       alert("Prop name is required");
@@ -163,14 +185,25 @@ export default function ComponentBuilder({ token, onSuccess }) {
     try {
       // Only send allowed fields
       const { name, label, category, description, code, installSteps, props } = formData;
-      const payload = { name, label, category, description, template: code, installSteps, props };
-      const response = await axios.post(
-        "http://localhost:5000/api/admin/components/create",
-        payload,
-        {
+      // If files/assets were selected, use legacy multipart upload endpoint which also saves files
+      if (selectedFiles.length > 0) {
+        const fd = new FormData();
+        fd.append("name", name);
+        fd.append("type", "frontend");
+        fd.append("category", category);
+        // props as comma separated names
+        if (props && props.length) fd.append("props", props.map(p => p.name).join(","));
+        selectedFiles.forEach((p) => fd.append("files", p.file));
+
+        await axios.post("http://localhost:5000/api/admin/component", fd, {
           headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+        });
+      } else {
+        const payload = { name, label, category, description, template: code, installSteps, props };
+        await axios.post("http://localhost:5000/api/admin/components/create", payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
 
       alert("Component created successfully!");
       setFormData({
@@ -182,6 +215,9 @@ export default function ComponentBuilder({ token, onSuccess }) {
         installSteps: "",
         props: [],
       });
+      // cleanup file previews
+      selectedFiles.forEach((f) => f.preview && URL.revokeObjectURL(f.preview));
+      setSelectedFiles([]);
       setStep("basic");
       onSuccess?.();
     } catch (err) {
@@ -357,6 +393,25 @@ export default function ComponentBuilder({ token, onSuccess }) {
                     rows="4"
                     className="form-input"
                   ></textarea>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Assets (images, video, other files)</label>
+                  <input type="file" multiple onChange={handleFileChange} className="form-input" />
+                  {selectedFiles.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {selectedFiles.map((f, idx) => (
+                        <div key={idx} className="relative rounded-lg border p-1 text-xs">
+                          {f.preview ? (
+                            <img src={f.preview} alt={f.file.name} className="h-20 w-full object-cover rounded" />
+                          ) : (
+                            <div className="flex h-20 items-center justify-center text-[11px]">{f.file.name}</div>
+                          )}
+                          <button type="button" onClick={() => removeFile(idx)} className="absolute top-1 right-1 rounded-full bg-white p-1 text-xs">✕</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
