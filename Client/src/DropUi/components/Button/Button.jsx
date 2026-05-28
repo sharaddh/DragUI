@@ -5,7 +5,6 @@ const ButtonComponent = React.forwardRef(({
   className = "",
   ...props
 }, ref) => {
-  console.log("🔘 Button component rendered");
   return (
     <button ref={ref} className={className} {...props}>
       {text}
@@ -15,4 +14,4 @@ const ButtonComponent = React.forwardRef(({
 
 ButtonComponent.displayName = "Button";
 
-export const Button = ButtonComponent;
+export const Button = React.memo(ButtonComponent);

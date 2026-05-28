@@ -1,0 +1,27 @@
+export const CSS_STYLE_KEYS = new Set([
+  "color",
+  "backgroundColor",
+  "fontSize",
+  "textAlign",
+  "fontWeight",
+  "padding",
+  "margin",
+  "width",
+  "height",
+  "display",
+  "border",
+  "borderRadius",
+  "boxShadow",
+  "minHeight",
+  "maxHeight",
+  "minWidth",
+  "maxWidth",
+  "gap",
+  "flexDirection",
+  "justifyContent",
+  "alignItems",
+  "alignContent",
+  "flexWrap",
+]);
+
+export default CSS_STYLE_KEYS;

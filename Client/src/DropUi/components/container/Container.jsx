@@ -1,7 +1,6 @@
 import React from "react";
 
 const ContainerComponent = React.forwardRef(({ children, className = "", ...props }, ref) => {
-  console.log("📦 Container component rendered");
   return (
     <div ref={ref} className={className} {...props}>
       {children}
@@ -11,4 +10,4 @@ const ContainerComponent = React.forwardRef(({ children, className = "", ...prop
 
 ContainerComponent.displayName = "Container";
 
-export const Container = ContainerComponent;
+export const Container = React.memo(ContainerComponent);
