@@ -25,6 +25,8 @@ function DynamicToolPreview({ label, props }) {
   );
 }
 
+const MemoToolItem = React.memo(ToolItem);
+
 const MemoDynamicToolPreview = React.memo(DynamicToolPreview);
 
 function ToolItem({ comp, index }) {
@@ -95,7 +97,7 @@ export default function Sidebar() {
       <div className="space-y-5">
         {validRegistry.map((comp, index) => (
           <div key={`${comp.type}-${index}`} className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4">
-            <ToolItem comp={comp} index={index} />
+            <MemoToolItem comp={comp} index={index} />
             <button
               type="button"
               onClick={() =>

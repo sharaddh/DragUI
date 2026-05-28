@@ -2,6 +2,7 @@ import React from "react";
 import { useBuilderStore } from "../store/useBuilderStore";
 import { components } from "../DropUi/index";
 import { useDroppable } from "@dnd-kit/core";
+import { CSS_STYLE_KEYS } from "../utils/cssProps";
 import { LiveProvider, LivePreview, LiveError } from "react-live";
 
 function getComponentName(code) {
@@ -75,31 +76,6 @@ export default function Renderer({ node }) {
   };
 
   // CSS-only properties that should not be spread as DOM attributes
-  const CSS_STYLE_KEYS = new Set([
-    "color",
-    "backgroundColor",
-    "fontSize",
-    "textAlign",
-    "fontWeight",
-    "padding",
-    "margin",
-    "width",
-    "height",
-    "display",
-    "border",
-    "borderRadius",
-    "boxShadow",
-    "minHeight",
-    "maxHeight",
-    "minWidth",
-    "maxWidth",
-    "gap",
-    "flexDirection",
-    "justifyContent",
-    "alignItems",
-    "alignContent",
-    "flexWrap",
-  ]);
 
   const { style: nodeCustomStyle, className, ...rawProps } = node.props || {};
   const cssProps = {};
