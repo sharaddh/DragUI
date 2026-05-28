@@ -180,7 +180,8 @@ export default function ComponentBuilder({ token, onSuccess }) {
     setIsSaved(false);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
 
     try {
       // Only send allowed fields

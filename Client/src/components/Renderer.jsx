@@ -17,32 +17,7 @@ function getPreviewCode(code, props = {}) {
   if (!trimmed) return "";
   const componentName = getComponentName(trimmed);
   
-  // Filter out CSS-only properties to avoid DOM attribute warnings
-  const CSS_STYLE_KEYS = new Set([
-    "color",
-    "backgroundColor",
-    "fontSize",
-    "textAlign",
-    "fontWeight",
-    "padding",
-    "margin",
-    "width",
-    "height",
-    "display",
-    "border",
-    "borderRadius",
-    "boxShadow",
-    "minHeight",
-    "maxHeight",
-    "minWidth",
-    "maxWidth",
-    "gap",
-    "flexDirection",
-    "justifyContent",
-    "alignItems",
-    "alignContent",
-    "flexWrap",
-  ]);
+  // Filter out CSS-only properties to avoid DOM attribute warnings (shared list)
 
   const cleanProps = {};
   Object.entries(props || {}).forEach(([key, value]) => {
