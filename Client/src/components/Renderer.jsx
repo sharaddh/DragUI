@@ -2,7 +2,6 @@ import React from "react";
 import { useBuilderStore } from "../store/useBuilderStore";
 import { components } from "../DropUi/index";
 import { useDroppable } from "@dnd-kit/core";
-import { CSS_STYLE_KEYS } from "../utils/cssProps";
 import { LiveProvider, LivePreview, LiveError } from "react-live";
 
 function getComponentName(code) {
@@ -17,7 +16,32 @@ function getPreviewCode(code, props = {}) {
   if (!trimmed) return "";
   const componentName = getComponentName(trimmed);
   
-  // Filter out CSS-only properties to avoid DOM attribute warnings (shared list)
+  // Filter out CSS-only properties to avoid DOM attribute warnings
+  const CSS_STYLE_KEYS = new Set([
+    "color",
+    "backgroundColor",
+    "fontSize",
+    "textAlign",
+    "fontWeight",
+    "padding",
+    "margin",
+    "width",
+    "height",
+    "display",
+    "border",
+    "borderRadius",
+    "boxShadow",
+    "minHeight",
+    "maxHeight",
+    "minWidth",
+    "maxWidth",
+    "gap",
+    "flexDirection",
+    "justifyContent",
+    "alignItems",
+    "alignContent",
+    "flexWrap",
+  ]);
 
   const cleanProps = {};
   Object.entries(props || {}).forEach(([key, value]) => {
@@ -51,6 +75,31 @@ export default function Renderer({ node }) {
   };
 
   // CSS-only properties that should not be spread as DOM attributes
+  const CSS_STYLE_KEYS = new Set([
+    "color",
+    "backgroundColor",
+    "fontSize",
+    "textAlign",
+    "fontWeight",
+    "padding",
+    "margin",
+    "width",
+    "height",
+    "display",
+    "border",
+    "borderRadius",
+    "boxShadow",
+    "minHeight",
+    "maxHeight",
+    "minWidth",
+    "maxWidth",
+    "gap",
+    "flexDirection",
+    "justifyContent",
+    "alignItems",
+    "alignContent",
+    "flexWrap",
+  ]);
 
   const { style: nodeCustomStyle, className, ...rawProps } = node.props || {};
   const cssProps = {};
@@ -95,12 +144,15 @@ export default function Renderer({ node }) {
 
   const previewCode = hasTemplate ? getPreviewCode(node.template, node.props) : "";
 
-  const isDomElement = typeof Comp === "string";
-  const isForwardRef = Comp && Comp.$$typeof === Symbol.for("react.forward_ref");
-  const shouldWrap = !isRoot && !isUnknown && !isDomElement && !isForwardRef;
-
-  const content = (
-    <>
+  return (
+    <Comp
+      ref={setNodeRef}
+      {...domPropsWithoutStyle}
+      onClick={handleClick}
+      onMouseDown={(e) => e.stopPropagation()}
+      style={style}
+      className={componentClassName}
+    >
       {isUnknown && hasTemplate ? (
         <div onClick={(e) => { e.stopPropagation(); selectComponent(node.id); }}>
           <LiveProvider code={previewCode} scope={{ React }} noInline>
@@ -112,34 +164,6 @@ export default function Renderer({ node }) {
       {node.children?.map((child) => (
         <Renderer key={child.id} node={child} />
       ))}
-    </>
-  );
-
-  if (shouldWrap) {
-    return (
-      <div
-        ref={setNodeRef}
-        onClick={handleClick}
-        onMouseDown={(e) => e.stopPropagation()}
-        style={style}
-        className={componentClassName}
-      >
-        <Comp {...domPropsWithoutStyle} />
-        {content}
-      </div>
-    );
-  }
-
-  return (
-    <Comp
-      ref={setNodeRef}
-      {...domPropsWithoutStyle}
-      onClick={handleClick}
-      onMouseDown={(e) => e.stopPropagation()}
-      style={style}
-      className={componentClassName}
-    >
-      {content}
     </Comp>
   );
 }
