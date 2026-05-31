@@ -537,48 +537,110 @@
     grid-template-columns: 1fr;
   }
 }
-.glass-container {
-  background: linear-gradient(135deg, #0f172a 0%, #1e2937 100%);
+.admin-dashboard {
+  background: linear-gradient(135deg, #0f172a, #1e2937);
   min-height: 100vh;
-}
-
-.glass-panel, .glass-card, .glass-header {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-.glass-btn, .glass-btn-primary {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
-}
-
-.glass-btn-primary {
-  background: linear-gradient(90deg, #3b82f6, #60a5fa);
-}
-
-.glass-input {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   color: white;
+  font-family: 'Inter', sans-serif;
+}
+
+.admin-header {
+  padding: 1.5rem 2rem;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .component-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+  max-width: 320px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: all 0.3s ease;
 }
 
 .component-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
 }
 
-.preview-container {
-  height: 180px;
+.preview-wrapper {
+  height: 200px;
+  background: #0f172a;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
   overflow: hidden;
+}
+
+.live-preview {
+  transform: scale(0.85);
+  transform-origin: top left;
+  width: 118%;
+  height: 118%;
+}
+
+.components-container {
+  display: grid;
+  gap: 24px;
+  padding: 2rem;
+}
+
+.components-container.grid {
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+.components-container.list {
+  grid-template-columns: 1fr;
+}
+
+.card-body {
+  padding: 1.25rem;
+}
+
+.meta {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+  flex-wrap: wrap;
+}
+
+.category-tag, .props-tag {
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.1);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.edit-btn, .delete-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .components-container.grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
 }

@@ -164,15 +164,26 @@ const getComponentName = (code) => {
   return (functionMatch?.[1] || constMatch?.[1] || arrowMatch?.[1] || "ComponentPreview");
 };
 
-const wrapPreviewCode = (code) => {
-  const trimmed = code?.trim();
-  if (!trimmed) return "";
-  if (trimmed.includes("render(")) return trimmed;
-  const name = getComponentName(trimmed);
-  return `${trimmed.replace(/\/\/ Asset Injection:[\s\S]*/g, "")}\n\nrender(<${name} />);`;
+const wrapPreviewCode = (code, assets = []) => {
+  let cleanCode = code?.trim() || "";
+  if (!cleanCode) return "";
+
+  // Replace blob URLs with actual Cloudinary URLs if available
+  assets.forEach(asset => {
+    if (asset.preview && asset.url) {
+      cleanCode = cleanCode.replace(new RegExp(asset.preview, 'g'), asset.url);
+    }
+  });
+
+  if (cleanCode.includes("render(")) return cleanCode;
+
+  const name = getComponentName(cleanCode);
+  cleanCode = cleanCode.replace(/\/\/ Asset Injection:[\s\S]*/g, "");
+
+  return `${cleanCode}\n\nrender(<${name} />);`;
 };
 
-const AdminDashboard = ({ token, onLogout }) => {
+const AdminDashboard = ({ token, onLogout, apiSecret }) => {
   const [components, setComponents] = useState([]);
   const [showBuilder, setShowBuilder] = useState(false);
   const [editingComponent, setEditingComponent] = useState(null);
@@ -180,7 +191,7 @@ const AdminDashboard = ({ token, onLogout }) => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [viewMode, setViewMode] = useState("grid"); // grid | list
+  const [viewMode, setViewMode] = useState("grid");
 
   useEffect(() => {
     fetchComponents();
@@ -188,9 +199,7 @@ const AdminDashboard = ({ token, onLogout }) => {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === "Escape" && showBuilder) {
-        handleCloseBuilder();
-      }
+      if (e.key === "Escape" && showBuilder) handleCloseBuilder();
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
@@ -199,16 +208,13 @@ const AdminDashboard = ({ token, onLogout }) => {
   const fetchComponents = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(
-        "http://localhost:5000/api/admin/components",
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const sorted = response.data.sort((a, b) => 
-        new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
-      );
+      const res = await axios.get("http://localhost:5000/api/admin/components", {
+        headers: { Authorization: `Bearer ${token}`, "x-api-secret": apiSecret }
+      });
+      const sorted = res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setComponents(sorted);
     } catch (err) {
-      console.error("Error fetching components:", err);
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
@@ -219,167 +225,124 @@ const AdminDashboard = ({ token, onLogout }) => {
     setEditingComponent(null);
   };
 
-  const handleEdit = (component) => {
-    setEditingComponent(component);
+  const handleEdit = (comp) => {
+    setEditingComponent(comp);
     setShowBuilder(true);
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this component permanently?")) return;
+    if (!window.confirm("Delete this component?")) return;
     try {
       await axios.delete(`http://localhost:5000/api/admin/component/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}`, "x-api-secret": apiSecret }
       });
       setComponents(prev => prev.filter(c => c._id !== id));
     } catch (err) {
-      alert("Delete failed: " + (err.response?.data?.message || err.message));
-      fetchComponents();
+      alert("Delete failed");
     }
   };
 
-  // Filter & Search
-  const filteredComponents = components
-    .filter(comp => 
-      (comp.label || comp.name || "").toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (selectedCategory === "All" || comp.category === selectedCategory)
-    );
+  const filteredComponents = components.filter(comp =>
+    (comp.label || comp.name || "").toLowerCase().includes(searchTerm.toLowerCase()) &&
+    (selectedCategory === "All" || comp.category === selectedCategory)
+  );
 
   const categories = ["All", ...new Set(components.map(c => c.category).filter(Boolean))];
 
   return (
-    <div className="admin-dashboard glass-container">
-      <header className="admin-header glass-header">
-        <div className="header-left">
+    <div className="admin-dashboard">
+      <header className="admin-header">
+        <div className="header-content">
           <h1>🚀 Component Studio</h1>
-          <p className="subtitle">Manage your UI Library</p>
+          <p>Build • Preview • Manage</p>
         </div>
-        <button onClick={onLogout} className="logout-btn glass-btn">Logout</button>
+        <button onClick={onLogout} className="logout-btn">Logout</button>
       </header>
 
-      <div className="admin-content">
+      <div className="dashboard-content">
         {showBuilder ? (
-          <div className="builder-full-screen">
-            <button onClick={handleCloseBuilder} className="back-to-library-btn glass-btn">
-              ← Back to Library
-            </button>
-            <ComponentBuilder
-              token={token}
-              initialData={editingComponent}
-              onSuccess={() => {
-                fetchComponents();
-                handleCloseBuilder();
-              }}
-            />
-          </div>
+          <ComponentBuilder
+            token={token}
+            apiSecret={apiSecret}
+            initialData={editingComponent}
+            onSuccess={() => {
+              fetchComponents();
+              handleCloseBuilder();
+            }}
+          />
         ) : (
-          <div className="library-view">
-            <div className="library-header glass-panel">
-              <div className="header-controls">
-                <h2>📚 Components Library ({filteredComponents.length})</h2>
-                
-                <div className="search-filter-bar">
-                  <input
-                    type="text"
-                    placeholder="Search components..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="search-input glass-input"
-                  />
-                  
-                  <select 
-                    value={selectedCategory} 
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="category-select glass-input"
-                  >
-                    {categories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
+          <>
+            <div className="library-header">
+              <h2>Components Library ({filteredComponents.length})</h2>
 
-                  <div className="view-toggle">
-                    <button 
-                      onClick={() => setViewMode("grid")}
-                      className={`toggle-btn ${viewMode === "grid" ? "active" : ""}`}
-                    >
-                      Grid
-                    </button>
-                    <button 
-                      onClick={() => setViewMode("list")}
-                      className={`toggle-btn ${viewMode === "list" ? "active" : ""}`}
-                    >
-                      List
-                    </button>
-                  </div>
+              <div className="controls">
+                <input
+                  type="text"
+                  placeholder="Search components..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
+                />
+
+                <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className="category-select">
+                  {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                </select>
+
+                <div className="view-toggle">
+                  <button onClick={() => setViewMode("grid")} className={viewMode === "grid" ? "active" : ""}>Grid</button>
+                  <button onClick={() => setViewMode("list")} className={viewMode === "list" ? "active" : ""}>List</button>
                 </div>
 
-                <button onClick={() => setShowBuilder(true)} className="create-btn glass-btn-primary">
-                  + New Component
-                </button>
+                <button onClick={() => setShowBuilder(true)} className="new-btn">+ New Component</button>
               </div>
             </div>
 
             {isLoading ? (
-              <div className="loading-state glass-panel">
-                <div className="loading-spinner">⏳ Loading your components...</div>
-              </div>
+              <div className="loading">Loading components...</div>
             ) : filteredComponents.length === 0 ? (
-              <div className="empty-state glass-panel">
-                <div className="empty-icon">📦</div>
+              <div className="empty-state">
                 <h3>No components found</h3>
-                <p>Try adjusting your search or create a new one</p>
-                <button onClick={() => setShowBuilder(true)} className="create-btn glass-btn-primary">
-                  Create First Component
-                </button>
+                <button onClick={() => setShowBuilder(true)} className="new-btn">Create New</button>
               </div>
             ) : (
-              <div className={`components-${viewMode}`}>
-                {filteredComponents.map((component) => {
-                  const sourceCode = component.template || component.code;
+              <div className={`components-container ${viewMode}`}>
+                {filteredComponents.map((comp) => {
+                  const sourceCode = comp.template || comp.code;
+                  const assets = comp.assets || []; // Assuming your backend returns assets array with {preview, url}
 
                   return (
-                    <div key={component._id} className="component-card glass-card">
-                      <div className="component-preview">
+                    <div key={comp._id} className="component-card">
+                      <div className="preview-wrapper">
                         {sourceCode ? (
-                          <LiveProvider code={wrapPreviewCode(sourceCode)} scope={{ React }} noInline>
-                            <div className="preview-container">
-                              <LivePreview />
-                            </div>
-                            <LiveError className="preview-error" />
+                          <LiveProvider code={wrapPreviewCode(sourceCode, assets)} scope={{ React }} noInline>
+                            <LivePreview className="live-preview" />
+                            <LiveError className="error" />
                           </LiveProvider>
                         ) : (
-                          <div className="preview-placeholder">No preview available</div>
+                          <div className="no-preview">No Preview</div>
                         )}
                       </div>
 
-                      <div className="component-info">
-                        <h3>{component.label || component.name}</h3>
-                        <p className="component-desc">{component.description?.slice(0, 80)}...</p>
-                        
-                        <div className="component-meta">
-                          <span className="meta-tag category">{component.category || "Uncategorized"}</span>
-                          {component.props?.length > 0 && (
-                            <span className="meta-tag props">{component.props.length} props</span>
-                          )}
-                          <span className="meta-tag date">
-                            {new Date(component.createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </div>
+                      <div className="card-body">
+                        <h3>{comp.label || comp.name}</h3>
+                        <p className="description">{comp.description?.substring(0, 85)}...</p>
 
-                      <div className="component-actions">
-                        <button onClick={() => handleEdit(component)} className="action-btn edit-btn">
-                          ✏️ Edit
-                        </button>
-                        <button onClick={() => handleDelete(component._id)} className="action-btn delete-btn">
-                          🗑️ Delete
-                        </button>
+                        <div className="meta">
+                          <span className="category-tag">{comp.category}</span>
+                          {comp.props?.length > 0 && <span className="props-tag">{comp.props.length} props</span>}
+                        </div>
+
+                        <div className="actions">
+                          <button onClick={() => handleEdit(comp)} className="edit-btn">Edit</button>
+                          <button onClick={() => handleDelete(comp._id)} className="delete-btn">Delete</button>
+                        </div>
                       </div>
                     </div>
                   );
                 })}
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
     </div>
