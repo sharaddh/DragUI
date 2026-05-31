@@ -277,7 +277,57 @@ router.get("/components", adminAuth, async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+// 🔥 Update Component (Handles text updates & new file uploads)
+router.put(
+  "/component/:id",
+  adminAuth,
+  upload.array("files"),
+  async (req, res) => {
+    try {
+      const { name, label, category, description, template, installSteps, props, type } = req.body;
 
+      // 1. Find existing component
+      const existingComponent = await Component.findById(req.params.id);
+      if (!existingComponent) return res.status(404).json({ message: "Component not found" });
+
+      // 2. Parse props safely
+      let parsedProps = existingComponent.props;
+      if (props) {
+        try {
+          parsedProps = typeof props === "string" ? JSON.parse(props) : props;
+        } catch (e) {
+          parsedProps = props.split(",").map((p) => ({ name: p.trim() }));
+        }
+      }
+
+      // 3. Handle new files if uploaded (append to existing, or you can replace)
+      const newFiles = req.files ? req.files.map((f) => f.path) : [];
+      const updatedFiles = [...existingComponent.files, ...newFiles];
+
+      // 4. Update the document
+      const updatedComponent = await Component.findByIdAndUpdate(
+        req.params.id,
+        {
+          name: name || existingComponent.name,
+          label: label || existingComponent.label,
+          category: category || existingComponent.category,
+          type: type || existingComponent.type,
+          description: description || existingComponent.description,
+          installSteps: installSteps !== undefined ? installSteps : existingComponent.installSteps,
+          props: parsedProps,
+          code: template || existingComponent.code,
+          files: updatedFiles,
+        },
+        { new: true } // Return the updated document
+      );
+
+      res.json({ message: "Component updated successfully", component: updatedComponent });
+    } catch (err) {
+      console.error("Component update error:", err);
+      res.status(500).json({ message: err.message });
+    }
+  }
+);
 // Delete component
 router.delete("/component/:id", adminAuth, async (req, res) => {
   try {
