@@ -157,6 +157,7 @@ import { LiveProvider, LivePreview, LiveError } from "react-live";
 import ComponentBuilder from "./ComponentBuilder";
 import "./AdminDashboard.css";
 
+const [editingComponent, setEditingComponent] = useState(null);
 // Improved regex to safely extract the component name
 const getComponentName = (code) => {
   if (!code) return "ComponentPreview";
@@ -172,7 +173,7 @@ const wrapPreviewCode = (code) => {
   if (!trimmed) return "";
   // If render is already explicitly called, just return the code
   if (trimmed.includes("render(")) return trimmed;
-  
+
   const name = getComponentName(trimmed);
   // Remove any asset injection comments that might break the raw render
   const cleanCode = trimmed.replace(/\/\/ Asset Injection:[\s\S]*/, "");
@@ -208,7 +209,7 @@ const AdminDashboard = ({ token, onLogout }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       // Sort components newest first (assuming _id or createdAt exists)
-      const sorted = response.data.sort((a, b) => 
+      const sorted = response.data.sort((a, b) =>
         new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
       );
       setComponents(sorted);
@@ -248,17 +249,21 @@ const AdminDashboard = ({ token, onLogout }) => {
         {showBuilder ? (
           <div className="builder-full-screen">
             <button
-              onClick={() => setShowBuilder(false)}
+              onClick={() => {
+                setShowBuilder(false);
+                setEditingComponent(null); // Clear edit state on exit
+              }}
               className="back-to-library-btn"
-              title="Press Esc to go back"
             >
               ← Back to Library
             </button>
             <ComponentBuilder
               token={token}
+              initialData={editingComponent} // Pass the data to the builder
               onSuccess={() => {
                 fetchComponents();
                 setShowBuilder(false);
+                setEditingComponent(null);
               }}
             />
           </div>
@@ -321,11 +326,19 @@ const AdminDashboard = ({ token, onLogout }) => {
                           )}
                         </div>
                       </div>
-                      <div className="component-actions">
+                      <div className="component-actions flex gap-2 mt-3">
+                        <button
+                          onClick={() => {
+                            setEditingComponent(component); // Set the component to edit
+                            setShowBuilder(true); // Open the builder
+                          }}
+                          className="btn btn-secondary text-sm px-3 py-1"
+                        >
+                          ✏️ Edit
+                        </button>
                         <button
                           onClick={() => handleDelete(component._id)}
-                          className="delete-btn"
-                          title="Delete Component"
+                          className="btn btn-danger text-sm px-3 py-1"
                         >
                           🗑️ Delete
                         </button>
