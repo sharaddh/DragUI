@@ -1,32 +1,32 @@
 import express from "express";
 import Component from "../models/components.js";
-import fs from "fs";
-import path from "path";
 
 const router = express.Router();
 
+// Get ALL components (Used by the DragUI Frontend sidebar)
 router.get("/all", async (req, res) => {
-  const components = await Component.find();
-  res.json(components);
+  try {
+    const components = await Component.find().select("-__v"); // Exclude mongoose version key
+    res.json(components);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching components" });
+  }
 });
 
+// Get a SPECIFIC component (Used by the CLI to pull code and assets)
 router.get("/:name", async (req, res) => {
-  const comp = await Component.findOne({ name: req.params.name });
+  try {
+    const comp = await Component.findOne({ name: req.params.name });
 
-  if (!comp) return res.status(404).json("Not found");
+    if (!comp) return res.status(404).json({ message: "Component not found" });
 
-  const basePath = path.join("templates", comp.path);
-
-  const files = comp.files.map((file) => {
-    const content = fs.readFileSync(
-      path.join(basePath, file),
-      "utf-8"
-    );
-
-    return { name: file, content };
-  });
-
-  res.json({ files });
+    // The CLI will consume this JSON. 
+    // comp.code contains the raw JSX.
+    // comp.files contains the Cloudinary URLs for assets.
+    res.json(comp);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching component details" });
+  }
 });
 
 export default router;
