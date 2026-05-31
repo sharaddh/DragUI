@@ -783,7 +783,7 @@ function getPreviewCode(code) {
   return `${trimmed}\n\nrender(<${name} />);`;
 }
 
-export default function ComponentBuilder({ token, onSuccess }) {
+export default function ComponentBuilder({ token, onSuccess, initialData = null }) {
   const [step, setStep] = useState("basic");
   const [formData, setFormData] = useState({
     name: "",
@@ -794,7 +794,21 @@ export default function ComponentBuilder({ token, onSuccess }) {
     installSteps: "",
     props: [],
   });
-
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.name || "",
+        label: initialData.label || "",
+        category: initialData.category || "",
+        description: initialData.description || "",
+        code: initialData.code || defaultCode,
+        installSteps: initialData.installSteps || "",
+        props: initialData.props || [],
+      });
+      // Optionally, skip to the code step immediately when editing
+      setStep("code");
+    }
+  }, [initialData]);
   const [currentProp, setCurrentProp] = useState({
     name: "",
     label: "",
@@ -981,7 +995,7 @@ export default function ComponentBuilder({ token, onSuccess }) {
 
     try {
       const { name, label, category, description, code, installSteps, props } = formData;
-      
+
       if (selectedFiles.length > 0) {
         const fd = new FormData();
         fd.append("name", name);
@@ -1092,7 +1106,7 @@ export default function ComponentBuilder({ token, onSuccess }) {
 
         <div className="editor-content">
           <form onSubmit={handleSubmit} className="form-container">
-            
+
             {/* STEP 1: BASIC INFO & MULTIPART FILES */}
             {step === "basic" && (
               <div className="step-section">
@@ -1141,13 +1155,13 @@ export default function ComponentBuilder({ token, onSuccess }) {
             {step === "code" && (
               <div className="step-section">
                 <h2 className="step-title">💻 Advanced Code Sandbox</h2>
-                
+
                 {/* File Dropdown Injection Control */}
                 <div className="asset-injection-bar">
                   <label className="form-label">Insert Uploaded Assets:</label>
                   <div className="flex gap-2">
-                    <select 
-                      value={selectedAssetToInject} 
+                    <select
+                      value={selectedAssetToInject}
                       onChange={(e) => setSelectedAssetToInject(e.target.value)}
                       className="form-input dynamic-select"
                     >
