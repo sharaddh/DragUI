@@ -783,7 +783,7 @@ function getPreviewCode(code) {
   return `${trimmed}\n\nrender(<${name} />);`;
 }
 
-export default function ComponentBuilder({ token, onSuccess, initialData = null }) {
+export default function ComponentBuilder({ token, onSuccess }) {
   const [step, setStep] = useState("basic");
   const [formData, setFormData] = useState({
     name: "",
@@ -794,21 +794,7 @@ export default function ComponentBuilder({ token, onSuccess, initialData = null 
     installSteps: "",
     props: [],
   });
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        name: initialData.name || "",
-        label: initialData.label || "",
-        category: initialData.category || "",
-        description: initialData.description || "",
-        code: initialData.code || defaultCode,
-        installSteps: initialData.installSteps || "",
-        props: initialData.props || [],
-      });
-      // Optionally, skip to the code step immediately when editing
-      setStep("code");
-    }
-  }, [initialData]);
+
   const [currentProp, setCurrentProp] = useState({
     name: "",
     label: "",
@@ -995,42 +981,45 @@ export default function ComponentBuilder({ token, onSuccess, initialData = null 
 
     try {
       const { name, label, category, description, code, installSteps, props } = formData;
-      const isEditing = !!initialData; // Check if we are updating
-
-      const payload = {
-        name, label, category, description, template: code, installSteps, props
-      };
-
+      
       if (selectedFiles.length > 0) {
-        // ... (Your existing FormData logic for files) ...
+        const fd = new FormData();
+        fd.append("name", name);
+        fd.append("label", label);
+        fd.append("type", "frontend");
+        fd.append("category", category);
+        fd.append("description", description);
+        fd.append("template", code);
+        fd.append("installSteps", installSteps);
+        if (props && props.length) fd.append("props", JSON.stringify(props));
+        selectedFiles.forEach((p) => fd.append("files", p.file));
 
-        if (isEditing) {
-          await axios.put(`http://localhost:5000/api/admin/component/${initialData._id}`, fd, {
-            headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
-          });
-        } else {
-          await axios.post("http://localhost:5000/api/admin/component", fd, {
-            headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
-          });
-        }
+        await axios.post("http://localhost:5000/api/admin/component", fd, {
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+        });
       } else {
-        // JSON only submission
-        if (isEditing) {
-          await axios.put(`http://localhost:5000/api/admin/component/${initialData._id}`, payload, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-        } else {
-          await axios.post("http://localhost:5000/api/admin/components/create", payload, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-        }
+        const payload = { name, label, category, description, template: code, installSteps, props };
+        await axios.post("http://localhost:5000/api/admin/components/create", payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
       }
 
-      alert(isEditing ? "Component updated successfully!" : "Component created successfully!");
-      // ... (Your existing cleanup code) ...
+      alert("Component created successfully!");
+      setFormData({
+        name: "",
+        label: "",
+        category: "",
+        description: "",
+        code: defaultCode,
+        installSteps: "",
+        props: [],
+      });
+      selectedFiles.forEach((f) => f.preview && URL.revokeObjectURL(f.preview));
+      setSelectedFiles([]);
+      setStep("basic");
       onSuccess?.();
     } catch (err) {
-      alert("Error saving component: " + (err.response?.data?.message || err.message));
+      alert("Error creating component: " + (err.response?.data?.message || err.message));
     }
   };
 
@@ -1103,7 +1092,7 @@ export default function ComponentBuilder({ token, onSuccess, initialData = null 
 
         <div className="editor-content">
           <form onSubmit={handleSubmit} className="form-container">
-
+            
             {/* STEP 1: BASIC INFO & MULTIPART FILES */}
             {step === "basic" && (
               <div className="step-section">
@@ -1152,13 +1141,13 @@ export default function ComponentBuilder({ token, onSuccess, initialData = null 
             {step === "code" && (
               <div className="step-section">
                 <h2 className="step-title">💻 Advanced Code Sandbox</h2>
-
+                
                 {/* File Dropdown Injection Control */}
                 <div className="asset-injection-bar">
                   <label className="form-label">Insert Uploaded Assets:</label>
                   <div className="flex gap-2">
-                    <select
-                      value={selectedAssetToInject}
+                    <select 
+                      value={selectedAssetToInject} 
                       onChange={(e) => setSelectedAssetToInject(e.target.value)}
                       className="form-input dynamic-select"
                     >

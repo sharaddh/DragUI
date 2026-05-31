@@ -292,3 +292,158 @@ DragUI
    └─ frontend
 
 ```
+```
+DragUI
+├─ admin
+│  ├─ .env
+│  ├─ eslint.config.js
+│  ├─ index.html
+│  ├─ package-lock.json
+│  ├─ package.json
+│  ├─ README.md
+│  ├─ src
+│  │  ├─ App.css
+│  │  ├─ App.jsx
+│  │  ├─ components
+│  │  │  ├─ AdminDashboard.css
+│  │  │  ├─ AdminDashboard.jsx
+│  │  │  ├─ AdminLogin.css
+│  │  │  ├─ AdminLogin.jsx
+│  │  │  ├─ ComponentBuilder.css
+│  │  │  └─ ComponentBuilder.jsx
+│  │  ├─ index.css
+│  │  └─ main.jsx
+│  └─ vite.config.js
+├─ ADMIN_SETUP.md
+├─ Client
+│  ├─ .env
+│  ├─ dist
+│  │  ├─ assets
+│  │  │  ├─ index-DJvNIQua.css
+│  │  │  └─ index-ekN-yH-o.js
+│  │  ├─ favicon.svg
+│  │  ├─ icons.svg
+│  │  └─ index.html
+│  ├─ eslint.config.js
+│  ├─ index.html
+│  ├─ package-lock.json
+│  ├─ package.json
+│  ├─ public
+│  │  ├─ favicon.svg
+│  │  └─ icons.svg
+│  ├─ src
+│  │  ├─ api
+│  │  │  ├─ auth.js
+│  │  │  ├─ component.js
+│  │  │  ├─ index.jsx
+│  │  │  └─ Project.js
+│  │  ├─ App.jsx
+│  │  ├─ assets
+│  │  │  ├─ hero.png
+│  │  │  ├─ react.svg
+│  │  │  └─ vite.svg
+│  │  ├─ components
+│  │  │  ├─ Background.jsx
+│  │  │  ├─ Canvas.jsx
+│  │  │  ├─ Navbar.jsx
+│  │  │  ├─ PropertiesPanel.jsx
+│  │  │  ├─ PropertiesPanelAdvanced.jsx
+│  │  │  ├─ Renderer.jsx
+│  │  │  ├─ save.jsx
+│  │  │  ├─ SaveButton.jsx
+│  │  │  ├─ Shortcuts.jsx
+│  │  │  ├─ Sidebar.jsx
+│  │  │  └─ TreeView.jsx
+│  │  ├─ context
+│  │  │  └─ authContext.jsx
+│  │  ├─ DropUi
+│  │  │  ├─ components
+│  │  │  │  ├─ Button
+│  │  │  │  │  ├─ Button.jsx
+│  │  │  │  │  └─ config.js
+│  │  │  │  ├─ container
+│  │  │  │  │  ├─ config.js
+│  │  │  │  │  └─ Container.jsx
+│  │  │  │  └─ Sidebar
+│  │  │  │     ├─ config.js
+│  │  │  │     └─ Sidebar.jsx
+│  │  │  └─ index.js
+│  │  ├─ GeneratedUI.jsx
+│  │  ├─ hooks
+│  │  │  └─ useRegistry.js
+│  │  ├─ index.css
+│  │  ├─ main.jsx
+│  │  ├─ middleware
+│  │  │  └─ ProtectedRoute.jsx
+│  │  ├─ pages
+│  │  │  ├─ Admin.jsx
+│  │  │  ├─ AuthSuccess.jsx
+│  │  │  ├─ Builder.jsx
+│  │  │  ├─ CliLogin.jsx
+│  │  │  ├─ Dashboard.jsx
+│  │  │  └─ Login.jsx
+│  │  ├─ store
+│  │  │  └─ useBuilderStore.js
+│  │  └─ utils
+│  │     ├─ cssProps.js
+│  │     ├─ helpers.js
+│  │     └─ registry.js
+│  └─ vite.config.js
+├─ DragUi-cli
+│  ├─ bin
+│  │  └─ index.js
+│  ├─ commands
+│  │  ├─ login.js
+│  │  ├─ logout.js
+│  │  ├─ pull.js
+│  │  └─ whoami.js
+│  ├─ package-lock.json
+│  ├─ package.json
+│  ├─ src
+│  │  └─ pages
+│  │     └─ clilogin.jsx
+│  └─ utils
+│     ├─ api.js
+│     ├─ config.js
+│     ├─ detect.js
+│     └─ logger.js
+├─ PROJECT_BLUEPRINT.md
+├─ README.md
+├─ server
+│  ├─ .env
+│  ├─ config
+│  │  └─ Passport.js
+│  ├─ middleware
+│  │  ├─ adminAuth.js
+│  │  ├─ auth.middleware.js
+│  │  └─ upload.js
+│  ├─ models
+│  │  ├─ Admin.js
+│  │  ├─ components.js
+│  │  ├─ Project.js
+│  │  └─ user.js
+│  ├─ package-lock.json
+│  ├─ package.json
+│  ├─ routes
+│  │  ├─ admin.js
+│  │  ├─ adminAuth.js
+│  │  ├─ authRoutes.js
+│  │  ├─ components.js
+│  │  └─ projectRoutes.js
+│  ├─ server.js
+│  ├─ templates
+│  │  └─ frontend
+│  │     ├─ dsf
+│  │     │  └─ WhatsApp Image 2026-05-30 at 3.53.14 PM.jpeg
+│  │     ├─ lolo
+│  │     │  └─ me.png
+│  │     └─ Sharad
+│  │        └─ me.png
+│  └─ utils
+│     └─ generateCode.js
+├─ temp-generated.jsx
+└─ templates
+   ├─ backend
+   └─ frontend
+
+```
