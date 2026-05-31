@@ -995,45 +995,42 @@ export default function ComponentBuilder({ token, onSuccess, initialData = null 
 
     try {
       const { name, label, category, description, code, installSteps, props } = formData;
+      const isEditing = !!initialData; // Check if we are updating
+
+      const payload = {
+        name, label, category, description, template: code, installSteps, props
+      };
 
       if (selectedFiles.length > 0) {
-        const fd = new FormData();
-        fd.append("name", name);
-        fd.append("label", label);
-        fd.append("type", "frontend");
-        fd.append("category", category);
-        fd.append("description", description);
-        fd.append("template", code);
-        fd.append("installSteps", installSteps);
-        if (props && props.length) fd.append("props", JSON.stringify(props));
-        selectedFiles.forEach((p) => fd.append("files", p.file));
+        // ... (Your existing FormData logic for files) ...
 
-        await axios.post("http://localhost:5000/api/admin/component", fd, {
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
-        });
+        if (isEditing) {
+          await axios.put(`http://localhost:5000/api/admin/component/${initialData._id}`, fd, {
+            headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+          });
+        } else {
+          await axios.post("http://localhost:5000/api/admin/component", fd, {
+            headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+          });
+        }
       } else {
-        const payload = { name, label, category, description, template: code, installSteps, props };
-        await axios.post("http://localhost:5000/api/admin/components/create", payload, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        // JSON only submission
+        if (isEditing) {
+          await axios.put(`http://localhost:5000/api/admin/component/${initialData._id}`, payload, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+        } else {
+          await axios.post("http://localhost:5000/api/admin/components/create", payload, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+        }
       }
 
-      alert("Component created successfully!");
-      setFormData({
-        name: "",
-        label: "",
-        category: "",
-        description: "",
-        code: defaultCode,
-        installSteps: "",
-        props: [],
-      });
-      selectedFiles.forEach((f) => f.preview && URL.revokeObjectURL(f.preview));
-      setSelectedFiles([]);
-      setStep("basic");
+      alert(isEditing ? "Component updated successfully!" : "Component created successfully!");
+      // ... (Your existing cleanup code) ...
       onSuccess?.();
     } catch (err) {
-      alert("Error creating component: " + (err.response?.data?.message || err.message));
+      alert("Error saving component: " + (err.response?.data?.message || err.message));
     }
   };
 
