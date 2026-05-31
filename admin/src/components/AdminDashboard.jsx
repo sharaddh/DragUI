@@ -150,50 +150,54 @@
 // };
 
 // export default AdminDashboard;
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { LiveProvider, LivePreview, LiveError } from "react-live";
 import ComponentBuilder from "./ComponentBuilder";
 import "./AdminDashboard.css";
 
-// Improved regex to safely extract the component name
+// ==================== UTILITIES ====================
+
 const getComponentName = (code) => {
   if (!code) return "ComponentPreview";
+  
   const functionMatch = code.match(/function\s+([A-Za-z0-9_]+)/);
-  const constMatch = code.match(/const\s+([A-Za-z0-9_]+)\s*=\s*/);
-  const arrowMatch = code.match(/([A-Za-z0-9_]+)\s*=\s*\(.*\)\s*=>/);
-  return (functionMatch || constMatch || arrowMatch)?.[1] || "ComponentPreview";
+  const constMatch = code.match(/const\s+([A-Za-z0-9_]+)\s*=/);
+  const arrowMatch = code.match(/([A-Za-z0-9_]+)\s*=\s*\(.*?\)\s*=>/);
+  
+  return (functionMatch?.[1] || constMatch?.[1] || arrowMatch?.[1] || "ComponentPreview");
 };
 
-// Safely wrap the code for react-live rendering
 const wrapPreviewCode = (code) => {
   const trimmed = code?.trim();
   if (!trimmed) return "";
-  // If render is already explicitly called, just return the code
+
   if (trimmed.includes("render(")) return trimmed;
-  
+
   const name = getComponentName(trimmed);
-  // Remove any asset injection comments that might break the raw render
-  const cleanCode = trimmed.replace(/\/\/ Asset Injection:[\s\S]*/, "");
+  const cleanCode = trimmed.replace(/\/\/ Asset Injection:[\s\S]*/g, "");
+
   return `${cleanCode}\n\nrender(<${name} />);`;
 };
+
+// ==================== MAIN COMPONENT ====================
 
 const AdminDashboard = ({ token, onLogout }) => {
   const [components, setComponents] = useState([]);
   const [showBuilder, setShowBuilder] = useState(false);
+  const [editingComponent, setEditingComponent] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch components on mount
+  // Fetch components
   useEffect(() => {
     fetchComponents();
   }, [token]);
 
-  // Global Keyboard Shortcuts (Escape to exit builder)
+  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape" && showBuilder) {
-        setShowBuilder(false);
+        handleCloseBuilder();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -207,7 +211,7 @@ const AdminDashboard = ({ token, onLogout }) => {
         "http://localhost:5000/api/admin/components",
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      // Sort components newest first (assuming _id or createdAt exists)
+      
       const sorted = response.data.sort((a, b) => 
         new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
       );
@@ -219,20 +223,29 @@ const AdminDashboard = ({ token, onLogout }) => {
     }
   };
 
+  const handleCloseBuilder = () => {
+    setShowBuilder(false);
+    setEditingComponent(null);
+  };
+
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this component? This action cannot be undone.")) {
-      try {
-        await axios.delete(`http://localhost:5000/api/admin/component/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        // Optimistic UI update for faster feeling interface
-        setComponents(prev => prev.filter(c => c._id !== id));
-      } catch (err) {
-        console.error("Error deleting component:", err);
-        alert("Error deleting component: " + (err.response?.data?.message || err.message));
-        fetchComponents(); // Re-fetch to ensure sync if delete failed halfway
-      }
+    if (!window.confirm("Delete this component? This action cannot be undone.")) return;
+
+    try {
+      await axios.delete(`http://localhost:5000/api/admin/component/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setComponents(prev => prev.filter(c => c._id !== id));
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert("Failed to delete component: " + (err.response?.data?.message || err.message));
+      fetchComponents(); // Sync recovery
     }
+  };
+
+  const handleEdit = (component) => {
+    setEditingComponent(component);
+    setShowBuilder(true);
   };
 
   return (
@@ -248,17 +261,19 @@ const AdminDashboard = ({ token, onLogout }) => {
         {showBuilder ? (
           <div className="builder-full-screen">
             <button
-              onClick={() => setShowBuilder(false)}
+              onClick={handleCloseBuilder}
               className="back-to-library-btn"
               title="Press Esc to go back"
             >
               ← Back to Library
             </button>
+            
             <ComponentBuilder
               token={token}
+              initialData={editingComponent}
               onSuccess={() => {
                 fetchComponents();
-                setShowBuilder(false);
+                handleCloseBuilder();
               }}
             />
           </div>
@@ -293,39 +308,53 @@ const AdminDashboard = ({ token, onLogout }) => {
             ) : (
               <div className="components-grid">
                 {components.map((component) => {
-                  // Accommodate schema differences (code vs template)
                   const sourceCode = component.template || component.code;
 
                   return (
                     <div key={component._id} className="component-card">
                       <div className="component-preview">
                         {sourceCode ? (
-                          <div className="live-preview-wrapper" style={{ height: "150px", overflow: "hidden", position: "relative" }}>
-                            <LiveProvider code={wrapPreviewCode(sourceCode)} scope={{ React }} noInline>
-                              <div className="preview-container" style={{ transform: "scale(0.8)", transformOrigin: "top left", width: "125%", height: "125%" }}>
+                          <div className="live-preview-wrapper">
+                            <LiveProvider 
+                              code={wrapPreviewCode(sourceCode)} 
+                              scope={{ React }} 
+                              noInline
+                            >
+                              <div className="preview-container">
                                 <LivePreview />
                               </div>
-                              <LiveError className="preview-error" style={{ position: "absolute", bottom: 0, left: 0, right: 0, fontSize: "10px", padding: "4px" }} />
+                              <LiveError className="preview-error" />
                             </LiveProvider>
                           </div>
                         ) : (
                           <div className="preview-placeholder">No valid code found</div>
                         )}
                       </div>
+
                       <div className="component-info">
                         <h3>{component.label || component.name}</h3>
                         <div className="component-meta">
-                          <span className="meta-tag category-tag">{component.category || "Uncategorized"}</span>
-                          {component.props && Array.isArray(component.props) && component.props.length > 0 && (
-                            <span className="meta-tag props-tag">{component.props.length} props</span>
+                          <span className="meta-tag category-tag">
+                            {component.category || "Uncategorized"}
+                          </span>
+                          {component.props?.length > 0 && (
+                            <span className="meta-tag props-tag">
+                              {component.props.length} props
+                            </span>
                           )}
                         </div>
                       </div>
+
                       <div className="component-actions">
                         <button
+                          onClick={() => handleEdit(component)}
+                          className="btn btn-secondary"
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
                           onClick={() => handleDelete(component._id)}
-                          className="delete-btn"
-                          title="Delete Component"
+                          className="btn btn-danger"
                         >
                           🗑️ Delete
                         </button>

@@ -751,7 +751,6 @@
 //     </div>
 //   );
 // }
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { LiveProvider, LiveEditor, LiveError, LivePreview } from "react-live";
@@ -769,10 +768,11 @@ const defaultCode = `function ComponentPreview({ title = "Component title", desc
 const defaultPreviewCode = `${defaultCode}\n\nrender(<ComponentPreview />);`;
 
 function getComponentName(code) {
+  if (!code) return "ComponentPreview";
   const functionMatch = code.match(/function\s+([A-Za-z0-9_]+)/);
-  const constMatch = code.match(/const\s+([A-Za-z0-9_]+)\s*=\s*/);
-  const arrowMatch = code.match(/([A-Za-z0-9_]+)\s*=\s*\(.*\)\s*=>/);
-  return (functionMatch || constMatch || arrowMatch)?.[1] || "ComponentPreview";
+  const constMatch = code.match(/const\s+([A-Za-z0-9_]+)\s*=/);
+  const arrowMatch = code.match(/([A-Za-z0-9_]+)\s*=\s*\(.*?\)\s*=>/);
+  return (functionMatch?.[1] || constMatch?.[1] || arrowMatch?.[1] || "ComponentPreview");
 }
 
 function getPreviewCode(code) {
@@ -783,7 +783,7 @@ function getPreviewCode(code) {
   return `${trimmed}\n\nrender(<${name} />);`;
 }
 
-export default function ComponentBuilder({ token, onSuccess }) {
+export default function ComponentBuilder({ token, onSuccess, initialData = null }) {
   const [step, setStep] = useState("basic");
   const [formData, setFormData] = useState({
     name: "",
@@ -796,11 +796,7 @@ export default function ComponentBuilder({ token, onSuccess }) {
   });
 
   const [currentProp, setCurrentProp] = useState({
-    name: "",
-    label: "",
-    type: "text",
-    default: "",
-    options: [],
+    name: "", label: "", type: "text", default: "", options: [],
   });
 
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -811,7 +807,26 @@ export default function ComponentBuilder({ token, onSuccess }) {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [selectedAssetToInject, setSelectedAssetToInject] = useState("");
 
-  // Revoke object URLs on unmount or file changes to prevent leaks
+  const isEditing = !!initialData;
+
+  // Pre-fill form for editing
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.name || "",
+        label: initialData.label || "",
+        category: initialData.category || "",
+        description: initialData.description || "",
+        code: initialData.template || initialData.code || defaultCode,
+        installSteps: initialData.installSteps || "",
+        props: initialData.props || [],
+      });
+      setStep("code");
+      setIsSaved(true);
+    }
+  }, [initialData]);
+
+  // Cleanup previews
   useEffect(() => {
     return () => {
       selectedFiles.forEach((f) => {
@@ -820,7 +835,7 @@ export default function ComponentBuilder({ token, onSuccess }) {
     };
   }, [selectedFiles]);
 
-  // Keyboard shortcuts handler
+  // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "s") {
@@ -829,31 +844,29 @@ export default function ComponentBuilder({ token, onSuccess }) {
       }
       if ((e.ctrlKey || e.metaKey) && e.key === "k") {
         e.preventDefault();
-        setShowShortcuts(!showShortcuts);
+        setShowShortcuts((prev) => !prev);
       }
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && step === "review") {
         e.preventDefault();
-        if (step === "review") {
-          handleSubmit();
-        }
+        handleSubmit();
       }
-      if (e.key === "ArrowRight" && e.ctrlKey) {
+      if (e.ctrlKey && e.key === "ArrowRight") {
         e.preventDefault();
         const steps = ["basic", "code", "props", "review"];
-        const currentIndex = steps.indexOf(step);
-        if (currentIndex < steps.length - 1) setStep(steps[currentIndex + 1]);
+        const idx = steps.indexOf(step);
+        if (idx < steps.length - 1) setStep(steps[idx + 1]);
       }
-      if (e.key === "ArrowLeft" && e.ctrlKey) {
+      if (e.ctrlKey && e.key === "ArrowLeft") {
         e.preventDefault();
         const steps = ["basic", "code", "props", "review"];
-        const currentIndex = steps.indexOf(step);
-        if (currentIndex > 0) setStep(steps[currentIndex - 1]);
+        const idx = steps.indexOf(step);
+        if (idx > 0) setStep(steps[idx - 1]);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [step, showShortcuts]);
+  }, [step]);
 
   const handleBasicChange = (e) => {
     const { name, value } = e.target;
@@ -867,20 +880,19 @@ export default function ComponentBuilder({ token, onSuccess }) {
     setIsSaved(false);
   };
 
-  // Inject chosen asset reference directly into the JSX editor string
   const handleInjectAsset = () => {
     if (!selectedAssetToInject) return;
-    const fileObj = selectedFiles[parseInt(selectedAssetToInject, 10)];
+    const fileObj = selectedFiles[parseInt(selectedAssetToInject)];
     if (!fileObj) return;
 
-    let injectionString = `"${fileObj.file.name}"`;
+    let injection = `"${fileObj.file.name}"`;
     if (fileObj.file.type.startsWith("image/")) {
-      injectionString = `<img src="${fileObj.preview || "#"}" alt="${fileObj.file.name}" style={{ maxWidth: "100%", height: "auto" }} />`;
+      injection = `<img src="${fileObj.preview}" alt="${fileObj.file.name}" style={{ maxWidth: "100%", height: "auto" }} />`;
     }
 
     setFormData((prev) => ({
       ...prev,
-      code: `${prev.code}\n\n// Asset Injection:\n${injectionString}`,
+      code: prev.code + `\n\n// Asset Injection:\n${injection}`,
     }));
     setIsSaved(false);
     setSelectedAssetToInject("");
@@ -889,43 +901,43 @@ export default function ComponentBuilder({ token, onSuccess }) {
   const handleAIFix = async () => {
     try {
       setAiLoading(true);
-      const response = await axios.post(
+      const res = await axios.post(
         "http://localhost:5000/api/admin/components/ai/fix",
         { code: formData.code },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      if (response.data?.code) {
-        setFormData((prev) => ({ ...prev, code: response.data.code }));
-        extractPropsFromCode(response.data.code);
+      if (res.data?.code) {
+        setFormData((prev) => ({ ...prev, code: res.data.code }));
+        extractPropsFromCode(res.data.code);
         setIsSaved(false);
-        alert("AI: Code updated successfully.");
+        alert("✅ AI Fixed the code successfully.");
       }
     } catch (err) {
-      alert("AI fix failed: " + (err.response?.data?.message || err.message));
+      alert("AI Fix failed: " + (err.response?.data?.message || err.message));
     } finally {
       setAiLoading(false);
     }
   };
 
   const handleAIGenerate = async () => {
+    if (!aiPrompt.trim()) return alert("Please enter a prompt.");
     try {
-      if (!aiPrompt.trim()) return alert("Enter a prompt describing the component.");
       setAiLoading(true);
-      const response = await axios.post(
+      const res = await axios.post(
         "http://localhost:5000/api/admin/components/ai/generate",
         { prompt: aiPrompt },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      if (response.data?.code) {
-        setFormData((prev) => ({ ...prev, code: response.data.code }));
-        extractPropsFromCode(response.data.code);
+      if (res.data?.code) {
+        setFormData((prev) => ({ ...prev, code: res.data.code }));
+        extractPropsFromCode(res.data.code);
         setIsSaved(false);
         setShowAIGenerator(false);
         setAiPrompt("");
-        alert("AI: Component code inserted successfully.");
+        alert("✅ AI Generated component successfully.");
       }
     } catch (err) {
-      alert("AI generation failed: " + (err.response?.data?.message || err.message));
+      alert("AI Generation failed: " + (err.response?.data?.message || err.message));
     } finally {
       setAiLoading(false);
     }
@@ -934,21 +946,25 @@ export default function ComponentBuilder({ token, onSuccess }) {
   const extractPropsFromCode = (code) => {
     const match = code.match(/function\s+\w+\s*\(\s*\{\s*([^}]*)\s*\}\s*\)/);
     if (match) {
-      const propsStr = match[1];
-      const props = propsStr.split(",").map((p) => p.trim()).filter((p) => p && !p.includes("="));
-      const extractedProps = props.map((prop) => ({
+      const props = match[1]
+        .split(",")
+        .map((p) => p.trim().split("=")[0].trim())
+        .filter(Boolean);
+
+      const extracted = props.map((prop) => ({
         name: prop,
         label: prop.charAt(0).toUpperCase() + prop.slice(1),
         type: "text",
         default: "",
         options: [],
       }));
-      setFormData((prev) => ({ ...prev, props: extractedProps }));
+
+      setFormData((prev) => ({ ...prev, props: extracted }));
     }
   };
 
   const handleFileChange = (e) => {
-    const files = Array.from(e.target.files || []);
+    const files = Array.from(e.target.files);
     const withPreview = files.map((f) => ({
       file: f,
       preview: f.type.startsWith("image/") ? URL.createObjectURL(f) : null,
@@ -959,29 +975,35 @@ export default function ComponentBuilder({ token, onSuccess }) {
 
   const removeFile = (index) => {
     const toRemove = selectedFiles[index];
-    if (toRemove && toRemove.preview) URL.revokeObjectURL(toRemove.preview);
+    if (toRemove?.preview) URL.revokeObjectURL(toRemove.preview);
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
     setIsSaved(false);
   };
 
   const addProp = () => {
     if (!currentProp.name) return alert("Prop name is required");
-    setFormData((prev) => ({ ...prev, props: [...prev.props, { ...currentProp }] }));
+    setFormData((prev) => ({
+      ...prev,
+      props: [...prev.props, { ...currentProp }],
+    }));
     setCurrentProp({ name: "", label: "", type: "text", default: "", options: [] });
     setIsSaved(false);
   };
 
   const removeProp = (index) => {
-    setFormData((prev) => ({ ...prev, props: prev.props.filter((_, i) => i !== index) }));
+    setFormData((prev) => ({
+      ...prev,
+      props: prev.props.filter((_, i) => i !== index),
+    }));
     setIsSaved(false);
   };
 
   const handleSubmit = async (e) => {
-    if (e && e.preventDefault) e.preventDefault();
+    if (e) e.preventDefault();
 
     try {
       const { name, label, category, description, code, installSteps, props } = formData;
-      
+
       if (selectedFiles.length > 0) {
         const fd = new FormData();
         fd.append("name", name);
@@ -991,41 +1013,47 @@ export default function ComponentBuilder({ token, onSuccess }) {
         fd.append("description", description);
         fd.append("template", code);
         fd.append("installSteps", installSteps);
-        if (props && props.length) fd.append("props", JSON.stringify(props));
-        selectedFiles.forEach((p) => fd.append("files", p.file));
+        if (props?.length) fd.append("props", JSON.stringify(props));
 
-        await axios.post("http://localhost:5000/api/admin/component", fd, {
+        selectedFiles.forEach((f) => fd.append("files", f.file));
+
+        const url = isEditing
+          ? `http://localhost:5000/api/admin/component/${initialData._id}`
+          : "http://localhost:5000/api/admin/component";
+
+        await axios[isEditing ? "put" : "post"](url, fd, {
           headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
         });
       } else {
         const payload = { name, label, category, description, template: code, installSteps, props };
-        await axios.post("http://localhost:5000/api/admin/components/create", payload, {
+        const url = isEditing
+          ? `http://localhost:5000/api/admin/component/${initialData._id}`
+          : "http://localhost:5000/api/admin/components/create";
+
+        await axios[isEditing ? "put" : "post"](url, payload, {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
 
-      alert("Component created successfully!");
-      setFormData({
-        name: "",
-        label: "",
-        category: "",
-        description: "",
-        code: defaultCode,
-        installSteps: "",
-        props: [],
-      });
-      selectedFiles.forEach((f) => f.preview && URL.revokeObjectURL(f.preview));
-      setSelectedFiles([]);
-      setStep("basic");
+      alert(isEditing ? "✅ Component updated successfully!" : "✅ Component created successfully!");
+
+      if (!isEditing) {
+        setFormData({
+          name: "", label: "", category: "", description: "", code: defaultCode,
+          installSteps: "", props: [],
+        });
+        setSelectedFiles([]);
+        setStep("basic");
+      }
+
       onSuccess?.();
     } catch (err) {
-      alert("Error creating component: " + (err.response?.data?.message || err.message));
+      alert("Error saving component: " + (err.response?.data?.message || err.message));
     }
   };
 
   return (
     <div className="vscode-container">
-      {/* Sidebar Controls */}
       <div className="vscode-left">
         <div className="activity-bar">
           <div className="activity-icon active" title="Component Builder"><span>🔨</span></div>
@@ -1034,7 +1062,7 @@ export default function ComponentBuilder({ token, onSuccess }) {
         </div>
 
         <div className="sidebar">
-          <div className="sidebar-header">Component Builder</div>
+          <div className="sidebar-header">{isEditing ? "✏️ Edit Component" : "🚀 Component Builder"}</div>
           <nav className="steps-nav">
             {[
               { id: "basic", label: "Basic Info", icon: "📝" },
@@ -1056,7 +1084,6 @@ export default function ComponentBuilder({ token, onSuccess }) {
         </div>
       </div>
 
-      {/* Primary Workspace */}
       <div className="vscode-main">
         <div className="editor-tabs">
           <div className="tab active">
@@ -1066,25 +1093,19 @@ export default function ComponentBuilder({ token, onSuccess }) {
         </div>
 
         <div className="breadcrumb">
-          <span className="breadcrumb-item">Admin</span>
-          <span className="breadcrumb-separator">/</span>
-          <span className="breadcrumb-item">Components</span>
-          <span className="breadcrumb-separator">/</span>
-          <span className="breadcrumb-item active">{step.toUpperCase()}</span>
+          Admin / Components / <span className="active">{step.toUpperCase()}</span>
         </div>
 
-        {/* Shortcuts Panel */}
         {showShortcuts && (
           <div className="shortcuts-modal">
             <div className="shortcuts-content">
               <button className="close-btn" onClick={() => setShowShortcuts(false)}>✕</button>
               <h2>Keyboard Shortcuts</h2>
               <div className="shortcuts-list">
-                <div className="shortcut-item"><span className="shortcut-key">Ctrl+K</span><span>Toggle Shortcuts</span></div>
-                <div className="shortcut-item"><span className="shortcut-key">Ctrl+→</span><span>Next Section</span></div>
-                <div className="shortcut-item"><span className="shortcut-key">Ctrl+←</span><span>Previous Section</span></div>
-                <div className="shortcut-item"><span className="shortcut-key">Ctrl+S</span><span>Mark Saved</span></div>
-                <div className="shortcut-item"><span className="shortcut-key">Ctrl+Enter</span><span>Submit Configuration</span></div>
+                <div className="shortcut-item"><span className="shortcut-key">Ctrl+K</span> Toggle Shortcuts</div>
+                <div className="shortcut-item"><span className="shortcut-key">Ctrl+→</span> Next Step</div>
+                <div className="shortcut-item"><span className="shortcut-key">Ctrl+←</span> Previous Step</div>
+                <div className="shortcut-item"><span className="shortcut-key">Ctrl+Enter</span> Submit (Review)</div>
               </div>
             </div>
           </div>
@@ -1092,22 +1113,22 @@ export default function ComponentBuilder({ token, onSuccess }) {
 
         <div className="editor-content">
           <form onSubmit={handleSubmit} className="form-container">
-            
-            {/* STEP 1: BASIC INFO & MULTIPART FILES */}
+
+            {/* STEP 1: BASIC */}
             {step === "basic" && (
               <div className="step-section">
                 <h2 className="step-title">📝 Basic Information</h2>
                 <div className="form-group">
-                  <label className="form-label">Component System Name *</label>
-                  <input type="text" name="name" value={formData.name} onChange={handleBasicChange} placeholder="e.g., CustomHeroCard" className="form-input" required />
+                  <label>Component System Name *</label>
+                  <input type="text" name="name" value={formData.name} onChange={handleBasicChange} placeholder="e.g., CustomHeroCard" required />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Display UI Label *</label>
-                  <input type="text" name="label" value={formData.label} onChange={handleBasicChange} placeholder="e.g., Hero Card Minimal" className="form-input" required />
+                  <label>Display UI Label *</label>
+                  <input type="text" name="label" value={formData.label} onChange={handleBasicChange} placeholder="e.g., Hero Card Minimal" required />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Category *</label>
-                  <select name="category" value={formData.category} onChange={handleBasicChange} className="form-input" required>
+                  <label>Category *</label>
+                  <select name="category" value={formData.category} onChange={handleBasicChange} required>
                     <option value="">Select Category</option>
                     <option value="Layout">Layout System</option>
                     <option value="Forms">Form Controller</option>
@@ -1117,18 +1138,18 @@ export default function ComponentBuilder({ token, onSuccess }) {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">System Description *</label>
-                  <textarea name="description" value={formData.description} onChange={handleBasicChange} placeholder="Explain layout parameters and styles..." rows="3" className="form-input" required></textarea>
+                  <label>System Description *</label>
+                  <textarea name="description" value={formData.description} onChange={handleBasicChange} rows="3" required />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Asset Pipeline & Media Files</label>
-                  <input type="file" multiple onChange={handleFileChange} className="form-input" />
+                  <label>Asset Pipeline & Media Files</label>
+                  <input type="file" multiple onChange={handleFileChange} />
                   {selectedFiles.length > 0 && (
                     <div className="asset-preview-grid">
                       {selectedFiles.map((f, idx) => (
                         <div key={idx} className="asset-preview-card">
-                          {f.preview ? <img src={f.preview} alt="preview" /> : <div className="generic-file">📄 {f.file.name.slice(-10)}</div>}
-                          <button type="button" onClick={() => removeFile(idx)} className="asset-remove-btn">✕</button>
+                          {f.preview ? <img src={f.preview} alt="preview" /> : <div>📄 {f.file.name}</div>}
+                          <button type="button" onClick={() => removeFile(idx)}>✕</button>
                         </div>
                       ))}
                     </div>
@@ -1137,28 +1158,21 @@ export default function ComponentBuilder({ token, onSuccess }) {
               </div>
             )}
 
-            {/* STEP 2: CODE EDITOR WITH ASSET INJECTION DROPDOWN */}
+            {/* STEP 2: CODE EDITOR */}
             {step === "code" && (
               <div className="step-section">
                 <h2 className="step-title">💻 Advanced Code Sandbox</h2>
-                
-                {/* File Dropdown Injection Control */}
+
                 <div className="asset-injection-bar">
-                  <label className="form-label">Insert Uploaded Assets:</label>
+                  <label>Insert Uploaded Assets:</label>
                   <div className="flex gap-2">
-                    <select 
-                      value={selectedAssetToInject} 
-                      onChange={(e) => setSelectedAssetToInject(e.target.value)}
-                      className="form-input dynamic-select"
-                    >
-                      <option value="">-- Choose Asset to Inject --</option>
-                      {selectedFiles.map((fileData, index) => (
-                        <option key={index} value={index}>{fileData.file.name}</option>
+                    <select value={selectedAssetToInject} onChange={(e) => setSelectedAssetToInject(e.target.value)}>
+                      <option value="">-- Choose Asset --</option>
+                      {selectedFiles.map((f, i) => (
+                        <option key={i} value={i}>{f.file.name}</option>
                       ))}
                     </select>
-                    <button type="button" onClick={handleInjectAsset} disabled={selectedAssetToInject === ""} className="btn btn-outline">
-                      📥 Insert Into Code
-                    </button>
+                    <button type="button" onClick={handleInjectAsset} disabled={!selectedAssetToInject}>📥 Insert</button>
                   </div>
                 </div>
 
@@ -1166,18 +1180,20 @@ export default function ComponentBuilder({ token, onSuccess }) {
                   <div className="code-editor-grid">
                     <div className="editor-wrapper">
                       <div className="editor-header">
-                        <span>Workspace Editor</span>
+                        Workspace Editor
                         <div className="flex gap-2">
-                          <button type="button" onClick={handleAIFix} disabled={aiLoading} className="btn btn-secondary">{aiLoading ? "Fixing..." : "AI Debug"}</button>
-                          <button type="button" onClick={() => setShowAIGenerator(true)} className="btn btn-outline">Prompt Engine</button>
+                          <button type="button" onClick={handleAIFix} disabled={aiLoading}>
+                            {aiLoading ? "Fixing..." : "AI Debug"}
+                          </button>
+                          <button type="button" onClick={() => setShowAIGenerator(true)}>Prompt Engine</button>
                         </div>
                       </div>
-                      <LiveEditor code={formData.code} onChange={handleCodeChange} className="live-editor" />
-                      <LiveError className="editor-error" />
+                      <LiveEditor code={formData.code} onChange={handleCodeChange} />
+                      <LiveError />
                     </div>
                     <div className="preview-wrapper">
-                      <div className="preview-header">Live Rendering Monitor</div>
-                      <div className="preview-render"><LivePreview /></div>
+                      <div className="preview-header">Live Preview</div>
+                      <LivePreview />
                     </div>
                   </div>
                 </LiveProvider>
@@ -1185,11 +1201,11 @@ export default function ComponentBuilder({ token, onSuccess }) {
                 {showAIGenerator && (
                   <div className="ai-generator-modal">
                     <div className="ai-generator-card">
-                      <h3>Describe Component Parameters</h3>
-                      <textarea value={aiPrompt} onChange={(e) => setAiPrompt(e.target.value)} placeholder="Generate tailwind components or buttons layout..." rows={4} className="form-input" />
-                      <div className="flex gap-2 mt-2">
-                        <button type="button" onClick={handleAIGenerate} disabled={aiLoading} className="btn btn-primary">Build Block</button>
-                        <button type="button" onClick={() => setShowAIGenerator(false)} className="btn btn-secondary">Dismiss</button>
+                      <h3>AI Component Generator</h3>
+                      <textarea value={aiPrompt} onChange={(e) => setAiPrompt(e.target.value)} rows={4} placeholder="Describe the component..." />
+                      <div className="flex gap-2">
+                        <button type="button" onClick={handleAIGenerate} disabled={aiLoading}>Generate</button>
+                        <button type="button" onClick={() => setShowAIGenerator(false)}>Cancel</button>
                       </div>
                     </div>
                   </div>
@@ -1197,69 +1213,82 @@ export default function ComponentBuilder({ token, onSuccess }) {
               </div>
             )}
 
-            {/* STEP 3: PROPS MANIFEST */}
+            {/* STEP 3: PROPS */}
             {step === "props" && (
               <div className="step-section">
-                <h2 className="step-title">🎛️ Prop Variables</h2>
+                <h2 className="step-title">🎛️ Props Configuration</h2>
                 <div className="props-list">
                   {formData.props.map((prop, idx) => (
                     <div key={idx} className="prop-item">
-                      <div><strong>{prop.name}</strong> - <span className="prop-type">{prop.type}</span></div>
-                      <button type="button" onClick={() => removeProp(idx)} className="prop-delete-btn">✕</button>
+                      <strong>{prop.name}</strong> — {prop.type}
+                      <button type="button" onClick={() => removeProp(idx)}>✕</button>
                     </div>
                   ))}
                 </div>
-                <div className="prop-form border p-3 rounded mt-3">
-                  <h3>Append Declarative Prop</h3>
-                  <div className="flex gap-2">
-                    <input type="text" placeholder="Prop key" value={currentProp.name} onChange={(e) => setCurrentProp(prev => ({ ...prev, name: e.target.value }))} className="form-input" />
-                    <select value={currentProp.type} onChange={(e) => setCurrentProp(prev => ({ ...prev, type: e.target.value }))} className="form-input">
-                      <option value="text">Text Node</option>
-                      <option value="color">Color Selector</option>
-                      <option value="boolean">Boolean Switch</option>
-                    </select>
-                    <button type="button" onClick={addProp} className="btn btn-success">+ Add</button>
-                  </div>
+                <div className="prop-form">
+                  <h3>Add New Prop</h3>
+                  <input
+                    type="text"
+                    placeholder="Prop name"
+                    value={currentProp.name}
+                    onChange={(e) => setCurrentProp((p) => ({ ...p, name: e.target.value }))}
+                  />
+                  <select
+                    value={currentProp.type}
+                    onChange={(e) => setCurrentProp((p) => ({ ...p, type: e.target.value }))}
+                  >
+                    <option value="text">Text</option>
+                    <option value="color">Color</option>
+                    <option value="boolean">Boolean</option>
+                  </select>
+                  <button type="button" onClick={addProp}>+ Add Prop</button>
                 </div>
               </div>
             )}
 
-            {/* STEP 4: REVIEW & SAVE */}
+            {/* STEP 4: REVIEW */}
             {step === "review" && (
               <div className="step-section">
-                <h2 className="step-title">✅ System Check & Review</h2>
+                <h2 className="step-title">✅ Review & Publish</h2>
                 <div className="review-grid">
-                  <div className="review-card"><span className="review-label">Identifier</span><div className="review-value">{formData.name || "None"}</div></div>
-                  <div className="review-card"><span className="review-label">Group Category</span><div className="review-value">{formData.category || "None"}</div></div>
-                  <div className="review-card"><span className="review-label">Total Assets Loaded</span><div className="review-value">{selectedFiles.length} files</div></div>
+                  <div><strong>Name:</strong> {formData.name}</div>
+                  <div><strong>Label:</strong> {formData.label}</div>
+                  <div><strong>Category:</strong> {formData.category}</div>
+                  <div><strong>Assets:</strong> {selectedFiles.length} files</div>
+                  <div><strong>Props:</strong> {formData.props.length}</div>
                 </div>
               </div>
             )}
 
-            {/* Navigation Bar */}
             <div className="action-buttons">
-              {step !== "basic" && <button type="button" onClick={() => {
-                const steps = ["basic", "code", "props", "review"];
-                setStep(steps[steps.indexOf(step) - 1]);
-              }} className="btn btn-secondary">← Back</button>}
+              {step !== "basic" && (
+                <button type="button" onClick={() => {
+                  const steps = ["basic", "code", "props", "review"];
+                  setStep(steps[steps.indexOf(step) - 1]);
+                }} className="btn btn-secondary">
+                  ← Back
+                </button>
+              )}
 
               {step !== "review" ? (
                 <button type="button" onClick={() => {
                   const steps = ["basic", "code", "props", "review"];
                   setStep(steps[steps.indexOf(step) + 1]);
-                }} className="btn btn-primary">Next Step →</button>
+                }} className="btn btn-primary">
+                  Next →
+                </button>
               ) : (
-                <button type="submit" className="btn btn-success">Publish Component System ✓</button>
+                <button type="submit" className="btn btn-success">
+                  {isEditing ? "Update Component" : "Publish Component"} ✓
+                </button>
               )}
             </div>
-
           </form>
         </div>
 
-        {/* Status Bar Indicator */}
         <div className="status-bar">
-          <div className="status-item">{isSaved ? "● Buffered & Ready" : "⚒ Unsaved Configuration Changes"}</div>
-          <div className="status-item">Step Focus: <strong>{step.toUpperCase()}</strong></div>
+          <div>{isSaved ? "● Ready" : "⚒ Unsaved changes"}</div>
+          <div>Mode: <strong>{isEditing ? "EDIT" : "CREATE"}</strong></div>
         </div>
       </div>
     </div>
