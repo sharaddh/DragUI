@@ -1,15 +1,64 @@
 import mongoose from "mongoose";
 
-const projectSchema = new mongoose.Schema({
-  userId: String,
-  name: String,
-  uniqueId: { type: String, index: true },
-  isPublic: { type: Boolean, default: false },
-  design: Object, // your tree JSON
-  updatedAt: {
-    type: Date,
-    default: Date.now,
+const projectSchema = new mongoose.Schema(
+{
+  owner:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:"User"
   },
+
+  projectId:{
+    type:String,
+    unique:true
+  },
+
+  name:{
+    type:String,
+    required:true
+  },
+
+  description:String,
+
+  type:{
+    type:String,
+    enum:[
+      "frontend",
+      "backend",
+      "fullstack"
+    ]
+  },
+
+  visibility:{
+    type:String,
+    enum:[
+      "public",
+      "private"
+    ],
+    default:"private"
+  },
+
+  frontend:[Object],
+
+  backend:[Object],
+
+  installs:{
+    type:Number,
+    default:0
+  },
+
+  version:{
+    type:String,
+    default:"1.0.0"
+  },
+
+  tags:[String]
+
+},
+{
+  timestamps:true
 });
 
-export default mongoose.model("Project", projectSchema);
+export default mongoose.model(
+  "Project",
+  projectSchema
+);
