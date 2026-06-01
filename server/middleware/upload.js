@@ -1,25 +1,74 @@
 import multer from "multer";
-import path from "path";
-import fs from "fs";
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const { type, name } = req.body;
+import { CloudinaryStorage }
+from "multer-storage-cloudinary";
 
-    const dir = path.join(
-      "templates",
-      type,        // frontend / backend
-      name         // component name
+import cloudinary from "../config/cloudinary.js";
+
+const storage =
+  new CloudinaryStorage({
+    cloudinary,
+
+    params: async (
+      req,
+      file
+    ) => ({
+      folder: "dropui",
+
+      resource_type: "auto",
+
+      public_id:
+        Date.now() +
+        "-" +
+        file.originalname,
+    }),
+  });
+
+const fileFilter = (
+  req,
+  file,
+  cb
+) => {
+  const allowed = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/svg+xml",
+
+    "video/mp4",
+    "video/quicktime",
+
+    "application/pdf",
+
+    "application/zip",
+    "application/x-zip-compressed",
+  ];
+
+  if (
+    allowed.includes(
+      file.mimetype
+    )
+  ) {
+    cb(null, true);
+  } else {
+    cb(
+      new Error(
+        "Unsupported file type"
+      ),
+      false
     );
+  }
+};
 
-    fs.mkdirSync(dir, { recursive: true });
+const upload = multer({
+  storage,
 
-    cb(null, dir);
+  limits: {
+    fileSize:
+      100 * 1024 * 1024,
   },
 
-  filename: (req, file, cb) => {
-    cb(null, file.originalname);
-  },
+  fileFilter,
 });
 
-export const upload = multer({ storage });
+export default upload;
