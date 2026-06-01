@@ -158,20 +158,23 @@ import "./AdminDashboard.css";
 
 const getComponentName = (code) => {
   if (!code) return "ComponentPreview";
-  const functionMatch = code.match(/function\s+([A-Za-z0-9_]+)/);
-  const constMatch = code.match(/const\s+([A-Za-z0-9_]+)\s*=/);
-  const arrowMatch = code.match(/([A-Za-z0-9_]+)\s*=\s*\(.*?\)\s*=>/);
-  return (functionMatch?.[1] || constMatch?.[1] || arrowMatch?.[1] || "ComponentPreview");
+  const matches = [
+    code.match(/function\s+([A-Za-z0-9_]+)/),
+    code.match(/const\s+([A-Za-z0-9_]+)\s*=/),
+    code.match(/([A-Za-z0-9_]+)\s*=\s*\(.*?\)\s*=>/)
+  ];
+  return matches.find(m => m)?.[1] || "ComponentPreview";
 };
 
-const wrapPreviewCode = (code, assets = []) => {
+const wrapPreviewCode = (code, files = []) => {
   let cleanCode = code?.trim() || "";
   if (!cleanCode) return "";
 
-  // Replace blob URLs with actual Cloudinary URLs if available
-  assets.forEach(asset => {
-    if (asset.preview && asset.url) {
-      cleanCode = cleanCode.replace(new RegExp(asset.preview, 'g'), asset.url);
+  // Replace any blob URLs with real Cloudinary URLs
+  files.forEach((url, index) => {
+    if (url && url.startsWith("http")) {
+      cleanCode = cleanCode.replace(/blob:http[^"]*/g, url);
+      cleanCode = cleanCode.replace(new RegExp(`"blob:[^"]*"`, 'g'), `"${url}"`);
     }
   });
 
@@ -197,24 +200,19 @@ const AdminDashboard = ({ token, onLogout, apiSecret }) => {
     fetchComponents();
   }, [token]);
 
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape" && showBuilder) handleCloseBuilder();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [showBuilder]);
-
   const fetchComponents = async () => {
     setIsLoading(true);
     try {
       const res = await axios.get("http://localhost:5000/api/admin/components", {
-        headers: { Authorization: `Bearer ${token}`, "x-api-secret": apiSecret }
+        headers: { 
+          Authorization: `Bearer ${token}`, 
+          "x-api-secret": apiSecret 
+        }
       });
-      const sorted = res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      setComponents(sorted);
+      setComponents(res.data);
     } catch (err) {
-      console.error(err);
+      console.error("Fetch error:", err);
+      alert("Failed to load components");
     } finally {
       setIsLoading(false);
     }
@@ -231,7 +229,7 @@ const AdminDashboard = ({ token, onLogout, apiSecret }) => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this component?")) return;
+    if (!window.confirm("Delete this component permanently?")) return;
     try {
       await axios.delete(`http://localhost:5000/api/admin/component/${id}`, {
         headers: { Authorization: `Bearer ${token}`, "x-api-secret": apiSecret }
@@ -242,9 +240,9 @@ const AdminDashboard = ({ token, onLogout, apiSecret }) => {
     }
   };
 
-  const filteredComponents = components.filter(comp =>
-    (comp.label || comp.name || "").toLowerCase().includes(searchTerm.toLowerCase()) &&
-    (selectedCategory === "All" || comp.category === selectedCategory)
+  const filtered = components.filter(c =>
+    (c.label || c.name || "").toLowerCase().includes(searchTerm.toLowerCase()) &&
+    (selectedCategory === "All" || c.category === selectedCategory)
   );
 
   const categories = ["All", ...new Set(components.map(c => c.category).filter(Boolean))];
@@ -252,9 +250,9 @@ const AdminDashboard = ({ token, onLogout, apiSecret }) => {
   return (
     <div className="admin-dashboard">
       <header className="admin-header">
-        <div className="header-content">
+        <div>
           <h1>🚀 Component Studio</h1>
-          <p>Build • Preview • Manage</p>
+          <p>Professional UI Library Manager</p>
         </div>
         <button onClick={onLogout} className="logout-btn">Logout</button>
       </header>
@@ -271,9 +269,9 @@ const AdminDashboard = ({ token, onLogout, apiSecret }) => {
             }}
           />
         ) : (
-          <>
+          <div className="library-view">
             <div className="library-header">
-              <h2>Components Library ({filteredComponents.length})</h2>
+              <h2>Components Library ({filtered.length})</h2>
 
               <div className="controls">
                 <input
@@ -285,7 +283,9 @@ const AdminDashboard = ({ token, onLogout, apiSecret }) => {
                 />
 
                 <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className="category-select">
-                  {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                  {categories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
                 </select>
 
                 <div className="view-toggle">
@@ -298,43 +298,49 @@ const AdminDashboard = ({ token, onLogout, apiSecret }) => {
             </div>
 
             {isLoading ? (
-              <div className="loading">Loading components...</div>
-            ) : filteredComponents.length === 0 ? (
+              <div className="loading-state">Loading your components...</div>
+            ) : filtered.length === 0 ? (
               <div className="empty-state">
                 <h3>No components found</h3>
-                <button onClick={() => setShowBuilder(true)} className="new-btn">Create New</button>
+                <button onClick={() => setShowBuilder(true)} className="new-btn">Create New Component</button>
               </div>
             ) : (
-              <div className={`components-container ${viewMode}`}>
-                {filteredComponents.map((comp) => {
-                  const sourceCode = comp.template || comp.code;
-                  const assets = comp.assets || []; // Assuming your backend returns assets array with {preview, url}
+              <div className={`components-grid ${viewMode}`}>
+                {filtered.map((comp) => {
+                  const sourceCode = comp.code || comp.template;
+                  const files = comp.files || []; // Cloudinary URLs from DB
 
                   return (
                     <div key={comp._id} className="component-card">
-                      <div className="preview-wrapper">
+                      <div className="preview-box">
                         {sourceCode ? (
-                          <LiveProvider code={wrapPreviewCode(sourceCode, assets)} scope={{ React }} noInline>
+                          <LiveProvider
+                            code={wrapPreviewCode(sourceCode, files)}
+                            scope={{ React }}
+                            noInline
+                          >
                             <LivePreview className="live-preview" />
-                            <LiveError className="error" />
+                            <LiveError className="preview-error" />
                           </LiveProvider>
                         ) : (
-                          <div className="no-preview">No Preview</div>
+                          <div className="no-preview">Preview Not Available</div>
                         )}
                       </div>
 
-                      <div className="card-body">
+                      <div className="card-content">
                         <h3>{comp.label || comp.name}</h3>
-                        <p className="description">{comp.description?.substring(0, 85)}...</p>
+                        <p className="desc">{comp.description ? comp.description.substring(0, 90) + "..." : "No description"}</p>
 
-                        <div className="meta">
-                          <span className="category-tag">{comp.category}</span>
-                          {comp.props?.length > 0 && <span className="props-tag">{comp.props.length} props</span>}
+                        <div className="meta-info">
+                          <span className="tag category">{comp.category || "Uncategorized"}</span>
+                          {comp.props?.length > 0 && (
+                            <span className="tag props">{comp.props.length} props</span>
+                          )}
                         </div>
 
                         <div className="actions">
-                          <button onClick={() => handleEdit(comp)} className="edit-btn">Edit</button>
-                          <button onClick={() => handleDelete(comp._id)} className="delete-btn">Delete</button>
+                          <button onClick={() => handleEdit(comp)} className="edit-btn">✏️ Edit</button>
+                          <button onClick={() => handleDelete(comp._id)} className="delete-btn">🗑️ Delete</button>
                         </div>
                       </div>
                     </div>
@@ -342,7 +348,7 @@ const AdminDashboard = ({ token, onLogout, apiSecret }) => {
                 })}
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </div>
