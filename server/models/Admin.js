@@ -2,46 +2,88 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
 const adminSchema = new mongoose.Schema(
-  {
-    adminId,
-    email,
+{
+  adminId: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+  },
 
-    password,
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+  },
 
-    provider: {
-      type: String,
-      enum: [
-        "local",
-        "google",
-        "github"
-      ]
-    },
+  password: {
+    type: String,
+  },
 
-    googleId,
-    githubId,
+  provider: {
+    type: String,
+    enum: [
+      "local",
+      "google",
+      "github",
+    ],
+    default: "local",
+  },
 
-    avatar,
+  googleId: String,
 
-    role: {
-      type: String,
-      default: "admin"
-    },
+  githubId: String,
 
-    lastLogin,
+  avatar: String,
 
-    isActive: true
-  });
+  role: {
+    type: String,
+    enum: [
+      "super_admin",
+      "admin",
+      "editor",
+    ],
+    default: "admin",
+  },
 
-// Hash password before saving
-adminSchema.pre("save", async function () {
-  if (!this.isModified("password")) return;
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
+
+  lastLogin: Date,
+},
+{
+  timestamps: true,
+}
+);
+
+adminSchema.pre("save", async function(next) {
+  if (!this.isModified("password"))
+    return next();
+
+  const salt =
+    await bcrypt.genSalt(10);
+
+  this.password =
+    await bcrypt.hash(
+      this.password,
+      salt
+    );
+
+  next();
 });
 
-// Method to compare passwords
-adminSchema.methods.comparePassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
+adminSchema.methods.comparePassword =
+async function(password) {
+  return bcrypt.compare(
+    password,
+    this.password
+  );
 };
 
-export default mongoose.model("Admin", adminSchema);
+export default mongoose.model(
+  "Admin",
+  adminSchema
+);

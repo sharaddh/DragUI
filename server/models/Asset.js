@@ -1,26 +1,46 @@
 import mongoose from "mongoose";
 
-const assetSchema = new mongoose.Schema(
+const assetSchema =
+new mongoose.Schema(
 {
-  name:String,
+  name: String,
 
-  url:String,
+  url: String,
 
-  publicId:String,
+  publicId: String,
 
-  type:String,
+  type: {
+    type: String,
+    enum: [
+      "image",
+      "video",
+      "pdf",
+      "zip",
+      "svg",
+      "other",
+    ],
+  },
 
-  size:Number,
+  size: Number,
 
-  uploadedBy:{
-    type:mongoose.Schema.Types.ObjectId,
-    ref:"Admin"
-  }
+  uploadedBy: {
+    type:
+      mongoose.Schema.Types.ObjectId,
+    ref: "Admin",
+  },
 
+  usedIn: [
+    {
+      type:
+        mongoose.Schema.Types.ObjectId,
+      ref: "Component",
+    },
+  ],
 },
 {
-  timestamps:true
-});
+  timestamps: true,
+}
+);
 
 export default mongoose.model(
   "Asset",

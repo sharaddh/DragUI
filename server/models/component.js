@@ -1,8 +1,10 @@
 import mongoose from "mongoose";
 
-const propSchema = new mongoose.Schema(
+const propSchema =
+new mongoose.Schema(
 {
   name: String,
+
   label: String,
 
   type: {
@@ -14,134 +16,124 @@ const propSchema = new mongoose.Schema(
       "boolean",
       "select",
       "image",
-      "url"
-    ]
+      "url",
+    ],
+    default: "text",
   },
 
-  defaultValue: mongoose.Schema.Types.Mixed,
+  defaultValue:
+    mongoose.Schema.Types.Mixed,
 
   required: {
     type: Boolean,
-    default: false
+    default: false,
   },
 
-  options: [String]
+  options: [String],
 },
-{ _id:false }
+{
+  _id: false,
+}
 );
 
-const componentSchema = new mongoose.Schema(
+const componentSchema =
+new mongoose.Schema(
 {
-  name:{
-    type:String,
-    required:true,
-    unique:true
+  name: {
+    type: String,
+    required: true,
   },
 
-  slug:{
-    type:String,
-    unique:true
+  slug: {
+    type: String,
+    unique: true,
   },
 
-  label:String,
+  label: String,
 
-  description:String,
+  description: String,
 
-  type:{
-    type:String,
-    enum:["frontend","backend"],
-    required:true
+  type: {
+    type: String,
+    enum: [
+      "frontend",
+      "backend",
+    ],
+    default: "frontend",
   },
 
-  category:String,
+  category: String,
 
-  tags:[String],
+  tags: [String],
 
-  version:{
-    type:String,
-    default:"1.0.0"
+  version: {
+    type: String,
+    default: "1.0.0",
   },
 
-  visibility:{
-    type:String,
-    enum:["public","private"],
-    default:"public"
+  visibility: {
+    type: String,
+    enum: [
+      "public",
+      "private",
+    ],
+    default: "public",
   },
 
-  status:{
-    type:String,
-    enum:[
+  status: {
+    type: String,
+    enum: [
       "draft",
       "published",
-      "deprecated"
+      "deprecated",
     ],
-    default:"published"
+    default: "draft",
   },
 
-  template:String,
+  template: String,
 
-  props:[propSchema],
+  code: String,
 
-  files:[
+  props: [propSchema],
+
+  thumbnail: String,
+
+  dependencies: [String],
+
+  peerDependencies: [String],
+
+  envVariables: [String],
+
+  files: [
     {
-      name:String,
-      url:String,
-      publicId:String,
-      size:Number,
-      type:String
-    }
+      name: String,
+      url: String,
+      publicId: String,
+      size: Number,
+      type: String,
+    },
   ],
 
-  thumbnail:String,
-
-  dependencies:[String],
-
-  peerDependencies:[String],
-
-  envVariables:[String],
-
-  downloads:{
-    type:Number,
-    default:0
-  },
-version:{
- type:String,
- default:"1.0.0"
-},
-status:{
- type:String,
- enum:[
-   "draft",
-   "published",
-   "deprecated"
- ],
- default:"draft"
-},
-thumbnail:String  ,
-downloads:{
- type:Number,
- default:0
-} ,
-dependencies:[String],
-envVariables:[String],
-visibility:{
- type:String,
- default:"public"
-},
-  usageCount:{
-    type:Number,
-    default:0
+  downloads: {
+    type: Number,
+    default: 0,
   },
 
-  createdBy:{
-    type:mongoose.Schema.Types.ObjectId,
-    ref:"Admin"
-  }
+  usageCount: {
+    type: Number,
+    default: 0,
+  },
 
+  createdBy: {
+    type:
+      mongoose.Schema.Types.ObjectId,
+    ref: "Admin",
+  },
 },
 {
-  timestamps:true
-});
+  timestamps: true,
+}
+);
 
 export default mongoose.model(
   "Component",

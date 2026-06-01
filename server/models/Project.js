@@ -1,62 +1,71 @@
 import mongoose from "mongoose";
 
-const projectSchema = new mongoose.Schema(
+const projectSchema =
+new mongoose.Schema(
 {
-  owner:{
-    type:mongoose.Schema.Types.ObjectId,
-    ref:"User"
+  owner: {
+    type:
+      mongoose.Schema.Types.ObjectId,
+    ref: "User",
   },
 
-  projectId:{
-    type:String,
-    unique:true
+  projectId: {
+    type: String,
+    unique: true,
   },
 
-  name:{
-    type:String,
-    required:true
+  name: {
+    type: String,
+    required: true,
   },
 
-  description:String,
+  description: String,
 
-  type:{
-    type:String,
-    enum:[
+  type: {
+    type: String,
+    enum: [
       "frontend",
       "backend",
-      "fullstack"
-    ]
-  },
-
-  visibility:{
-    type:String,
-    enum:[
-      "public",
-      "private"
+      "fullstack",
     ],
-    default:"private"
   },
 
-  frontend:[Object],
-
-  backend:[Object],
-
-  installs:{
-    type:Number,
-    default:0
+  visibility: {
+    type: String,
+    enum: [
+      "public",
+      "private",
+    ],
+    default: "private",
   },
 
-  version:{
-    type:String,
-    default:"1.0.0"
+  frontend: [Object],
+
+  backend: [Object],
+
+  installs: {
+    type: Number,
+    default: 0,
   },
 
-  tags:[String]
+  version: {
+    type: String,
+    default: "1.0.0",
+  },
 
+  tags: [String],
+
+  thumbnail: String,
+
+  isPublished: {
+    type: Boolean,
+    default: false,
+  },
 },
 {
-  timestamps:true
-});
+  timestamps: true,
+}
+);
 
 export default mongoose.model(
   "Project",
