@@ -1,25 +1,36 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
-const adminSchema = new mongoose.Schema({
-  adminId: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    unique: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+const adminSchema = new mongoose.Schema(
+  {
+    adminId,
+    email,
+
+    password,
+
+    provider: {
+      type: String,
+      enum: [
+        "local",
+        "google",
+        "github"
+      ]
+    },
+
+    googleId,
+    githubId,
+
+    avatar,
+
+    role: {
+      type: String,
+      default: "admin"
+    },
+
+    lastLogin,
+
+    isActive: true
+  });
 
 // Hash password before saving
 adminSchema.pre("save", async function () {
