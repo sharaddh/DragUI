@@ -104,7 +104,30 @@ const componentSchema = new mongoose.Schema(
     type:Number,
     default:0
   },
-
+version:{
+ type:String,
+ default:"1.0.0"
+},
+status:{
+ type:String,
+ enum:[
+   "draft",
+   "published",
+   "deprecated"
+ ],
+ default:"draft"
+},
+thumbnail:String  ,
+downloads:{
+ type:Number,
+ default:0
+} ,
+dependencies:[String],
+envVariables:[String],
+visibility:{
+ type:String,
+ default:"public"
+},
   usageCount:{
     type:Number,
     default:0

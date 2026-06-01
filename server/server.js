@@ -2,7 +2,9 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
-
+import helmet from "helmet";
+import compression from "compression";
+import morgan from "morgan";
 import authRoutes from "./routes/authRoutes.js";
 import projectRoutes from "./routes/projectRoutes.js";
 import session from "express-session";
@@ -19,7 +21,21 @@ app.use(
     saveUninitialized: true,
   })
 );
+app.use(helmet());
 
+app.use(compression());
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174"
+    ],
+    credentials: true
+  })
+);
+
+app.use(morgan("dev"));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(cors());
@@ -34,12 +50,6 @@ import componentRoutes from "./routes/componentRoutes.js";
 app.use("/api/component", componentRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/project", projectRoutes);
-import componentRoutes from "./routes/componentRoutes.js";
-
-app.use(
-  "/api/components",
-  componentRoutes
-);
 
 mongoose.connect(process.env.MONGO_URI).then(() => {
   console.log("✅ DB connected");

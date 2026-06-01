@@ -1,28 +1,26 @@
 import mongoose from "mongoose";
 
-const componentVersionSchema =
+const schema =
 new mongoose.Schema(
 {
-  component:{
-    type:mongoose.Schema.Types.ObjectId,
-    ref:"Component"
-  },
+ component:{
+  type:mongoose.Schema.Types.ObjectId,
+  ref:"Component"
+ },
 
-  version:String,
+ version:String,
 
-  template:String,
+ template:String,
 
-  props:[Object],
+ props:[Object],
 
-  dependencies:[String],
-
-  changelog:String
+ files:[String]
 },
 {
-  timestamps:true
+ timestamps:true
 });
 
 export default mongoose.model(
-  "ComponentVersion",
-  componentVersionSchema
+ "ComponentVersion",
+ schema
 );
