@@ -79,6 +79,15 @@ app.get("/", (req, res) => {
   });
 });
 
+import errorHandler
+from "./middleware/errorHandler.js";
+
+import {
+  apiLimiter,
+} from "./middleware/rateLimiter.js";
+
+app.use(apiLimiter);
+app.use(errorHandler);
 // Routes
 
 import authRoutes from "./routes/authRoutes.js";
