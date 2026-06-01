@@ -34,7 +34,12 @@ import componentRoutes from "./routes/componentRoutes.js";
 app.use("/api/component", componentRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/project", projectRoutes);
+import componentRoutes from "./routes/componentRoutes.js";
 
+app.use(
+  "/api/components",
+  componentRoutes
+);
 
 mongoose.connect(process.env.MONGO_URI).then(() => {
   console.log("✅ DB connected");

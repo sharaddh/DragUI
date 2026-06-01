@@ -1,32 +1,40 @@
-import express from "express";
-import Component from "../models/components.js";
+import * as componentService from "../services/componentService.js";
 
-const router = express.Router();
-
-// Get ALL components (Used by the DragUI Frontend sidebar)
-router.get("/all", async (req, res) => {
+export const create = async (
+  req,
+  res
+) => {
   try {
-    const components = await Component.find().select("-__v"); // Exclude mongoose version key
+    const component =
+      await componentService.createComponent(
+        req.body,
+        req.adminId
+      );
+
+    res.status(201).json(component);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+export const getAll = async (
+  req,
+  res
+) => {
+  try {
+    const components =
+      await Component.find()
+        .select(
+          "name label category type thumbnail version downloads"
+        )
+        .lean();
+
     res.json(components);
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching components" });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
   }
-});
-
-// Get a SPECIFIC component (Used by the CLI to pull code and assets)
-router.get("/:name", async (req, res) => {
-  try {
-    const comp = await Component.findOne({ name: req.params.name });
-
-    if (!comp) return res.status(404).json({ message: "Component not found" });
-
-    // The CLI will consume this JSON. 
-    // comp.code contains the raw JSX.
-    // comp.files contains the Cloudinary URLs for assets.
-    res.json(comp);
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching component details" });
-  }
-});
-
-export default router;
+};
