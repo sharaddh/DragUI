@@ -7,43 +7,66 @@ export default function extractProps(code) {
   try {
     const ast = parse(code, {
       sourceType: "module",
-      plugins: ["jsx"],
+      plugins: [
+        "jsx",
+        "typescript"
+      ]
     });
 
     traverse.default(ast, {
       FunctionDeclaration(path) {
-        const firstParam = path.node.params[0];
+        const first =
+          path.node.params?.[0];
 
         if (
-          firstParam &&
-          firstParam.type === "ObjectPattern"
+          first &&
+          first.type === "ObjectPattern"
         ) {
-          firstParam.properties.forEach((prop) => {
-            props.push({
-              name: prop.key.name,
-              label: prop.key.name,
-              type: "text",
-            });
-          });
+          first.properties.forEach(
+            (prop) => {
+              props.push({
+                name:
+                  prop.key.name,
+
+                label:
+                  prop.key.name,
+
+                type: "text",
+
+                required: false
+              });
+            }
+          );
         }
       },
 
-      ArrowFunctionExpression(path) {
-        const firstParam = path.node.params[0];
+      ArrowFunctionExpression(
+        path
+      ) {
+        const first =
+          path.node.params?.[0];
 
         if (
-          firstParam &&
-          firstParam.type === "ObjectPattern"
+          first &&
+          first.type === "ObjectPattern"
         ) {
-          firstParam.properties.forEach((prop) => {
-            props.push({
-              name: prop.key.name,
-              label: prop.key.name,
-              type: "text",
-            });
-          });
+          first.properties.forEach(
+            (prop) => {
+              props.push({
+                name:
+                  prop.key.name,
+
+                label:
+                  prop.key.name,
+
+                type: "text",
+
+                required: false
+              });
+            }
+          );
         }
-      },
+      }
     });
 
     return props;

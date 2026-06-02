@@ -1,31 +1,36 @@
-import fs from "fs";
+import fs from "fs-extra";
 import path from "path";
 
-export const saveTemplate = async ({
-  type,
-  name,
-  code,
-}) => {
-  const dir = path.join(
-    process.cwd(),
-    "templates",
+export const saveTemplate =
+  async ({
     type,
-    name
-  );
+    slug,
+    code
+  }) => {
+    const dir = path.join(
+      process.cwd(),
+      "templates",
+      type,
+      slug
+    );
 
-  fs.mkdirSync(dir, {
-    recursive: true,
-  });
+    await fs.ensureDir(dir);
 
-  const filePath = path.join(
-    dir,
-    `${name}.jsx`
-  );
+    const filePath =
+      path.join(
+        dir,
+        `${slug}.jsx`
+      );
 
-  fs.writeFileSync(filePath, code);
+    await fs.writeFile(
+      filePath,
+      code
+    );
 
-  return {
-    path: `${type}/${name}`,
-    filePath,
+    return {
+      path:
+        `${type}/${slug}`,
+
+      filePath
+    };
   };
-};
