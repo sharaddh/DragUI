@@ -108,7 +108,20 @@ app.use(
   "/api/projects",
   projectRoutes
 );
+import analyticsRoutes
+from "./routes/analyticsRoutes.js";
 
+import assetRoutes
+from "./routes/assetRoutes.js";
+app.use(
+ "/api/analytics",
+ analyticsRoutes
+);
+
+app.use(
+ "/api/assets",
+ assetRoutes
+);
 // DB
 
 connectDB();

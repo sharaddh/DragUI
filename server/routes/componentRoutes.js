@@ -378,9 +378,131 @@ router.post(
     }
   }
 );
+router.post(
+ "/:id/clone",
+ adminAuth,
+ async (
+   req,
+   res
+ ) => {
 
+   const component =
+     await Component.findById(
+       req.params.id
+     );
+
+   if(!component){
+     return res.status(404)
+       .json({
+         success:false
+       });
+   }
+
+   const clone =
+     await Component.create({
+
+       ...component.toObject(),
+
+       _id:undefined,
+
+       name:
+         component.name +
+         " Copy",
+
+       slug:
+         component.slug +
+         "-copy"
+     });
+
+   res.json({
+     success:true,
+     clone
+   });
+
+ }
+);
+router.patch(
+ "/:id/publish",
+ adminAuth,
+ async (
+   req,
+   res
+ ) => {
+
+   const component =
+     await Component.findByIdAndUpdate(
+       req.params.id,
+       {
+         status:
+           "published"
+       },
+       {
+         new:true
+       }
+     );
+
+   res.json({
+     success:true,
+     component
+   });
+
+ }
+);
+router.patch(
+ "/:id/draft",
+ adminAuth,
+ async (
+   req,
+   res
+ ) => {
+
+   const component =
+     await Component.findByIdAndUpdate(
+       req.params.id,
+       {
+         status:
+           "draft"
+       },
+       {
+         new:true
+       }
+     );
+
+   res.json({
+     success:true,
+     component
+   });
+
+ }
+);
 // Fix Component
+router.get(
+ "/search",
+ adminAuth,
+ async (
+   req,
+   res
+ ) => {
 
+   const {
+     q=""
+   } = req.query;
+
+   const components =
+     await Component.find({
+       name:{
+         $regex:q,
+         $options:"i"
+       }
+     });
+
+   res.json({
+     success:true,
+     components
+   });
+
+ }
+);
 router.post(
   "/ai/fix",
   adminAuth,
