@@ -1,32 +1,66 @@
 ﻿# DropUI
 
-DropUI is a full-stack visual app builder that combines a React-based builder UI, an admin dashboard, a shared backend service, a CLI generation tool, and template-driven code storage.
+DropUI is a modular full-stack visual app builder that enables teams to design, manage, and generate React-based applications through a drag-and-drop builder, an admin registry dashboard, a shared backend API, and a developer CLI.
 
-## Current Architecture
+---
+
+## 🚀 Overview
+
+DropUI is designed for production-ready development workflows with separate apps for:
+
+- **Client**: Visual builder and page editor
+- **Admin**: Registry, component management, and administration
+- **Server**: REST API, authentication, project storage, and code generation
+- **CLI**: Developer tools for authentication and pulling generated projects
+- **Templates**: Scaffolding assets for frontend and backend generation
+
+This repository is intended as a complete end-to-end platform for building and exporting React applications from a low-code/no-code interface.
+
+---
+
+## 📁 Repository Structure
 
 ```text
-DropUI/
-├── Client/         # User-facing builder frontend application
-├── admin/          # Admin dashboard and registry interface
-├── server/         # Backend API, auth engine, and project routes
-├── DragUi-cli/     # CLI tool for login, pull, and project generation
-├── templates/      # File-based frontend/backend template storage
-├── PROJECT_BLUEPRINT.md # Architecture and system overview
-└── README.md       # Project overview and startup instructions
+DragUI/
+├── Client/           # Builder frontend for end users
+├── admin/            # Admin dashboard for registry and component management
+├── server/           # Backend API, auth, storage, and generation services
+├── DragUi-cli/       # CLI tool for authentication and project pull operations
+├── templates/        # Frontend/backend scaffolding templates
+├── ADMIN_SETUP.md    # Admin onboarding and setup notes
+├── PROJECT_BLUEPRINT.md # Architecture and design documentation
+└── README.md         # This file
 ```
 
-## Apps and Responsibilities
+---
+
+## 🌟 Core Features
+
+- Visual drag-and-drop UI builder
+- Component registry and reusable component authoring
+- Authentication for users and admin access
+- Persistent project storage and versioned components
+- CLI support for login, pull, and developer workflows
+- Template-driven app generation for frontend and backend
+- Extensible architecture for production deployments
+
+---
+
+## 🧩 Application Breakdown
 
 ### Client
 
-The main builder frontend where users can:
+**Purpose:** End-user builder application.
 
-- sign in and manage sessions
-- access the visual project builder
-- work with components and page structure
-- open the CLI login flow
+**Capabilities:**
 
-Tech stack:
+- Sign in and manage sessions
+- Build UI using drag-and-drop components
+- Configure component properties and layout
+- Preview generated UI in real time
+- Save projects and component tree data
+
+**Tech stack:**
 
 - React 19
 - Vite
@@ -38,15 +72,16 @@ Tech stack:
 
 ### Admin
 
-The admin interface manages the registry and admin operations.
+**Purpose:** Registry and admin management.
 
-Current features include:
+**Capabilities:**
 
-- admin login
-- protected admin dashboard
-- component creation and management
+- Admin login / protected routes
+- Component and registry management
+- Create and manage reusable component definitions
+- Monitor project and user activity
 
-Tech stack:
+**Tech stack:**
 
 - React 18
 - Vite
@@ -54,69 +89,124 @@ Tech stack:
 
 ### Server
 
-The shared backend provides authentication, admin APIs, project endpoints, and registry routes.
+**Purpose:** Backend API and generation engine.
 
-Current stack:
+**Capabilities:**
+
+- Authentication and authorization
+- Project CRUD endpoints
+- Component registry API
+- Code generation and template orchestration
+- File upload handling and asset storage
+
+**Tech stack:**
 
 - Node.js
 - Express 5
 - MongoDB / Mongoose
 - JWT
-- Passport.js for OAuth
+- Passport.js
 - express-session
 - Multer
 
 ### CLI
 
-The CLI tool enables developer workflows with local authentication and project pull generation.
+**Purpose:** Developer tooling and project synchronization.
 
-Current commands:
+**Capabilities:**
 
 - `dropui login`
 - `dropui pull <projectId>`
 - `dropui logout`
 - `dropui whoami`
 
-CLI implementation uses:
+**Implementation:**
 
 - Node.js
-- local callback server
-- browser open flow
-- token storage via config helpers
+- Local callback server
+- Browser-based OAuth/auth flow
+- Local config token storage
 
 ### Templates
 
-The `templates/` folder contains file-based code templates for frontend and backend assets. These templates are intended for project generation and code scaffolding.
+**Purpose:** Static scaffolding assets for generated applications.
 
-## Getting Started
+**Contents:**
 
-### Prerequisites
+- Frontend templates
+- Backend templates
+- Project generation resources
 
-- Node.js 18+
-- npm
-- MongoDB running locally
+---
 
-### Run the backend server
+## ✅ Requirements
+
+- Node.js 18+ installed
+- npm 10+ installed
+- MongoDB instance available locally or remotely
+- Git for source control and CLI workflow
+
+---
+
+## ⚙️ Setup
+
+### 1. Clone the repository
+
+```bash
+git clone <repository-url>
+cd DragUI
+```
+
+### 2. Install dependencies for each app
 
 ```bash
 cd server
 npm install
-node server.js
+
+cd ../Client
+npm install
+
+cd ../admin
+npm install
+
+cd ../DragUi-cli
+npm install
 ```
 
-### Run the client builder
+### 3. Configure environment variables
+
+Create `.env` files for each application as needed.
+
+Recommended locations:
+
+- `server/.env`
+- `Client/.env`
+- `admin/.env`
+
+> The repo does not include committed secret values. Add your own API URLs, MongoDB connection strings, JWT secrets, and OAuth keys.
+
+---
+
+## 🚀 Run Locally
+
+### Start the server
 
 ```bash
-cd Client
-npm install
+cd server
 npm run dev
 ```
 
-### Run the admin dashboard
+### Start the client builder
+
+```bash
+cd Client
+npm run dev
+```
+
+### Start the admin dashboard
 
 ```bash
 cd admin
-npm install
 npm run dev
 ```
 
@@ -124,7 +214,6 @@ npm run dev
 
 ```bash
 cd DragUi-cli
-npm install
 npm link
 
 dropui login
@@ -132,318 +221,104 @@ dropui whoami
 dropui pull <projectId>
 ```
 
-## Notes
+---
 
-- The current project architecture is based on the workspace folders and package configurations present in this repository.
-- For a full architectural overview, see `PROJECT_BLUEPRINT.md`.
+## 🧪 Production Build
 
-```
-DragUI
-├─ admin
-│  ├─ .env
-│  ├─ eslint.config.js
-│  ├─ index.html
-│  ├─ package-lock.json
-│  ├─ package.json
-│  ├─ README.md
-│  ├─ src
-│  │  ├─ App.css
-│  │  ├─ App.jsx
-│  │  ├─ components
-│  │  │  ├─ AdminDashboard.css
-│  │  │  ├─ AdminDashboard.jsx
-│  │  │  ├─ AdminLogin.css
-│  │  │  ├─ AdminLogin.jsx
-│  │  │  ├─ ComponentBuilder.css
-│  │  │  └─ ComponentBuilder.jsx
-│  │  ├─ index.css
-│  │  └─ main.jsx
-│  └─ vite.config.js
-├─ ADMIN_SETUP.md
-├─ Client
-│  ├─ .env
-│  ├─ dist
-│  │  ├─ assets
-│  │  │  ├─ index-DJvNIQua.css
-│  │  │  └─ index-ekN-yH-o.js
-│  │  ├─ favicon.svg
-│  │  ├─ icons.svg
-│  │  └─ index.html
-│  ├─ eslint.config.js
-│  ├─ index.html
-│  ├─ package-lock.json
-│  ├─ package.json
-│  ├─ public
-│  │  ├─ favicon.svg
-│  │  └─ icons.svg
-│  ├─ src
-│  │  ├─ api
-│  │  │  ├─ auth.js
-│  │  │  ├─ component.js
-│  │  │  ├─ index.jsx
-│  │  │  └─ Project.js
-│  │  ├─ App.jsx
-│  │  ├─ assets
-│  │  │  ├─ hero.png
-│  │  │  ├─ react.svg
-│  │  │  └─ vite.svg
-│  │  ├─ components
-│  │  │  ├─ Background.jsx
-│  │  │  ├─ Canvas.jsx
-│  │  │  ├─ Navbar.jsx
-│  │  │  ├─ PropertiesPanel.jsx
-│  │  │  ├─ PropertiesPanelAdvanced.jsx
-│  │  │  ├─ Renderer.jsx
-│  │  │  ├─ save.jsx
-│  │  │  ├─ SaveButton.jsx
-│  │  │  ├─ Shortcuts.jsx
-│  │  │  ├─ Sidebar.jsx
-│  │  │  └─ TreeView.jsx
-│  │  ├─ context
-│  │  │  └─ authContext.jsx
-│  │  ├─ DropUi
-│  │  │  ├─ components
-│  │  │  │  ├─ Button
-│  │  │  │  │  ├─ Button.jsx
-│  │  │  │  │  └─ config.js
-│  │  │  │  ├─ container
-│  │  │  │  │  ├─ config.js
-│  │  │  │  │  └─ Container.jsx
-│  │  │  │  └─ Sidebar
-│  │  │  │     ├─ config.js
-│  │  │  │     └─ Sidebar.jsx
-│  │  │  └─ index.js
-│  │  ├─ GeneratedUI.jsx
-│  │  ├─ hooks
-│  │  │  └─ useRegistry.js
-│  │  ├─ index.css
-│  │  ├─ main.jsx
-│  │  ├─ middleware
-│  │  │  └─ ProtectedRoute.jsx
-│  │  ├─ pages
-│  │  │  ├─ Admin.jsx
-│  │  │  ├─ AuthSuccess.jsx
-│  │  │  ├─ Builder.jsx
-│  │  │  ├─ CliLogin.jsx
-│  │  │  ├─ Dashboard.jsx
-│  │  │  └─ Login.jsx
-│  │  ├─ store
-│  │  │  └─ useBuilderStore.js
-│  │  └─ utils
-│  │     ├─ cssProps.js
-│  │     ├─ helpers.js
-│  │     └─ registry.js
-│  └─ vite.config.js
-├─ DragUi-cli
-│  ├─ bin
-│  │  └─ index.js
-│  ├─ commands
-│  │  ├─ login.js
-│  │  ├─ logout.js
-│  │  ├─ pull.js
-│  │  └─ whoami.js
-│  ├─ package-lock.json
-│  ├─ package.json
-│  ├─ src
-│  │  └─ pages
-│  │     └─ clilogin.jsx
-│  └─ utils
-│     ├─ api.js
-│     ├─ config.js
-│     ├─ detect.js
-│     └─ logger.js
-├─ PROJECT_BLUEPRINT.md
-├─ README.md
-├─ server
-│  ├─ .env
-│  ├─ config
-│  │  └─ Passport.js
-│  ├─ middleware
-│  │  ├─ adminAuth.js
-│  │  ├─ auth.middleware.js
-│  │  └─ upload.js
-│  ├─ models
-│  │  ├─ Admin.js
-│  │  ├─ components.js
-│  │  ├─ Project.js
-│  │  └─ user.js
-│  ├─ package-lock.json
-│  ├─ package.json
-│  ├─ routes
-│  │  ├─ admin.js
-│  │  ├─ adminAuth.js
-│  │  ├─ authRoutes.js
-│  │  ├─ components.js
-│  │  └─ projectRoutes.js
-│  ├─ server.js
-│  ├─ templates
-│  │  └─ frontend
-│  │     ├─ dsf
-│  │     │  └─ WhatsApp Image 2026-05-30 at 3.53.14 PM.jpeg
-│  │     ├─ lolo
-│  │     │  └─ me.png
-│  │     └─ Sharad
-│  │        └─ me.png
-│  └─ utils
-│     └─ generateCode.js
-├─ temp-generated.jsx
-└─ templates
-   ├─ backend
-   └─ frontend
+### Build Client
 
+```bash
+cd Client
+npm run build
 ```
-```
-DragUI
-├─ admin
-│  ├─ .env
-│  ├─ eslint.config.js
-│  ├─ index.html
-│  ├─ package-lock.json
-│  ├─ package.json
-│  ├─ README.md
-│  ├─ src
-│  │  ├─ App.css
-│  │  ├─ App.jsx
-│  │  ├─ components
-│  │  │  ├─ AdminDashboard.css
-│  │  │  ├─ AdminDashboard.jsx
-│  │  │  ├─ AdminLogin.css
-│  │  │  ├─ AdminLogin.jsx
-│  │  │  ├─ ComponentBuilder.css
-│  │  │  └─ ComponentBuilder.jsx
-│  │  ├─ index.css
-│  │  └─ main.jsx
-│  └─ vite.config.js
-├─ ADMIN_SETUP.md
-├─ Client
-│  ├─ .env
-│  ├─ dist
-│  │  ├─ assets
-│  │  │  ├─ index-DJvNIQua.css
-│  │  │  └─ index-ekN-yH-o.js
-│  │  ├─ favicon.svg
-│  │  ├─ icons.svg
-│  │  └─ index.html
-│  ├─ eslint.config.js
-│  ├─ index.html
-│  ├─ package-lock.json
-│  ├─ package.json
-│  ├─ public
-│  │  ├─ favicon.svg
-│  │  └─ icons.svg
-│  ├─ src
-│  │  ├─ api
-│  │  │  ├─ auth.js
-│  │  │  ├─ component.js
-│  │  │  ├─ index.jsx
-│  │  │  └─ Project.js
-│  │  ├─ App.jsx
-│  │  ├─ assets
-│  │  │  ├─ hero.png
-│  │  │  ├─ react.svg
-│  │  │  └─ vite.svg
-│  │  ├─ components
-│  │  │  ├─ Background.jsx
-│  │  │  ├─ Canvas.jsx
-│  │  │  ├─ Navbar.jsx
-│  │  │  ├─ PropertiesPanel.jsx
-│  │  │  ├─ PropertiesPanelAdvanced.jsx
-│  │  │  ├─ Renderer.jsx
-│  │  │  ├─ save.jsx
-│  │  │  ├─ SaveButton.jsx
-│  │  │  ├─ Shortcuts.jsx
-│  │  │  ├─ Sidebar.jsx
-│  │  │  └─ TreeView.jsx
-│  │  ├─ context
-│  │  │  └─ authContext.jsx
-│  │  ├─ DropUi
-│  │  │  ├─ components
-│  │  │  │  ├─ Button
-│  │  │  │  │  ├─ Button.jsx
-│  │  │  │  │  └─ config.js
-│  │  │  │  ├─ container
-│  │  │  │  │  ├─ config.js
-│  │  │  │  │  └─ Container.jsx
-│  │  │  │  └─ Sidebar
-│  │  │  │     ├─ config.js
-│  │  │  │     └─ Sidebar.jsx
-│  │  │  └─ index.js
-│  │  ├─ GeneratedUI.jsx
-│  │  ├─ hooks
-│  │  │  └─ useRegistry.js
-│  │  ├─ index.css
-│  │  ├─ main.jsx
-│  │  ├─ middleware
-│  │  │  └─ ProtectedRoute.jsx
-│  │  ├─ pages
-│  │  │  ├─ Admin.jsx
-│  │  │  ├─ AuthSuccess.jsx
-│  │  │  ├─ Builder.jsx
-│  │  │  ├─ CliLogin.jsx
-│  │  │  ├─ Dashboard.jsx
-│  │  │  └─ Login.jsx
-│  │  ├─ store
-│  │  │  └─ useBuilderStore.js
-│  │  └─ utils
-│  │     ├─ cssProps.js
-│  │     ├─ helpers.js
-│  │     └─ registry.js
-│  └─ vite.config.js
-├─ DragUi-cli
-│  ├─ bin
-│  │  └─ index.js
-│  ├─ commands
-│  │  ├─ login.js
-│  │  ├─ logout.js
-│  │  ├─ pull.js
-│  │  └─ whoami.js
-│  ├─ package-lock.json
-│  ├─ package.json
-│  ├─ src
-│  │  └─ pages
-│  │     └─ clilogin.jsx
-│  └─ utils
-│     ├─ api.js
-│     ├─ config.js
-│     ├─ detect.js
-│     └─ logger.js
-├─ PROJECT_BLUEPRINT.md
-├─ README.md
-├─ server
-│  ├─ .env
-│  ├─ config
-│  │  └─ Passport.js
-│  ├─ middleware
-│  │  ├─ adminAuth.js
-│  │  ├─ auth.middleware.js
-│  │  └─ upload.js
-│  ├─ models
-│  │  ├─ Admin.js
-│  │  ├─ components.js
-│  │  ├─ Project.js
-│  │  └─ user.js
-│  ├─ package-lock.json
-│  ├─ package.json
-│  ├─ routes
-│  │  ├─ admin.js
-│  │  ├─ adminAuth.js
-│  │  ├─ authRoutes.js
-│  │  ├─ components.js
-│  │  └─ projectRoutes.js
-│  ├─ server.js
-│  ├─ templates
-│  │  └─ frontend
-│  │     ├─ dsf
-│  │     │  └─ WhatsApp Image 2026-05-30 at 3.53.14 PM.jpeg
-│  │     ├─ lolo
-│  │     │  └─ me.png
-│  │     └─ Sharad
-│  │        └─ me.png
-│  └─ utils
-│     └─ generateCode.js
-├─ temp-generated.jsx
-└─ templates
-   ├─ backend
-   └─ frontend
 
+### Build Admin
+
+```bash
+cd admin
+npm run build
 ```
+
+### Server Production
+
+```bash
+cd server
+npm install --production
+node server.js
+```
+
+### CLI Packaging
+
+The CLI is designed to be installed globally or linked locally using `npm link`.
+
+---
+
+## 📦 Deployment Recommendations
+
+- Host the server on a managed Node.js platform or container service
+- Use MongoDB Atlas or a managed MongoDB cluster
+- Deploy `Client` and `admin` as static Vite builds behind a CDN
+- Secure API endpoints with HTTPS and JWT validation
+- Configure environment variables securely in production
+- Enable CORS only for trusted frontend origins
+
+---
+
+## 🔧 Folder Summary
+
+### `Client/`
+
+- `src/App.jsx` – main builder entry
+- `src/components/` – builder UI components
+- `src/api/` – API integration
+- `src/pages/` – route pages
+- `src/utils/` – helper functions and registry
+
+### `admin/`
+
+- `src/App.jsx` – admin app entry
+- `src/components/` – admin UI screens and forms
+
+### `server/`
+
+- `server.js` – Express entrypoint
+- `routes/` – API route definitions
+- `controllers/` – request handling logic
+- `models/` – MongoDB schemas
+- `services/` – business logic and generation utilities
+- `middleware/` – auth, upload, and error handling
+
+### `DragUi-cli/`
+
+- `bin/index.js` – CLI bootstrap
+- `commands/` – command implementations
+- `utils/` – shared helpers and auth flow
+
+### `templates/`
+
+- `backend/` – backend scaffolding templates
+- `frontend/` – frontend scaffolding templates
+
+---
+
+## 📌 Notes
+
+- See `PROJECT_BLUEPRINT.md` for full architectural details.
+- Use `ADMIN_SETUP.md` for admin onboarding and registry instructions.
+- `temp-generated.jsx` contains temporary generated UI output.
+
+---
+
+## 🤝 Contributing
+
+If you want to contribute:
+
+1. Fork the repository
+2. Create a feature branch
+3. Open a pull request with a clear description
+
+---
+
+## 📄 License
+
+This project includes a `LICENCE` file in the repository root. Review it for license terms.
