@@ -142,8 +142,23 @@ connectDB();
 const PORT =
   process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(
-    `🚀 Server Running On ${PORT}`
+import http from "http";
+
+import {
+ initializeSocket
+}
+from "./socket/index.js";
+const server =
+  http.createServer(
+    app
   );
-});
+  server.listen(
+  PORT,
+  () => {
+
+    console.log(
+      `🚀 Server Running On ${PORT}`
+    );
+
+  }
+);
