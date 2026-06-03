@@ -113,7 +113,10 @@ new mongoose.Schema(
       type: String,
     },
   ],
-
+  workspace: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Workspace"
+},
   downloads: {
     type: Number,
     default: 0,

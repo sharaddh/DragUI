@@ -20,7 +20,10 @@ new mongoose.Schema(
       "other",
     ],
   },
-
+  workspace: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Workspace"
+},
   size: Number,
 
   uploadedBy: {

@@ -33,6 +33,10 @@ isMarketplace:{
  type:Boolean,
  default:false
 },
+workspace: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Workspace"
+},
   visibility: {
     type: String,
     enum: [
