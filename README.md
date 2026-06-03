@@ -1,4 +1,5 @@
-﻿# DropUI
+﻿![Header](./i.jpeg)
+# DropUI
 
 DropUI is a modular full-stack visual app builder that enables teams to design, manage, and generate React-based applications through a drag-and-drop builder, an admin registry dashboard, a shared backend API, and a developer CLI.
 
