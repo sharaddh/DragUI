@@ -127,6 +127,12 @@ app.use(
  "/api/assets",
  assetRoutes
 );
+import workspaceRoutes
+from "./routes/workspaceRoutes.js";
+app.use(
+  "/api/workspaces",
+  workspaceRoutes
+);
 // DB
 
 connectDB();
