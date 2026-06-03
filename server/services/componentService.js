@@ -13,6 +13,11 @@ import extractDependencies
 from "../utils/extractDependencies.js";
 
 import {
+ buildManifest
+}
+from "./manifestService.js";
+
+import {
   saveTemplate
 }
 from "./templateService.js";
@@ -100,6 +105,8 @@ async (
     changelog:
       "Initial version"
   });
-
+await buildManifest(
+ component
+);
   return component;
 };
