@@ -146,6 +146,13 @@ app.use(
   "/api/recommendations",
   recommendationRoutes
 );
+
+import searchRoutes
+from "./routes/searchRoutes.js";
+app.use(
+  "/api/search",
+  searchRoutes
+);
 // DB
 
 connectDB();
