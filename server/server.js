@@ -139,6 +139,13 @@ app.use(
   "/api/workspaces",
   workspaceRoutes
 );
+
+import recommendationRoutes
+from "./routes/recommendationRoutes.js";
+app.use(
+  "/api/recommendations",
+  recommendationRoutes
+);
 // DB
 
 connectDB();
