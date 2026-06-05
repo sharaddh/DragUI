@@ -13,6 +13,11 @@ import extractDependencies
 from "../utils/extractDependencies.js";
 
 import {
+ renderThumbnail
+}
+from "./renderThumbnail.js";
+
+import {
  buildManifest
 }
 from "./manifestService.js";
@@ -56,6 +61,22 @@ async (
       slug,
       code
     });
+
+    const thumbnail =
+  await renderThumbnail(
+    component
+  );
+
+if (thumbnail) {
+
+  component.thumbnail =
+    thumbnail.url;
+
+  component.thumbnailPublicId =
+    thumbnail.publicId;
+
+  await component.save();
+}
 
   const component =
     await Component.create({
