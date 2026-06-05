@@ -160,6 +160,13 @@ app.use(
  "/api/component-analytics",
  componentAnalyticsRoutes
 );
+
+import marketplaceRoutes
+from "./routes/marketplaceRoutes.js";
+app.use(
+ "/api/marketplace",
+ marketplaceRoutes
+);
 // DB
 
 connectDB();
