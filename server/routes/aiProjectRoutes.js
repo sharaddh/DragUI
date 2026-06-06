@@ -27,4 +27,10 @@ router.get(
  aiProjectController.getOne
 );
 
+router.post(
+ "/generate-code",
+ authMiddleware,
+ aiProjectController.generateCode
+);
+
 export default router;

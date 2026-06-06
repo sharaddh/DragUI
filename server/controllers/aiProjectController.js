@@ -1,6 +1,6 @@
 import AIProject
 from "../models/AIProject.js";
-
+import {buildFullProject}from "../services/fullProjectGenerator.js";
 import {
  generateProject
 }
@@ -113,6 +113,47 @@ async (
      success:false,
      message:error.message
    });
+
+ }
+
+};
+export const generateCode =
+async (
+ req,
+ res
+) => {
+
+ try {
+
+  const generated =
+   await generateProject(
+    req.body.prompt
+   );
+
+  const files =
+   await buildFullProject(
+    generated
+   );
+
+  res.json({
+
+   success:true,
+
+   blueprint:
+    generated,
+
+   files
+  });
+
+ } catch(error){
+
+  res.status(500).json({
+
+   success:false,
+
+   message:
+    error.message
+  });
 
  }
 
