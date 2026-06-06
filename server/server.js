@@ -167,6 +167,12 @@ app.use(
  "/api/marketplace",
  marketplaceRoutes
 );
+import aiProjectRoutes
+from "./routes/aiProjectRoutes.js";
+app.use(
+ "/api/ai-projects",
+ aiProjectRoutes
+);
 // DB
 
 connectDB();
