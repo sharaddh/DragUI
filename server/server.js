@@ -1,15 +1,15 @@
-import express from "express";
 import dotenv from "dotenv";
+dotenv.config();
+import express from "express";
 import cors from "cors";
 import session from "express-session";
 import helmet from "helmet";
 import compression from "compression";
 import morgan from "morgan";
 
-import passport from "./config/passport.js";
+import passport from "./config/Passport.js";
 import connectDB from "./config/db.js";
 
-dotenv.config();
 
 const app = express();
 

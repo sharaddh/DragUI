@@ -3,34 +3,35 @@ from "../models/RealtimeSession.js";
 
 export const getActiveUsers =
 async (
- req,
- res
+  req,
+  res
 ) => {
 
- try {
+  try {
 
-   const sessions =
-     await RealtimeSession.find({
-       project:
-         req.params.projectId
-     })
-     .populate(
-       "user",
-       "username avatar"
-     );
+    const sessions =
+      await RealtimeSession
+        .find({
+          project:
+            req.params.projectId
+        })
+        .populate(
+          "user",
+          "username email avatar"
+        );
 
-   res.json({
-     success:true,
-     sessions
-   });
+    res.json({
+      success: true,
+      sessions
+    });
 
- } catch(error){
+  } catch (error) {
 
-   res.status(500).json({
-     success:false,
-     message:error.message
-   });
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
 
- }
+  }
 
 };

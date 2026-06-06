@@ -162,7 +162,7 @@ import axios from "axios";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
-import Component from "../models/components.js";
+import Component from "../models/component.js";
 import adminAuth from "../middleware/adminAuth.js";
 
 const router = express.Router();

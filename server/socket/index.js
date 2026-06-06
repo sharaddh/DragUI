@@ -3,7 +3,7 @@ import { Server } from "socket.io";
 import registerBuilderEvents
 from "./builderEvents.js";
 
-import registerPresence
+import {registerPresence}
 from "./presence.js";
 
 let io;

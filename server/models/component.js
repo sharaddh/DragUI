@@ -147,7 +147,8 @@ thumbnailPublicId: {
 }
 );
 
-export default mongoose.model(
+export default mongoose.models.Component ||
+mongoose.model(
   "Component",
   componentSchema
 );

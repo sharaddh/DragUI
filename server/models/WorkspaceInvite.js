@@ -60,10 +60,6 @@ new mongoose.Schema(
 );
 
 workspaceInviteSchema.index({
-  token: 1
-});
-
-workspaceInviteSchema.index({
   expiresAt: 1
 });
 

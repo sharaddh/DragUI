@@ -93,10 +93,6 @@ const workspaceSchema = new mongoose.Schema(
 }
 );
 
-workspaceSchema.index({
-  slug: 1
-});
-
 export default mongoose.model(
   "Workspace",
   workspaceSchema
