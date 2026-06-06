@@ -91,14 +91,25 @@ app.use(errorHandler);
 // Routes
 
 import authRoutes from "./routes/authRoutes.js";
-import adminRoutes from "./routes/adminRoutes.js";
 import componentRoutes from "./routes/componentRoutes.js";
 import projectRoutes from "./routes/projectRoutes.js";
 
+import adminRoutes
+from "./routes/adminRoutes.js";
+
+import adminAuthRoutes
+from "./routes/adminAuth.js";
+
+app.use(
+  "/api/admin",
+  adminRoutes
+);
+
+app.use(
+  "/api/admin-auth",
+  adminAuthRoutes
+);
 app.use("/api/auth", authRoutes);
-
-app.use("/api/admin", adminRoutes);
-
 app.use(
   "/api/components",
   componentRoutes
