@@ -173,6 +173,12 @@ app.use(
  "/api/ai-projects",
  aiProjectRoutes
 );
+import publishRoutes
+from "./routes/publishRoutes.js";
+app.use(
+ "/api/publish",
+ publishRoutes
+);
 // DB
 
 connectDB();
