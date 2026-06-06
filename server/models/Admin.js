@@ -59,9 +59,11 @@ const adminSchema = new mongoose.Schema(
 }
 );
 
-adminSchema.pre("save", async function(next) {
-  if (!this.isModified("password"))
-    return next();
+adminSchema.pre("save", async function () {
+
+  if (!this.isModified("password")) {
+    return;
+  }
 
   const salt =
     await bcrypt.genSalt(10);
@@ -72,7 +74,6 @@ adminSchema.pre("save", async function(next) {
       salt
     );
 
-  next();
 });
 
 adminSchema.methods.comparePassword =
@@ -83,7 +84,9 @@ async function(password) {
   );
 };
 
-export default mongoose.model(
+
+export default mongoose.models.Admin ||
+mongoose.model(
   "Admin",
   adminSchema
 );

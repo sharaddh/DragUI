@@ -9,7 +9,7 @@ const generateToken = (id) => {
   );
 };
 
-export const registerAdmin = async (req, res) => {
+export const registerAdmin = async (req, res, next) => {
   try {
 
     const {
@@ -45,15 +45,19 @@ export const registerAdmin = async (req, res) => {
 
   } catch (error) {
 
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+  console.error(error);
+
+  res.status(500).json({
+    success: false,
+    message: error.message,
+  });
+
+
 
   }
 };
 
-export const loginAdmin = async (req, res) => {
+export const loginAdmin = async (req, res, next) => {
   try {
 
     const {
@@ -103,7 +107,8 @@ export const loginAdmin = async (req, res) => {
 
 export const getProfile = async (
   req,
-  res
+  res,
+  next
 ) => {
 
   try {
