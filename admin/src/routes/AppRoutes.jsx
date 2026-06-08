@@ -10,6 +10,7 @@ import Dashboard from "../pages/Dashboard";
 import ProtectedRoute from "../middleware/ProtectedRoute";
 
 import AdminLayout from "../layouts/AdminLayout";
+import Components from "../pages/Components";
 
 export default function AppRoutes() {
 
@@ -30,6 +31,21 @@ export default function AppRoutes() {
             <AdminLayout>
 
               <Dashboard />
+
+            </AdminLayout>
+
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/components"
+        element={
+          <ProtectedRoute>
+
+            <AdminLayout>
+
+              <Components />
 
             </AdminLayout>
 
