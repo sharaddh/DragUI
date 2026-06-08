@@ -14,8 +14,6 @@ import {
  Link
 }
 from "react-router-dom";
-import PropertyBuilder
-from "../components/PropertyBuilder";
 import {
  getComponents
 }
