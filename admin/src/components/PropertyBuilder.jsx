@@ -1,11 +1,8 @@
-import {
-  Plus,
-  Trash2
-} from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 
 export default function PropertyBuilder({
   propsData,
-  setPropsData
+  setPropsData,
 }) {
 
   const addProp = () => {
@@ -17,8 +14,8 @@ export default function PropertyBuilder({
         type: "string",
         default: "",
         required: false,
-        options: []
-      }
+        options: [],
+      },
     ]);
 
   };
@@ -29,52 +26,50 @@ export default function PropertyBuilder({
     value
   ) => {
 
-    const updated =
-      [...propsData];
+    const updated = [...propsData];
 
     updated[index][field] =
       value;
 
-    setPropsData(
-      updated
-    );
+    setPropsData(updated);
 
   };
 
-  const removeProp =
-    (index) => {
+  const removeProp = (
+    index
+  ) => {
 
-      setPropsData(
-        propsData.filter(
-          (_, i) =>
-            i !== index
-        )
-      );
+    setPropsData(
+      propsData.filter(
+        (_, i) =>
+          i !== index
+      )
+    );
 
-    };
+  };
 
   return (
 
     <div className="space-y-4">
 
-      <div className="flex justify-between">
+      <div className="flex justify-between items-center">
 
-        <h2 className="font-semibold text-lg">
+        <h2 className="font-semibold">
           Properties
         </h2>
 
         <button
           onClick={addProp}
           className="
-          flex gap-2
           px-3 py-2
-          rounded-lg
           bg-black
           text-white
+          rounded-lg
+          flex gap-2
           "
         >
           <Plus size={16}/>
-          Add Prop
+          Add
         </button>
 
       </div>
@@ -87,14 +82,14 @@ export default function PropertyBuilder({
             className="
             border
             rounded-xl
-            p-4
-            space-y-3
+            p-3
+            space-y-2
             "
           >
 
             <input
-              placeholder="Property Name"
               value={prop.name}
+              placeholder="Property Name"
               onChange={(e)=>
                 updateProp(
                   index,
@@ -105,8 +100,8 @@ export default function PropertyBuilder({
               className="
               w-full
               border
-              rounded-lg
               p-2
+              rounded
               "
             />
 
@@ -122,8 +117,8 @@ export default function PropertyBuilder({
               className="
               w-full
               border
-              rounded-lg
               p-2
+              rounded
               "
             >
 
@@ -150,8 +145,8 @@ export default function PropertyBuilder({
             </select>
 
             <input
-              placeholder="Default Value"
               value={prop.default}
+              placeholder="Default"
               onChange={(e)=>
                 updateProp(
                   index,
@@ -162,28 +157,10 @@ export default function PropertyBuilder({
               className="
               w-full
               border
-              rounded-lg
               p-2
+              rounded
               "
             />
-
-            <label className="flex gap-2">
-
-              <input
-                type="checkbox"
-                checked={prop.required}
-                onChange={(e)=>
-                  updateProp(
-                    index,
-                    "required",
-                    e.target.checked
-                  )
-                }
-              />
-
-              Required
-
-            </label>
 
             <button
               onClick={() =>
@@ -193,7 +170,7 @@ export default function PropertyBuilder({
               text-red-500
               "
             >
-              <Trash2 size={18}/>
+              <Trash2 size={16}/>
             </button>
 
           </div>
