@@ -126,7 +126,57 @@ const loadComponent =
   );
 
  };
+const saveComponent =
+async () => {
 
+ try {
+
+  const payload = {
+
+   name:
+    selected.replace(
+      ".jsx",
+      ""
+    ),
+
+   code:
+    current.code,
+
+   props:
+    propsData,
+
+  };
+
+  if(id){
+
+   await updateComponent(
+    id,
+    payload
+   );
+
+  }else{
+
+   await createComponent(
+    payload
+   );
+
+  }
+
+  toast.success(
+    "Component Saved"
+  );
+
+ } catch(error){
+
+  console.error(error);
+
+  toast.error(
+    "Failed To Save"
+  );
+
+ }
+
+};
  return(
 
  <div
@@ -137,7 +187,9 @@ const loadComponent =
  "
  >
 
-  <ComponentToolbar/>
+  <ComponentToolbar
+ onSave={saveComponent}
+/>
 
   <div
    className="
