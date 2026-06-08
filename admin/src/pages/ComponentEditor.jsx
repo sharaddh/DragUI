@@ -229,46 +229,11 @@ async () => {
    </div>
 
    <div
- className="
- w-[500px]
- border-l
- flex
- flex-col
- "
->
-
- <div
-  className="
-  flex-1
-  "
- >
-
-  <PreviewPanel
-   code={current.code}
-  />
-
- </div>
-
- <div
-  className="
-  h-[400px]
-  overflow-y-auto
-  border-t
-  p-4
-  "
- >
-
-  <PropertyBuilder
-
-   propsData={propsData}
-
-   setPropsData={setPropsData}
-
-  />
-
- </div>
-
-</div>
+   className="
+   w-[500px]
+   border-l
+   "
+   >
 
     <PreviewPanel
 
