@@ -61,6 +61,16 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+    
+    <Route
+    path="/components/edit/:id"
+    element={
+      <ProtectedRoute>
+            <ComponentEditor/>
+      </ProtectedRoute>
+        }
+      />
     </Routes>
 
   );
