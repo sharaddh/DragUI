@@ -19,8 +19,30 @@ import {
  getComponents
 }
 from "../api/componentApi";
+import {
+ deleteComponent
+}
+from "../api/componentApi";
 
 export default function Components(){
+    const remove =
+async(id)=>{
+
+ if(
+  !window.confirm(
+   "Delete component?"
+  )
+ ){
+  return;
+ }
+
+ await deleteComponent(
+  id
+ );
+
+ load();
+
+};
 
  const [
   components,

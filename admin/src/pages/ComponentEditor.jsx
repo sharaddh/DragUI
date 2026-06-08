@@ -15,6 +15,11 @@ from "../components/FileExplorer";
 import ComponentToolbar
 from "../components/ComponentToolbar";
 
+import {
+ useParams
+}
+from "react-router-dom";
+
 export default function ComponentEditor(){
 
  const [
@@ -39,7 +44,34 @@ export default function Button(){
 `
  }
  ]);
+const { id } =
+ useParams();
+ useEffect(()=>{
 
+ if(id){
+
+  loadComponent();
+
+ }
+
+},[id]);
+const loadComponent =
+ async()=>{
+
+  const data =
+   await getComponent(id);
+
+  setFiles([
+   {
+    name:
+     `${data.name}.jsx`,
+
+    code:
+     data.code
+   }
+  ]);
+
+ };
  const [
   selected,
   setSelected
