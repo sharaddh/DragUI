@@ -36,7 +36,10 @@ import {
 from "react-router-dom";
 
 export default function ComponentEditor(){
-
+const [
+ propsData,
+ setPropsData
+] = useState([]);
  const [
   files,
   setFiles
