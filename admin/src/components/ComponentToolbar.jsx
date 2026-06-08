@@ -1,64 +1,60 @@
 import {
- Save,
- Upload,
- Rocket
-}
-from "lucide-react";
+  Save,
+  Upload,
+  Rocket,
+} from "lucide-react";
 
-export default function ComponentToolbar(){
+export default function ComponentToolbar({
+  onSave,
+}) {
 
- return(
+  return (
 
- <div
- className="
- h-14
- border-b
- flex
- items-center
- px-4
- gap-4
- "
- >
+    <div
+      className="
+      h-14
+      border-b
+      flex
+      items-center
+      px-4
+      gap-4
+      "
+    >
 
-  <button
-  className="
-  flex
-  gap-2
-  "
-  >
+      <button
+        onClick={onSave}
+        className="
+        flex
+        gap-2
+        "
+      >
+        <Save size={18}/>
+        Save
+      </button>
 
-   <Save size={18}/>
-   Save
+      <button
+        className="
+        flex
+        gap-2
+        "
+      >
+        <Upload size={18}/>
+        Version
+      </button>
 
-  </button>
+      <button
+        className="
+        flex
+        gap-2
+        text-green-500
+        "
+      >
+        <Rocket size={18}/>
+        Publish
+      </button>
 
-  <button
-  className="
-  flex
-  gap-2
-  "
-  >
+    </div>
 
-   <Upload size={18}/>
-   Version
-
-  </button>
-
-  <button
-  className="
-  flex
-  gap-2
-  text-green-500
-  "
-  >
-
-   <Rocket size={18}/>
-   Publish
-
-  </button>
-
- </div>
-
- );
+  );
 
 }
