@@ -11,7 +11,7 @@ import ProtectedRoute from "../middleware/ProtectedRoute";
 
 import AdminLayout from "../layouts/AdminLayout";
 import Components from "../pages/Components";
-
+import ComponentEditor from "../pages/ComponentEditor";
 export default function AppRoutes() {
 
   return (
@@ -52,7 +52,15 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       />
-
+      
+      <Route
+        path="/components/new"
+        element={
+          <ProtectedRoute>
+            <ComponentEditor />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
 
   );
