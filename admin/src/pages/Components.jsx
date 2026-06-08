@@ -14,7 +14,8 @@ import {
  Link
 }
 from "react-router-dom";
-
+import PropertyBuilder
+from "../components/PropertyBuilder";
 import {
  getComponents
 }
@@ -43,7 +44,10 @@ async(id)=>{
  load();
 
 };
-
+const [
+  propsData,
+  setPropsData
+] = useState([]);
  const [
   components,
   setComponents
