@@ -74,13 +74,13 @@ router.get(
 router.patch(
  "/:id/publish",
  adminAuth,
- publishComponent
+ componentController.publishComponent
 );
-router.patch(
- "/:id/archive",
- adminAuth,
- archiveComponent
-);
+// router.patch(
+//  "/:id/archive",
+//  adminAuth,
+//  componentController.archiveComponent
+// );
 router.get(
  "/:id/manifest",
  async (

@@ -6,6 +6,11 @@ import {
 import {
   Link,
 } from "react-router-dom";
+<Link
+ to="/marketplace"
+>
+ Marketplace
+</Link>
 
 export default function Sidebar() {
 
@@ -33,6 +38,14 @@ export default function Sidebar() {
         >
           <Boxes />
           Components
+        </Link>
+
+        <Link
+          to="/marketplace"
+          className="flex gap-3 p-4"
+        >
+          <Boxes />
+          Marketplace
         </Link>
 
       </nav>
