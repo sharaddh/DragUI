@@ -2,7 +2,8 @@ import {
   useState
 }
   from "react";
-
+import MarketplaceSettings
+  from "../components/MarketplaceSettings";
 import MonacoEditor
   from "../components/MonacoEditor";
 import AssetManager
@@ -45,6 +46,18 @@ export default function ComponentEditor() {
     propsData,
     setPropsData
   ] = useState([]);
+  const [
+    marketplace,
+    setMarketplace
+  ] = useState({
+
+    title: "",
+
+    description: "",
+
+    tags: []
+
+  });
   const [
     files,
     setFiles
@@ -151,24 +164,12 @@ export default function Button(){
             propsData,
 
           assets:
-            assets
+            assets,
+
+          marketplace:
+            marketplace
 
         };
-
-        if (id) {
-
-          await updateComponent(
-            id,
-            payload
-          );
-
-        } else {
-
-          await createComponent(
-            payload
-          );
-
-        }
 
         toast.success(
           "Component Saved"
@@ -269,6 +270,14 @@ export default function Button(){
             <AssetManager
               assets={assets}
               setAssets={setAssets}
+            />
+
+            <MarketplaceSettings
+
+              marketplace={marketplace}
+
+              setMarketplace={setMarketplace}
+
             />
 
           </div>
