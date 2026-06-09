@@ -1,170 +1,170 @@
 import {
- useEffect,
- useState
+  useEffect,
+  useState
 }
-from "react";
+  from "react";
 import {
- publishComponent,
- archiveComponent
+  publishComponent,
+  archiveComponent
 }
-from "../api/componentApi";
+  from "../api/componentApi";
 import {
- Search,
- Plus
+  Search,
+  Plus
 }
-from "lucide-react";
+  from "lucide-react";
 
 import {
- Link
+  Link
 }
-from "react-router-dom";
+  from "react-router-dom";
 import {
- getComponents
+  getComponents
 }
-from "../api/componentApi";
+  from "../api/componentApi";
 import {
- deleteComponent
+  deleteComponent
 }
-from "../api/componentApi";
+  from "../api/componentApi";
 
-export default function Components(){
+export default function Components() {
   const publish =
-async(id)=>{
+    async (id) => {
 
- await publishComponent(
-  id
- );
+      await publishComponent(
+        id
+      );
 
- load();
+      load();
 
-};
-const archive =
-async(id)=>{
+    };
+  const archive =
+    async (id) => {
 
- await archiveComponent(
-  id
- );
+      await archiveComponent(
+        id
+      );
 
- load();
+      load();
 
-};
-    const remove =
-async(id)=>{
+    };
+  const remove =
+    async (id) => {
 
- if(
-  !window.confirm(
-   "Delete component?"
-  )
- ){
-  return;
- }
+      if (
+        !window.confirm(
+          "Delete component?"
+        )
+      ) {
+        return;
+      }
 
- await deleteComponent(
-  id
- );
+      await deleteComponent(
+        id
+      );
 
- load();
+      load();
 
-};
-const [
-  propsData,
-  setPropsData
-] = useState([]);
- const [
-  components,
-  setComponents
- ] = useState([]);
+    };
+  const [
+    propsData,
+    setPropsData
+  ] = useState([]);
+  const [
+    components,
+    setComponents
+  ] = useState([]);
 
- const [
-  search,
-  setSearch
- ] = useState("");
+  const [
+    search,
+    setSearch
+  ] = useState("");
 
- useEffect(()=>{
+  useEffect(() => {
 
-  load();
+    load();
 
- },[]);
+  }, []);
 
- const load =
- async()=>{
+  const load =
+    async () => {
 
-  const data =
-  await getComponents();
+      const data =
+        await getComponents();
 
-  setComponents(
-   data.components || []
-  );
+      setComponents(
+        data.components || []
+      );
 
- };
+    };
 
- const filtered =
- components.filter(
- component=>
+  const filtered =
+    components.filter(
+      component =>
 
- component.name
- .toLowerCase()
- .includes(
-  search.toLowerCase()
- )
- );
+        component.name
+          .toLowerCase()
+          .includes(
+            search.toLowerCase()
+          )
+    );
 
- return(
+  return (
 
- <div className="space-y-6">
+    <div className="space-y-6">
 
-  <div className="flex justify-between">
+      <div className="flex justify-between">
 
-   <div>
+        <div>
 
-    <h1 className="text-3xl font-bold">
-     Components
-    </h1>
+          <h1 className="text-3xl font-bold">
+            Components
+          </h1>
 
-    <p>
-     Manage Registry
-    </p>
+          <p>
+            Manage Registry
+          </p>
 
-   </div>
+        </div>
 
-   <Link
-    to="/components/new"
-    className="
+        <Link
+          to="/components/new"
+          className="
     px-4 py-2
     rounded-xl
     bg-black
     text-white
     flex gap-2
     "
-   >
+        >
 
-    <Plus size={18}/>
-    New Component
+          <Plus size={18} />
+          New Component
 
-   </Link>
+        </Link>
 
-  </div>
+      </div>
 
-  <div className="relative">
+      <div className="relative">
 
-   <Search
-    className="
+        <Search
+          className="
     absolute
     left-3
     top-3
     "
-   />
+        />
 
-   <input
+        <input
 
-    value={search}
+          value={search}
 
-    onChange={(e)=>
-    setSearch(
-     e.target.value
-    )}
+          onChange={(e) =>
+            setSearch(
+              e.target.value
+            )}
 
-    className="
+          className="
     w-full
     border
     rounded-xl
@@ -172,24 +172,24 @@ const [
     py-3
     "
 
-    placeholder="
+          placeholder="
     Search Components
     "
 
-   />
+        />
 
-  </div>
+      </div>
 
-  <div className="grid gap-4">
+      <div className="grid gap-4">
 
-   {filtered.map(
-    component=>(
+        {filtered.map(
+          component => (
 
-     <div
+            <div
 
-      key={component._id}
+              key={component._id}
 
-      className="
+              className="
       p-4
       rounded-xl
       border
@@ -199,35 +199,45 @@ const [
       items-center
       "
 
-     >
+            >
+              <ComponentCard
 
-      <div>
+                component={component}
 
-       <h3>
-        {component.name}
-       </h3>
+                onDelete={remove}
 
-       <p>
-        {component.category}
-       </p>
+                onPublish={publish}
+
+                onArchive={archive}
+
+              />
+              <div>
+
+                <h3>
+                  {component.name}
+                </h3>
+
+                <p>
+                  {component.category}
+                </p>
+
+              </div>
+
+              <div>
+
+                {component.status}
+
+              </div>
+
+            </div>
+
+          )
+        )}
 
       </div>
 
-      <div>
+    </div>
 
-       {component.status}
-
-      </div>
-
-     </div>
-
-    )
-   )}
-
-  </div>
-
- </div>
-
- );
+  );
 
 }
