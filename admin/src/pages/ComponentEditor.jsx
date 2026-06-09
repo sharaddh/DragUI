@@ -1,7 +1,7 @@
 import {
-  useState
-}
-  from "react";
+  useState,
+  useEffect
+} from "react";
 import MarketplaceSettings
   from "../components/MarketplaceSettings";
 import MonacoEditor
@@ -16,10 +16,6 @@ import FileExplorer
 
 import ComponentToolbar
   from "../components/ComponentToolbar";
-import {
-  useState,
-  useEffect
-} from "react";
 
 import PropertyBuilder
   from "../components/PropertyBuilder";
