@@ -1,53 +1,58 @@
 import {
- useState
+  useState
 }
-from "react";
+  from "react";
 
 import MonacoEditor
-from "../components/MonacoEditor";
-
+  from "../components/MonacoEditor";
+import AssetManager
+  from "../components/AssetManager";
 import PreviewPanel
-from "../components/PreviewPanel";
+  from "../components/PreviewPanel";
 
 import FileExplorer
-from "../components/FileExplorer";
+  from "../components/FileExplorer";
 
 import ComponentToolbar
-from "../components/ComponentToolbar";
+  from "../components/ComponentToolbar";
 import {
   useState,
   useEffect
 } from "react";
 
 import PropertyBuilder
-from "../components/PropertyBuilder";
+  from "../components/PropertyBuilder";
 
 import {
   getComponent,
   createComponent,
   updateComponent
 }
-from "../api/componentApi";
+  from "../api/componentApi";
 
 import toast from "react-hot-toast";
 import {
- useParams
+  useParams
 }
-from "react-router-dom";
+  from "react-router-dom";
 
-export default function ComponentEditor(){
-const [
- propsData,
- setPropsData
-] = useState([]);
- const [
-  files,
-  setFiles
- ] = useState([
- {
-  name:"Button.jsx",
+export default function ComponentEditor() {
+  const [
+    assets,
+    setAssets
+  ] = useState([]);
+  const [
+    propsData,
+    setPropsData
+  ] = useState([]);
+  const [
+    files,
+    setFiles
+  ] = useState([
+    {
+      name: "Button.jsx",
 
-  code:`
+      code: `
 export default function Button(){
 
  return(
@@ -60,220 +65,220 @@ export default function Button(){
 
 }
 `
- }
- ]);
-const { id } =
- useParams();
- useEffect(()=>{
-
- if(id){
-
-  loadComponent();
-
- }
-
-},[id]);
-const loadComponent =
- async()=>{
-
-  const data =
-   await getComponent(id);
-
-  setFiles([
-   {
-    name:
-     `${data.name}.jsx`,
-
-    code:
-     data.code
-   }
+    }
   ]);
+  const { id } =
+    useParams();
+  useEffect(() => {
 
- };
- const [
-  selected,
-  setSelected
- ] = useState(
- "Button.jsx"
- );
+    if (id) {
 
- const current =
- files.find(
- file=>
- file.name===
- selected
- );
+      loadComponent();
 
- const updateCode =
- code=>{
+    }
 
-  setFiles(
-   prev=>
+  }, [id]);
+  const loadComponent =
+    async () => {
 
-   prev.map(
-    file=>
+      const data =
+        await getComponent(id);
 
-    file.name===
-    selected
+      setFiles([
+        {
+          name:
+            `${data.name}.jsx`,
 
-    ? {
-      ...file,
-      code
-     }
+          code:
+            data.code
+        }
+      ]);
 
-    : file
-   )
+    };
+  const [
+    selected,
+    setSelected
+  ] = useState(
+    "Button.jsx"
   );
 
- };
-const saveComponent =
-async () => {
+  const current =
+    files.find(
+      file =>
+        file.name ===
+        selected
+    );
 
- try {
+  const updateCode =
+    code => {
 
-  const payload = {
+      setFiles(
+        prev =>
 
-   name:
-    selected.replace(
-      ".jsx",
-      ""
-    ),
+          prev.map(
+            file =>
 
-   code:
-    current.code,
+              file.name ===
+                selected
 
-   props:
-    propsData,
+                ? {
+                  ...file,
+                  code
+                }
 
-  };
+                : file
+          )
+      );
 
-  if(id){
+    };
+  const saveComponent =
+    async () => {
 
-   await updateComponent(
-    id,
-    payload
-   );
+      try {
 
-  }else{
+        const payload = {
 
-   await createComponent(
-    payload
-   );
+          name:
+            selected.replace(
+              ".jsx",
+              ""
+            ),
 
-  }
+          code:
+            current.code,
 
-  toast.success(
-    "Component Saved"
-  );
+          props:
+            propsData,
 
- } catch(error){
+          assets:
+            assets
 
-  console.error(error);
+        };
 
-  toast.error(
-    "Failed To Save"
-  );
+        if (id) {
 
- }
+          await updateComponent(
+            id,
+            payload
+          );
 
-};
- return(
+        } else {
 
- <div
- className="
+          await createComponent(
+            payload
+          );
+
+        }
+
+        toast.success(
+          "Component Saved"
+        );
+
+      } catch (error) {
+
+        console.error(error);
+
+        toast.error(
+          "Failed To Save"
+        );
+
+      }
+
+    };
+  return (
+
+    <div
+      className="
  h-screen
  flex
  flex-col
  "
- >
+    >
 
-  <ComponentToolbar
- onSave={saveComponent}
-/>
+      <ComponentToolbar
+        onSave={saveComponent}
+      />
 
-  <div
-   className="
+      <div
+        className="
    flex
    flex-1
    "
-  >
+      >
 
-   <FileExplorer
+        <FileExplorer
 
-    files={files}
+          files={files}
 
-    selected={selected}
+          selected={selected}
 
-    setSelected={setSelected}
+          setSelected={setSelected}
 
-   />
+        />
 
-   <div
-   className="
+        <div
+          className="
    flex-1
    "
-   >
+        >
 
-    <MonacoEditor
+          <MonacoEditor
 
-     code={
-      current.code
-     }
+            code={
+              current.code
+            }
 
-     setCode={
-      updateCode
-     }
+            setCode={
+              updateCode
+            }
 
-    />
+          />
 
-   </div>
+        </div>
 
-   <div
- className="
+        <div
+          className="
  w-[500px]
  border-l
  flex
  flex-col
  "
->
+        >
 
- <div
-  className="
+          <div
+            className="
   flex-1
   "
- >
+          >
 
-  <PreviewPanel
-   code={current.code}
-  />
+            <PreviewPanel
+              code={current.code}
+            />
 
- </div>
+          </div>
 
- <div
-  className="
-  h-[400px]
-  overflow-y-auto
-  border-t
-  p-4
-  "
- >
+          <div
+            className="h-[500px] overflow-y-auto"
+          >
 
-  <PropertyBuilder
+            <PropertyBuilder
+              propsData={propsData}
+              setPropsData={setPropsData}
+            />
 
-   propsData={propsData}
+            <AssetManager
+              assets={assets}
+              setAssets={setAssets}
+            />
 
-   setPropsData={setPropsData}
+          </div>
 
-  />
+        </div>
 
- </div>
+      </div>
 
-</div>
+    </div>
 
-  </div>
-
- </div>
-
- );
+  );
 
 }
