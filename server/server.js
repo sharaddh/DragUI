@@ -190,6 +190,14 @@ app.use(
  "/api/publish",
  publishRoutes
 );
+
+import uploadRoutes
+from "./routes/uploadRoutes.js";
+
+app.use(
+ "/api/upload",
+ uploadRoutes
+);
 // DB
 
 connectDB();
