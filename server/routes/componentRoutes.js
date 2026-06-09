@@ -71,6 +71,16 @@ router.get(
  componentController.getHealth
 );
 
+router.patch(
+ "/:id/publish",
+ adminAuth,
+ publishComponent
+);
+router.patch(
+ "/:id/archive",
+ adminAuth,
+ archiveComponent
+);
 router.get(
  "/:id/manifest",
  async (
