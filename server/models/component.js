@@ -148,6 +148,48 @@ assets: [
   type: String
  }
 ],
+status: {
+ type: String,
+ enum: [
+  "draft",
+  "published",
+  "archived"
+ ],
+ default: "draft"
+},
+
+version: {
+ type: String,
+ default: "1.0.0"
+},
+
+downloads: {
+ type: Number,
+ default: 0
+},
+
+views: {
+ type: Number,
+ default: 0
+},
+
+rating: {
+ type: Number,
+ default: 0
+},
+
+tags: [String],
+
+documentation: String,
+
+changelog: String,
+
+demoUrl: String,
+
+featured: {
+ type: Boolean,
+ default: false
+},
   createdBy: {
     type:
       mongoose.Schema.Types.ObjectId,
