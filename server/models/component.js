@@ -135,7 +135,19 @@ thumbnailPublicId: {
     type: Number,
     default: 0,
   },
+thumbnail: String,
 
+gallery: [String],
+
+video: String,
+
+assets: [
+ {
+  name: String,
+  url: String,
+  type: String
+ }
+],
   createdBy: {
     type:
       mongoose.Schema.Types.ObjectId,
