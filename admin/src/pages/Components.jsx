@@ -3,7 +3,11 @@ import {
  useState
 }
 from "react";
-
+import {
+ publishComponent,
+ archiveComponent
+}
+from "../api/componentApi";
 import {
  Search,
  Plus
@@ -24,6 +28,26 @@ import {
 from "../api/componentApi";
 
 export default function Components(){
+  const publish =
+async(id)=>{
+
+ await publishComponent(
+  id
+ );
+
+ load();
+
+};
+const archive =
+async(id)=>{
+
+ await archiveComponent(
+  id
+ );
+
+ load();
+
+};
     const remove =
 async(id)=>{
 

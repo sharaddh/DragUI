@@ -68,17 +68,27 @@ export default function ComponentCard({
             )
           }
         >
-          <Pencil size={18}/>
+          <Pencil size={18} />
         </button>
 
         <button
+
           onClick={() =>
             onPublish(
               component._id
             )
           }
+
+          className="
+ px-3 py-1
+ rounded-lg
+ bg-green-600
+ text-white
+ "
         >
-          <Rocket size={18}/>
+
+          Publish
+
         </button>
 
         <button
@@ -88,7 +98,7 @@ export default function ComponentCard({
             )
           }
         >
-          <Archive size={18}/>
+          <Archive size={18} />
         </button>
 
         <button
@@ -98,7 +108,7 @@ export default function ComponentCard({
             )
           }
         >
-          <Trash2 size={18}/>
+          <Trash2 size={18} />
         </button>
 
       </div>
