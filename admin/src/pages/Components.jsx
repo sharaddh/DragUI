@@ -13,7 +13,8 @@ import {
   Plus
 }
   from "lucide-react";
-
+import ComponentCard
+  from "../components/ComponentCard";
 import {
   Link
 }
@@ -137,7 +138,6 @@ export default function Components() {
     flex gap-2
     "
         >
-
           <Plus size={18} />
           New Component
 
