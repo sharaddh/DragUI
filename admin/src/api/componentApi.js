@@ -52,7 +52,28 @@ async (
 
   return res.data;
 };
+export const publishComponent =
+async(id)=>{
 
+ const res =
+ await api.patch(
+  `/components/${id}/publish`
+ );
+
+ return res.data;
+
+};
+export const archiveComponent =
+async(id)=>{
+
+ const res =
+ await api.patch(
+  `/components/${id}/archive`
+ );
+
+ return res.data;
+
+};
 export const deleteComponent =
 async (
  id
