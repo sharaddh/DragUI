@@ -3,10 +3,13 @@ import {
   Upload,
   Rocket,
 } from "lucide-react";
-
 export default function ComponentToolbar({
-  onVersion,
-  onSave,
+
+ onSave,
+ onVersion,
+ onLock,
+ isLocked
+
 }) {
 
   return (
