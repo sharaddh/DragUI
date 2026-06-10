@@ -7,9 +7,9 @@ import {
   Link,
 } from "react-router-dom";
 <Link
- to="/marketplace"
+  to="/marketplace"
 >
- Marketplace
+  Marketplace
 </Link>
 
 export default function Sidebar() {
@@ -39,7 +39,11 @@ export default function Sidebar() {
           <Boxes />
           Components
         </Link>
-
+        <Link
+          to="/ai-studio"
+        >
+          AI Studio
+        </Link>
         <Link
           to="/marketplace"
           className="flex gap-3 p-4"

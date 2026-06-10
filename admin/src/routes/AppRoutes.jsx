@@ -84,6 +84,25 @@ export default function AppRoutes() {
 
       />
       <Route
+
+        path="/ai-studio"
+
+        element={
+
+          <ProtectedRoute>
+
+            <AdminLayout>
+
+              <AIStudio />
+
+            </AdminLayout>
+
+          </ProtectedRoute>
+
+        }
+
+      />
+      <Route
         path="/components/edit/:id"
         element={
           <ProtectedRoute>
