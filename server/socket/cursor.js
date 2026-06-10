@@ -1,21 +1,20 @@
 export default function registerCursor(
- io,
- socket
-){
+  io,
+  socket
+) {
 
- socket.on(
-  "cursor:update",
-
-  payload=>{
-
-   socket.to(
-    payload.componentId
-   ).emit(
+  socket.on(
     "cursor:update",
-    payload
-   );
+    (payload) => {
 
-  }
- );
+      socket.to(
+        payload.componentId
+      ).emit(
+        "cursor:update",
+        payload
+      );
+
+    }
+  );
 
 }
