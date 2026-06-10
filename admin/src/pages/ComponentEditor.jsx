@@ -310,7 +310,22 @@ export default function Button(){
               setMarketplace={setMarketplace}
 
             />
+            <VersionModal
 
+              open={
+                versionOpen
+              }
+
+              onClose={() =>
+                setVersionOpen(
+                  false
+                )}
+
+              onSave={
+                saveVersion
+              }
+
+            />
           </div>
 
         </div>
