@@ -1,6 +1,10 @@
 import express from "express";
 import adminAuth from "../middleware/adminAuth.js";
-
+import {
+ lockComponent,
+ unlockComponent
+}
+from "../controllers/componentLockController.js";
 import * as componentController from "../controllers/componentController.js";
 
 const router = express.Router();
@@ -75,6 +79,17 @@ router.patch(
  "/:id/publish",
  adminAuth,
  componentController.publishComponent
+);
+router.post(
+ "/:id/lock",
+ adminAuth,
+ lockComponent
+);
+
+router.post(
+ "/:id/unlock",
+ adminAuth,
+ unlockComponent
 );
 // router.patch(
 //  "/:id/archive",

@@ -86,3 +86,26 @@ async (
 
   return res.data;
 };
+export const lockComponent =
+async(id)=>{
+
+ const res =
+  await api.post(
+   `/components/${id}/lock`
+  );
+
+ return res.data;
+
+};
+
+export const unlockComponent =
+async(id)=>{
+
+ const res =
+  await api.post(
+   `/components/${id}/unlock`
+  );
+
+ return res.data;
+
+};
