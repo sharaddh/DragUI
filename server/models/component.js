@@ -193,6 +193,19 @@ featured: {
  type: Boolean,
  default: false
 },
+lockedBy: {
+ type:
+  mongoose.Schema.Types.ObjectId,
+
+ ref: "Admin",
+
+ default: null
+},
+
+lockedAt: {
+ type: Date,
+ default: null
+},
   createdBy: {
     type:
       mongoose.Schema.Types.ObjectId,
