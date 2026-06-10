@@ -57,3 +57,40 @@ export const initializeSocket =
 
 export const getIO =
 () => io;
+
+import registerCollaboration
+from "./collaboration.js";
+
+import registerPresence
+from "./presence.js";
+
+import registerComments
+from "./comments.js";
+
+export default function initSocket(
+ io
+){
+
+ io.on(
+  "connection",
+  socket=>{
+
+   registerCollaboration(
+    io,
+    socket
+   );
+
+   registerPresence(
+    io,
+    socket
+   );
+
+   registerComments(
+    io,
+    socket
+   );
+
+  }
+ );
+
+}
