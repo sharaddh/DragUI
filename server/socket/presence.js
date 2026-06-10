@@ -1,79 +1,80 @@
-const users = new Map();
+const rooms = {};
 
-export const registerPresence = (
+export default function registerPresence(
   io,
   socket
-) => {
+) {
 
   socket.on(
     "presence:join",
     ({
-      projectId,
+      componentId,
       user
     }) => {
 
-      users.set(
-        socket.id,
-        {
-          user,
-          projectId
-        }
-      );
+      if (
+        !rooms[
+          componentId
+        ]
+      ) {
 
-      socket.join(
-        projectId
-      );
+        rooms[
+          componentId
+        ] = [];
 
-      const online =
-        Array.from(
-          users.values()
-        ).filter(
-          item =>
-            item.projectId ===
-            projectId
-        );
+      }
+
+      rooms[
+        componentId
+      ].push(user);
 
       io.to(
-        projectId
+        componentId
       ).emit(
         "presence:update",
-        online
+        rooms[
+          componentId
+        ]
       );
 
     }
   );
 
   socket.on(
-    "disconnect",
-    () => {
+    "presence:leave",
+    ({
+      componentId,
+      user
+    }) => {
 
-      const current =
-        users.get(
-          socket.id
-        );
+      if (
+        rooms[
+          componentId
+        ]
+      ) {
 
-      if (current) {
-
-        users.delete(
-          socket.id
-        );
-
-        const online =
-          Array.from(
-            users.values()
-          ).filter(
-            item =>
-              item.projectId ===
-              current.projectId
+        rooms[
+          componentId
+        ] =
+          rooms[
+            componentId
+          ].filter(
+            (u) =>
+              u.id !==
+              user.id
           );
 
-        io.to(
-          current.projectId
-        ).emit(
-          "presence:update",
-          online
-        );
       }
+
+      io.to(
+        componentId
+      ).emit(
+        "presence:update",
+        rooms[
+          componentId
+        ]
+      );
+
     }
   );
 
