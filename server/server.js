@@ -198,6 +198,13 @@ app.use(
  "/api/upload",
  uploadRoutes
 );
+import versionRoutes
+from "./routes/versionRoutes.js";
+
+app.use(
+ "/api/versions",
+ versionRoutes
+);
 // DB
 
 connectDB();
