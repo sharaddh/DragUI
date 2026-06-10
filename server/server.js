@@ -212,6 +212,13 @@ app.use(
  "/api/ai",
  aiRoutes
 );
+import commentRoutes
+from "./routes/commentRoutes.js";
+
+app.use(
+ "/api/comments",
+ commentRoutes
+);
 // DB
 
 connectDB();
