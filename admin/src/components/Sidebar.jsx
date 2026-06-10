@@ -23,7 +23,18 @@ export default function Sidebar() {
       </div>
 
       <nav>
+        <Link
+          to="/collaboration"
+          className="
+ flex
+ gap-3
+ p-4
+ "
+        >
 
+          Collaboration
+
+        </Link>
         <Link
           to="/"
           className="flex gap-3 p-4"

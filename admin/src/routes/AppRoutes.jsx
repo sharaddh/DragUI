@@ -6,7 +6,8 @@ import {
 import Login from "../pages/Login";
 
 import Dashboard from "../pages/Dashboard";
-
+import Collaboration
+  from "../pages/Collaboration";
 import ProtectedRoute from "../middleware/ProtectedRoute";
 
 import AdminLayout from "../layouts/AdminLayout";
@@ -109,6 +110,25 @@ export default function AppRoutes() {
             <ComponentEditor />
           </ProtectedRoute>
         }
+      />
+      <Route
+
+        path="/collaboration"
+
+        element={
+
+          <ProtectedRoute>
+
+            <AdminLayout>
+
+              <Collaboration />
+
+            </AdminLayout>
+
+          </ProtectedRoute>
+
+        }
+
       />
     </Routes>
 
