@@ -5,10 +5,10 @@ import {
 } from "lucide-react";
 export default function ComponentToolbar({
 
- onSave,
- onVersion,
- onLock,
- isLocked
+  onSave,
+  onVersion,
+  onLock,
+  isLocked
 
 }) {
 
@@ -48,7 +48,20 @@ export default function ComponentToolbar({
         Version
 
       </button>
+      <button
+        onClick={onLock}
+        className="
+ flex
+ gap-2
+ text-yellow-500
+ "
+      >
 
+        {isLocked
+          ? "Unlock"
+          : "Lock"}
+
+      </button>
       <button
         className="
         flex
