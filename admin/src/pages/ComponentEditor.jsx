@@ -13,7 +13,13 @@ import PreviewPanel
 
 import FileExplorer
   from "../components/FileExplorer";
+import VersionModal
+  from "../components/VersionModal";
 
+import {
+  createVersion
+}
+  from "../api/versionApi";
 import ComponentToolbar
   from "../components/ComponentToolbar";
 
@@ -34,6 +40,10 @@ import {
   from "react-router-dom";
 
 export default function ComponentEditor() {
+  const [
+    versionOpen,
+    setVersionOpen
+  ] = useState(false);
   const [
     assets,
     setAssets
@@ -117,7 +127,33 @@ export default function Button(){
         file.name ===
         selected
     );
+  const saveVersion =
+    async (changelog) => {
 
+      try {
+
+        await createVersion(
+          id,
+          changelog
+        );
+
+        toast.success(
+          "Version Created"
+        );
+
+        setVersionOpen(
+          false
+        );
+
+      } catch (error) {
+
+        toast.error(
+          "Version Failed"
+        );
+
+      }
+
+    };
   const updateCode =
     code => {
 
@@ -140,48 +176,49 @@ export default function Button(){
       );
 
     };
-  const saveComponent =
-    async () => {
+  const
+    saveComponent =
+      async () => {
 
-      try {
+        try {
 
-        const payload = {
+          const payload = {
 
-          name:
-            selected.replace(
-              ".jsx",
-              ""
-            ),
+            name:
+              selected.replace(
+                ".jsx",
+                ""
+              ),
 
-          code:
-            current.code,
+            code:
+              current.code,
 
-          props:
-            propsData,
+            props:
+              propsData,
 
-          assets:
-            assets,
+            assets:
+              assets,
 
-          marketplace:
-            marketplace
+            marketplace:
+              marketplace
 
-        };
+          };
 
-        toast.success(
-          "Component Saved"
-        );
+          toast.success(
+            "Component Saved"
+          );
 
-      } catch (error) {
+        } catch (error) {
 
-        console.error(error);
+          console.error(error);
 
-        toast.error(
-          "Failed To Save"
-        );
+          toast.error(
+            "Failed To Save"
+          );
 
-      }
+        }
 
-    };
+      };
   return (
 
     <div
@@ -192,9 +229,7 @@ export default function Button(){
  "
     >
 
-      <ComponentToolbar
-        onSave={saveComponent}
-      />
+      ComponentToolbar
 
       <div
         className="
