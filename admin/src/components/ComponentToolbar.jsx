@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 
 export default function ComponentToolbar({
+  onVersion,
   onSave,
 }) {
 
@@ -28,18 +29,21 @@ export default function ComponentToolbar({
         gap-2
         "
       >
-        <Save size={18}/>
+        <Save size={18} />
         Save
       </button>
 
       <button
+        onClick={onVersion}
         className="
-        flex
-        gap-2
-        "
+ flex
+ gap-2
+ "
       >
-        <Upload size={18}/>
+
+        <Upload size={18} />
         Version
+
       </button>
 
       <button
@@ -49,7 +53,7 @@ export default function ComponentToolbar({
         text-green-500
         "
       >
-        <Rocket size={18}/>
+        <Rocket size={18} />
         Publish
       </button>
 
