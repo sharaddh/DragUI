@@ -1,3 +1,4 @@
+
 export const ROLES = {
   OWNER: "owner",
   ADMIN: "admin",
@@ -52,9 +53,10 @@ export const PERMISSIONS = {
     "asset.upload",
     "asset.read"
   ],
+  
 
   VIEWER: [
     "project.read",
     "component.read"
   ]
-};
+};    
