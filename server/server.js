@@ -14,7 +14,7 @@ import connectDB from "./config/db.js";
 const app = express();
 
 // Security
-
+app.use(rateLimiter);
 app.use(helmet());
 
 // Compression
