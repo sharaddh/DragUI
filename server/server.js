@@ -10,6 +10,7 @@ import morgan from "morgan";
 import passport from "./config/Passport.js";
 import connectDB from "./config/db.js";
 import mongoSanitize from "express-mongo-sanitize";
+import morgan from "morgan";
 
 
 const app = express();
@@ -20,6 +21,9 @@ app.use(helmet());
 
 // Compression
 
+app.use(
+ morgan("combined")
+);
 app.use(
  mongoSanitize()
 );
