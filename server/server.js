@@ -227,6 +227,13 @@ app.use(
  "/api/comments",
  commentRoutes
 );
+import registryRoutes
+from "./routes/registryRoutes.js";
+
+app.use(
+ "/api/registry",
+ registryRoutes
+);
 // DB
 
 connectDB();

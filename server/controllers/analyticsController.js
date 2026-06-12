@@ -1,29 +1,31 @@
-import * as analyticsService
-from "../services/analyticsService.js";
+import ComponentAnalytics
+from "../models/ComponentAnalytics.js";
 
-export const dashboard =
-async (
-  req,
-  res
-) => {
+export const trackView =
+async(req,res)=>{
 
-  try {
+ await ComponentAnalytics
+ .findOneAndUpdate(
 
-    const stats =
-      await analyticsService.getDashboardStats();
+ {
+  component:
+   req.params.id
+ },
 
-    res.json({
-      success:true,
-      stats
-    });
-
-  } catch(error){
-
-    res.status(500).json({
-      success:false,
-      message:error.message
-    });
-
+ {
+  $inc:{
+   views:1
   }
+ },
+
+ {
+  upsert:true
+ }
+
+ );
+
+ res.json({
+  success:true
+ });
 
 };
