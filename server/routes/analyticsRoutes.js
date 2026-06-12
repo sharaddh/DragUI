@@ -1,18 +1,17 @@
-import express from "express";
+import express
+from "express";
 
-import adminAuth
-from "../middleware/adminAuth.js";
-
-import * as analyticsController
+import {
+ trackView
+}
 from "../controllers/analyticsController.js";
 
 const router =
-  express.Router();
+ express.Router();
 
-router.get(
- "/dashboard",
- adminAuth,
- analyticsController.dashboard
+router.post(
+ "/view/:id",
+ trackView
 );
 
 export default router;
