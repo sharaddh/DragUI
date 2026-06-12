@@ -29,7 +29,6 @@ passport.deserializeUser(
   }
 );
 
-// GOOGLE
 
 passport.use(
   new GoogleStrategy(
@@ -81,7 +80,6 @@ passport.use(
   )
 );
 
-// GITHUB
 
 passport.use(
   new GithubStrategy(
