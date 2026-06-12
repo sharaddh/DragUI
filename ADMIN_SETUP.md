@@ -1,10 +1,10 @@
 # Admin System Setup & Usage Guide
 
-## 🎯 Overview
+## Overview
 
 I've created a complete admin authentication system with component management for your DragUI project. Here's what has been built:
 
-### ✅ What's Included
+### What's Included
 
 1. **Backend (Node/Express)**
    - Admin model with password hashing using bcryptjs
@@ -21,7 +21,7 @@ I've created a complete admin authentication system with component management fo
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Step 1: Backend Setup
 
@@ -55,7 +55,7 @@ The admin dashboard will open at `http://localhost:3001`
 
 ---
 
-## 📋 Usage Flow
+## Usage Flow
 
 ### 1. Register Admin Account
 
@@ -93,7 +93,7 @@ On the dashboard left side:
 
 ---
 
-## 🔐 API Endpoints
+## API Endpoints
 
 ### Authentication Endpoints
 
@@ -201,7 +201,7 @@ Response:
 
 ---
 
-## 📁 File Structure
+## File Structure
 
 ```
 DragUI/
@@ -246,7 +246,7 @@ DragUI/
 
 ---
 
-## 🔒 Security Features
+## Security Features
 
 ✅ **Password Hashing**: Passwords are hashed with bcryptjs before storing  
 ✅ **JWT Tokens**: Secure token-based authentication  
@@ -256,7 +256,7 @@ DragUI/
 
 ---
 
-## 🛠 Customization
+## Customization
 
 ### Change Port
 Edit `admin/vite.config.js`:
@@ -282,7 +282,7 @@ const token = jwt.sign({ adminId: admin._id }, process.env.JWT_SECRET, {
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 **"No token provided"**
 - Make sure you're logged in
@@ -302,7 +302,7 @@ const token = jwt.sign({ adminId: admin._id }, process.env.JWT_SECRET, {
 
 ---
 
-## 📝 Next Steps
+## Next Steps
 
 You can now:
 1. ✅ Register admin accounts
@@ -315,7 +315,7 @@ To integrate these components into your UI builder, you can fetch them from `/ap
 
 ---
 
-## 📞 Support
+## Support
 
 For issues or questions about the admin system, check:
 - Server logs in terminal
