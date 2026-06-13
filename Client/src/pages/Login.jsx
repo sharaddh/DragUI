@@ -42,4 +42,37 @@ export default function Login() {
       // Ensure token exists before proceeding
       if (res.data?.token) {
         login(res.data.token);
-        navigate("/dash   
+        navigate("/dashboard");
+      } else {
+        throw new Error("Invalid response from server");
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed. Please try again.");
+      setTimeout(() => setError(""), 5000);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSocialLogin = async (providerFn, providerName) => {
+    setIsLoading(true);
+    setError("");
+    try {
+      const res = await providerFn();
+      if (res.data?.token) {
+        login(res.data.token);
+        navigate("/dashboard");
+      }
+    } catch (err) {
+      setError(`${providerName} login failed. Please try again.`);
+      setTimeout(() => setError(""), 5000);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="bg-white/90 backdrop-blur-md p-8 z-10 rounded-2xl shadow-2xl w-full max-w-md border border-white/40">
+        
+        {/* Header */}   
