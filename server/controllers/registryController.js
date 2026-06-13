@@ -45,3 +45,52 @@ async(req,res)=>{
  });
 
 };
+export const getManifest =
+async(req,res)=>{
+
+ const component =
+ await Component.findOne({
+
+  slug:
+   req.params.name,
+
+  status:
+   "published"
+
+ });
+
+ if(!component){
+
+  return res.status(404)
+  .json({
+   success:false
+  });
+
+ }
+
+ res.json({
+
+  success:true,
+
+  manifest:{
+
+   name:
+    component.slug,
+
+   version:
+    component.version,
+
+   files:
+    component.files,
+
+   dependencies:
+    component.dependencies,
+
+   assets:
+    component.assets
+
+  }
+
+ });
+
+};

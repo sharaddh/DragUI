@@ -17,7 +17,10 @@ router.get(
  "/",
  getRegistry
 );
-
+router.get(
+ "/manifest/:name",
+ getManifest
+);
 router.get(
  "/:slug",
  getRegistryComponent
