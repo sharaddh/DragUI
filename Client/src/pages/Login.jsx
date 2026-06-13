@@ -75,4 +75,9 @@ export default function Login() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4 relative overflow-hidden">
       <div className="bg-white/90 backdrop-blur-md p-8 z-10 rounded-2xl shadow-2xl w-full max-w-md border border-white/40">
         
-        {/* Header */}   
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-4 shadow-lg transform transition-transform hover:scale-105">
+            <LogIn className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-3xl   
