@@ -3,16 +3,36 @@
 import add
 from "./commands/add.js";
 
+import init
+from "./commands/init.js";
+
+import update
+from "./commands/update.js";
+
 const command =
  process.argv[2];
 
 const value =
  process.argv[3];
 
-if(
- command === "add"
-){
+switch(command){
 
- await add(value);
+ case "init":
+
+  init();
+
+ break;
+
+ case "add":
+
+  await add(value);
+
+ break;
+
+ case "update":
+
+  await update(value);
+
+ break;
 
 }
