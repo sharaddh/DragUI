@@ -104,4 +104,18 @@ export default function Login() {
               placeholder="Email address"
               value={form.email}
               onChange={(e) => { setForm({ ...form, email: e.target.value }); clearError(); }}
-              className="pl-10 pr-4 py-3 w-full bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ri   
+              className="pl-10 pr-4 py-3 w-full bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
+              disabled={isLoading}
+              aria-label="Email address"
+            />
+          </div>
+
+          {/* Password Input */}
+          <div className="relative group">
+            <Lock className="absolute left-3 top-1/2 h-5 w-5 text-gray-400 transform -translate-y-1/2 transition-colors group-focus-within:text-blue-500" />
+            <input
+              type="password"
+              placeholder="Password"
+              value={form.password}
+              onChange={(e) => { setForm({ ...form, password: e.target.value }); clearError(); }}
+              className="pl-10 pr-4 py-3 w-full bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:outline-none focus:   
