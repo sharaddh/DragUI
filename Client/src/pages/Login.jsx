@@ -89,4 +89,19 @@ export default function Login() {
         {/* Error Message */}
         {error && (
           <div className="mb-6 p-3 bg-red-50 border border-red-100 rounded-lg flex items-start text-red-700 text-sm animate-fade-in">
-            <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0 mt-   
+            <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {/* Form */}
+        <form onSubmit={handleEmailLogin} className="space-y-5">
+          {/* Email Input */}
+          <div className="relative group">
+            <Mail className="absolute left-3 top-1/2 h-5 w-5 text-gray-400 transform -translate-y-1/2 transition-colors group-focus-within:text-blue-500" />
+            <input
+              type="email"
+              placeholder="Email address"
+              value={form.email}
+              onChange={(e) => { setForm({ ...form, email: e.target.value }); clearError(); }}
+              className="pl-10 pr-4 py-3 w-full bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ri   
