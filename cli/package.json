@@ -1,0 +1,24 @@
+{
+  "name": "Dropui-cli",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "commonjs",
+  "bin": {
+    "cli": "./bin/dropui.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.17.0",
+    "chalk": "^5.6.2",
+    "commander": "^15.0.0",
+    "fs-extra": "^11.3.5",
+    "inquirer": "^14.0.2",
+    "ora": "^9.4.0"
+  }
+}
