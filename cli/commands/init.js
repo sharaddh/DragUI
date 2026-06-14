@@ -1,23 +1,38 @@
-import fs
-from "fs";
+import chalk from "chalk";
 
-export default function init(){
+import {
+ detectFramework
+}
+from "../utils/framework.js";
 
- fs.writeFileSync(
+import {
+ saveConfig
+}
+from "../utils/config.js";
 
-  "dropui.config.json",
+export default async function init() {
 
-  JSON.stringify({
+ const config = {
 
-   componentsDir:
-    "src/components"
+  framework:
+   detectFramework(),
 
-  })
+  componentsDir:
+   "src/components",
 
+  registry:
+   "default"
+
+ };
+
+ saveConfig(
+  config
  );
 
  console.log(
-  "DropUI Initialized"
+  chalk.green(
+   "✓ DropUI initialized"
+  )
  );
 
 }
