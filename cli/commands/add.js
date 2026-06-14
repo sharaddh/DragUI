@@ -1,57 +1,55 @@
-import api
-from "../utils/api.js";
+import ora from "ora";
 
 import {
- getDropUIConfig
+ getConfig
 }
 from "../utils/config.js";
 
-import {
- writeFiles
-}
+import writeFiles
 from "../utils/fileWriter.js";
 
 import {
- installPackages
+ getManifest
 }
-from "../utils/packageManager.js";
+from "../services/registry.js";
 
 export default async function add(
-
  component
-
 ){
 
- const config =
- getDropUIConfig();
+ const spinner =
+  ora(
+   "Installing..."
+  ).start();
 
- const result =
- await api.get(
+ try {
 
-  `/registry/manifest/${component}`
+  const config =
+   getConfig();
 
- );
+  const manifest =
+   await getManifest(
+    component
+   );
 
- const manifest =
-  result.data.manifest;
+  await writeFiles(
 
- installPackages(
+   manifest.files,
 
-  manifest.dependencies
+   config.componentsDir
 
- );
+  );
 
- writeFiles(
+  spinner.succeed(
+   `${component} installed`
+  );
 
-  manifest.files,
+ } catch(error){
 
-  config.componentsDir
+  spinner.fail(
+   error.message
+  );
 
- );
-
- console.log(
-  "Installed",
-  component
- );
+ }
 
 }
