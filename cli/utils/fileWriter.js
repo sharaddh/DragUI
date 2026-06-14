@@ -1,26 +1,38 @@
-import fs
-from "fs";
+import fs from "fs-extra";
+import path from "path";
 
-export function writeFiles(
+export default async function writeFiles(
 
  files,
-
- targetDir
+ componentsDir
 
 ){
 
- files.forEach(
-  file=>{
+ for (
+  const file
+  of files
+ ){
 
-   fs.writeFileSync(
+  const target =
+   path.join(
 
-    `${targetDir}/${file.path}`,
+    componentsDir,
 
-    file.content
+    file.path
 
    );
 
-  }
- );
+  await fs.ensureDir(
+   path.dirname(
+    target
+   )
+  );
+
+  await fs.writeFile(
+   target,
+   file.content
+  );
+
+ }
 
 }
