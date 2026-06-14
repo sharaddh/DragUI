@@ -1,28 +1,40 @@
-import fs
-from "fs";
+import fs from "fs";
 
-export function getDropUIConfig(){
+const CONFIG =
+ "dropui.config.json";
 
- const path =
-  "./dropui.config.json";
+export function getConfig() {
 
- if(
-  !fs.existsSync(path)
- ){
+ if (
+  !fs.existsSync(CONFIG)
+ ) {
 
   throw new Error(
-   "Run dropui init"
+   "Run dropui init first"
   );
 
  }
 
  return JSON.parse(
-
   fs.readFileSync(
-   path,
+   CONFIG,
    "utf8"
   )
+ );
 
+}
+
+export function saveConfig(
+ config
+) {
+
+ fs.writeFileSync(
+  CONFIG,
+  JSON.stringify(
+   config,
+   null,
+   2
+  )
  );
 
 }

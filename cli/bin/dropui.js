@@ -1,38 +1,29 @@
-#!/usr/bin/env node
+import { Command } from "commander";
 
-import login from "../commands/login.js";
-import pull from "../commands/pull.js";
-import logout from "../commands/logout.js";
-import whoami from "../commands/whoami.js";
+import initCommand from "../commands/init.js";
+import addCommand from "../commands/add.js";
+import searchCommand from "../commands/search.js";
 
-const command = process.argv[2];
-const arg = process.argv[3];
+const program = new Command();
 
-switch (command) {
-  case "login":
-    login();
-    break;
+program
+ .name("dropui")
+ .description("DropUI CLI")
+ .version("1.0.0");
 
-  case "pull":
-    pull(arg);
-    break;
+program
+ .command("init")
+ .description("Initialize DropUI")
+ .action(initCommand);
 
-  case "logout":
-    logout();
-    break;
+program
+ .command("add <component>")
+ .description("Install component")
+ .action(addCommand);
 
-  case "whoami":
-    whoami();
-    break;
+program
+ .command("search <query>")
+ .description("Search components")
+ .action(searchCommand);
 
-  default:
-    console.log(`
-DropUI CLI
-
-Commands:
-  dropui login
-  dropui pull <projectId>
-  dropui logout
-  dropui whoami
-`);
-}
+program.parse();
