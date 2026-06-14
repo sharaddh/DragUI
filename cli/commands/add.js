@@ -14,7 +14,7 @@ from "../utils/fileWriter.js";
 import {
  installPackages
 }
-from "../utils/packageInstaller.js";
+from "../utils/packageManager.js";
 
 export default async function add(
 
