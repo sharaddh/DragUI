@@ -15,7 +15,12 @@ async(
 
   const response =
    await openai.chat.completions.create({
+catch(error){
 
+  res.status(500).json({
+   message:
+    error.message
+  });
     model:
      "gpt-4.1",
 
