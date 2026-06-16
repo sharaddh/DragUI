@@ -1,5 +1,36 @@
 import Project from "../models/Project.js";
 
+export const publishPackage =
+async(req,res)=>{
+
+ try{
+
+  const component =
+   await Component.create(
+    req.body
+   );
+
+  res.json({
+
+   success:true,
+
+   component
+
+  });
+
+ }catch(error){
+
+  res.status(500).json({
+
+   success:false,
+
+   message:error.message
+
+  });
+
+ }
+
+};
 export const pullProject =
 async (
   req,

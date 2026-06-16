@@ -6,7 +6,11 @@ const router = express.Router();
 /*
 GET /api/cli/pull/A4da7
 */
-
+router.post(
+ "/publish",
+ adminAuth,
+ publishPackage
+);
 router.get(
   "/pull/:projectId",
   cliController.pullProject
