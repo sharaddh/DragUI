@@ -8,6 +8,14 @@ from "../utils/config.js";
 import writeFiles
 from "../utils/fileWriter.js";
 
+import installPackages
+from "../utils/installPackages.js";
+
+import {
+ addComponent
+}
+from "../utils/lockfile.js";
+
 import {
  getManifest
 }
@@ -22,15 +30,25 @@ export default async function add(
    "Installing..."
   ).start();
 
- try {
+ try{
 
   const config =
    getConfig();
 
-  const manifest =
+  const data =
    await getManifest(
     component
    );
+
+  const manifest =
+   data.manifest;
+
+  installPackages(
+
+   manifest.dependencies
+   || []
+
+  );
 
   await writeFiles(
 
@@ -40,11 +58,22 @@ export default async function add(
 
   );
 
-  spinner.succeed(
-   `${component} installed`
+  addComponent(
+
+   manifest.name,
+
+   manifest.version
+
   );
 
- } catch(error){
+  spinner.succeed(
+
+   `${manifest.name}
+    installed`
+
+  );
+
+ }catch(error){
 
   spinner.fail(
    error.message
