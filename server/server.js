@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
 import cors from "cors";
+import mongoose from 'mongoose';
 import session from "express-session";
 import helmet from "helmet";
 import compression from "compression";
@@ -21,9 +22,7 @@ app.use(helmet());
 app.use(
  morgan("combined")
 );
-app.use(
- mongoSanitize()
-);
+mongoose.set('sanitizeFilter', true);
 app.use(compression());
 
 // Logging
