@@ -1,5 +1,5 @@
 import {
-  searchComponents,
+  searchComponents
 }
 from "../services/searchService.js";
 
