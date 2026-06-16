@@ -5,7 +5,8 @@ import {
 
  getRegistry,
 
- getRegistryComponent
+ getRegistryComponent,
+ getManifest
 
 }
 from "../controllers/registryController.js";

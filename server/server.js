@@ -11,11 +11,9 @@ import passport from "./config/Passport.js";
 import connectDB from "./config/db.js";
 import mongoSanitize from "express-mongo-sanitize";
 
-
 const app = express();
 
 // Security
-app.use(rateLimiter);
 app.use(helmet());
 
 // Compression
