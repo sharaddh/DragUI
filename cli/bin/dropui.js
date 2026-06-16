@@ -9,20 +9,21 @@ import removeCommand
     from "../commands/remove.js";
 import updateCommand
     from "../commands/update.js";
-    import loginCommand
-from "../commands/login.js";
-
+import loginCommand
+    from "../commands/login.js";
+import doctorCommand
+    from "../commands/doctor.js";
 import whoamiCommand
-from "../commands/whoami.js";
+    from "../commands/whoami.js";
 const program = new Command();
 
 program
- .command("login")
- .action(loginCommand);
+    .command("login")
+    .action(loginCommand);
 
 program
- .command("whoami")
- .action(whoamiCommand);
+    .command("whoami")
+    .action(whoamiCommand);
 program
     .name("dropui")
     .description("DropUI CLI")
@@ -57,7 +58,11 @@ program
     .command("search <query>")
     .description("Search components")
     .action(searchCommand);
-
+program
+    .command("doctor")
+    .action(
+        doctorCommand
+    );
 program
     .command(
         "update <component>"
