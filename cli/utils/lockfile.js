@@ -1,38 +1,65 @@
-import fs from "fs-extra";
-import path from "path";
+import fs from "fs";
 
-export default async function writeFiles(
+const LOCKFILE =
+ "dropui.lock";
 
- files,
- componentsDir
+export function readLockfile(){
 
-){
-
- for (
-  const file
-  of files
+ if(
+  !fs.existsSync(
+   LOCKFILE
+  )
  ){
 
-  const target =
-   path.join(
-
-    componentsDir,
-
-    file.path
-
-   );
-
-  await fs.ensureDir(
-   path.dirname(
-    target
-   )
-  );
-
-  await fs.writeFile(
-   target,
-   file.content
-  );
+  return {
+   components:{}
+  };
 
  }
+
+ return JSON.parse(
+
+  fs.readFileSync(
+   LOCKFILE,
+   "utf8"
+  )
+
+ );
+
+}
+
+export function saveLockfile(
+ data
+){
+
+ fs.writeFileSync(
+
+  LOCKFILE,
+
+  JSON.stringify(
+   data,
+   null,
+   2
+  )
+
+ );
+
+}
+
+export function addComponent(
+ name,
+ version
+){
+
+ const lock =
+  readLockfile();
+
+ lock.components[
+  name
+ ] = version;
+
+ saveLockfile(
+  lock
+ );
 
 }
