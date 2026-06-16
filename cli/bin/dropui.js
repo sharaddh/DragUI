@@ -5,6 +5,8 @@ import addCommand from "../commands/add.js";
 import searchCommand from "../commands/search.js";
 import listCommand
 from "../commands/list.js";
+import removeCommand
+from "../commands/remove.js";
 const program = new Command();
 
 program
@@ -20,7 +22,13 @@ program
  .action(
   listCommand
  );
- 
+program
+ .command(
+  "remove <component>"
+ )
+ .action(
+  removeCommand
+ );
 program
  .command("init")
  .description("Initialize DropUI")
