@@ -10,7 +10,6 @@ import morgan from "morgan";
 import passport from "./config/Passport.js";
 import connectDB from "./config/db.js";
 import mongoSanitize from "express-mongo-sanitize";
-import morgan from "morgan";
 
 
 const app = express();

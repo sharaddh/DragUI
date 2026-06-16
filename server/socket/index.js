@@ -61,8 +61,6 @@ export const getIO =
 import registerCollaboration
 from "./collaboration.js";
 
-import registerPresence
-from "./presence.js";
 
 import registerComments
 from "./comments.js";
