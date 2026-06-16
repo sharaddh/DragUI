@@ -9,8 +9,20 @@ import removeCommand
     from "../commands/remove.js";
 import updateCommand
     from "../commands/update.js";
+    import loginCommand
+from "../commands/login.js";
+
+import whoamiCommand
+from "../commands/whoami.js";
 const program = new Command();
 
+program
+ .command("login")
+ .action(loginCommand);
+
+program
+ .command("whoami")
+ .action(whoamiCommand);
 program
     .name("dropui")
     .description("DropUI CLI")
