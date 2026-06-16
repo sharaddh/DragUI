@@ -3,7 +3,8 @@ import { Command } from "commander";
 import initCommand from "../commands/init.js";
 import addCommand from "../commands/add.js";
 import searchCommand from "../commands/search.js";
-
+import listCommand
+from "../commands/list.js";
 const program = new Command();
 
 program
@@ -11,6 +12,15 @@ program
  .description("DropUI CLI")
  .version("1.0.0");
 
+ program
+ .command("list")
+ .description(
+  "List installed components"
+ )
+ .action(
+  listCommand
+ );
+ 
 program
  .command("init")
  .description("Initialize DropUI")
