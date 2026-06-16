@@ -1,7 +1,4 @@
-import {
-  searchComponents
-}
-from "../services/searchService.js";
+import searchComponents from '../services/searchService.js';
 
 export const search =
 async (
