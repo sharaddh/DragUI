@@ -1,26 +1,27 @@
-import fs
-from "fs";
+import fs from "fs";
 
-export function writeFiles(
+export function detectPackageManager(){
 
- files,
+ if(
+  fs.existsSync(
+   "pnpm-lock.yaml"
+  )
+ ){
 
- targetDir
+  return "pnpm";
 
-){
+ }
 
- files.forEach(
-  file=>{
+ if(
+  fs.existsSync(
+   "yarn.lock"
+  )
+ ){
 
-   fs.writeFileSync(
+  return "yarn";
 
-    `${targetDir}/${file.path}`,
+ }
 
-    file.content
-
-   );
-
-  }
- );
+ return "npm";
 
 }
