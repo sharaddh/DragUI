@@ -15,6 +15,15 @@ import doctorCommand
     from "../commands/doctor.js";
 import whoamiCommand
     from "../commands/whoami.js";
+const workspace =
+ program.command(
+  "workspace"
+ );
+ workspace
+ .command("list")
+ .action(
+  workspaceList
+ );
 const program = new Command();
 
 program
