@@ -39,3 +39,14 @@ export async function searchComponents(
  return res.data;
 
 }
+export async function getLatestVersion(
+ component
+){
+
+ const res =
+ await api.get(
+  `/registry/version/${component}`
+ );
+
+ return res.data;
+}
