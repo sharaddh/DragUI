@@ -1,6 +1,6 @@
 const rooms = {};
 
-export default function registerPresence(
+export function registerPresence(
   io,
   socket
 ) {
@@ -11,6 +11,10 @@ export default function registerPresence(
       componentId,
       user
     }) => {
+
+      socket.join(
+        componentId
+      );
 
       if (
         !rooms[
@@ -24,9 +28,24 @@ export default function registerPresence(
 
       }
 
-      rooms[
-        componentId
-      ].push(user);
+      const exists =
+        rooms[
+          componentId
+        ].find(
+          (u) =>
+            u.id ===
+            user.id
+        );
+
+      if (!exists) {
+
+        rooms[
+          componentId
+        ].push(
+          user
+        );
+
+      }
 
       io.to(
         componentId
