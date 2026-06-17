@@ -130,4 +130,15 @@ export default function PreviewPanel({ code }) {
       />
     </div>
   );
+}export default function Component() {
+  return (
+    <div className="p-8 rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 transition-colors duration-300 shadow-xl">
+      <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
+        Hello World
+      </h1>
+      <p className="text-zinc-500 dark:text-zinc-400 mt-2">
+        Click the theme toggle to see the magic happen.
+      </p>
+    </div>
+  );
 }
