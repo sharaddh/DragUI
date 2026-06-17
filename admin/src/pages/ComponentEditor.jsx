@@ -89,7 +89,7 @@ export default function ComponentEditor() {
   };
 
   return (
-    <div className="h-[calc(100vh-80px)] w-full flex flex-col bg-[#050505] font-sans text-white overflow-hidden divide-y divide-white/[0.05]">
+    <div className="h-screen w-full flex flex-col bg-[#050505] font-sans text-white overflow-hidden divide-y divide-white/[0.05]">
       
       {/* Toolbar */}
       <ComponentToolbar 

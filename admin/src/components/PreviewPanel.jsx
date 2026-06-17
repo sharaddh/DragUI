@@ -7,7 +7,7 @@ export default function PreviewPanel({ code }) {
       */}
       <iframe
         title="preview"
-        className="w-full h-full border-none bg-white"
+        className="w-full h-full border-none bg-gry-900"
         srcDoc={`
           <!DOCTYPE html>
           <html>
