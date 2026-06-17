@@ -30,24 +30,7 @@ export default function PreviewPanel({ code }) {
             <script>
               setTimeout(() => {
                 try {
-                  const rawCode = \`${escapedCode}\`;
-                  
-                  // 1. Aggressively strip all user-defined imports
-                  let cleanCode = rawCode.replace(/import\\s+[\\s\\S]*?from\\s+['"].*?['"];?/g, '');
-                  cleanCode = cleanCode.replace(/import\\s+['"].*?['"];?/g, '');
-                  
-                  // 2. Strip all 'export default' and 'export' keywords
-                  cleanCode = cleanCode.replace(/export\\s+default\\s+/g, '');
-                  cleanCode = cleanCode.replace(/export\\s+/g, '');
-                  
-                  // 3. Find the component name (e.g., function App() -> App)
-                  const match = cleanCode.match(/(?:function|const|let|var|class)\\s+(\\w+)/);
-                  const componentName = match ? match[1] : null;
-
-                  if (!componentName) {
-                    throw new Error("Could not find a valid React component name.");
-                  }
-
+                 
                   // 4. Create the final execution script
                   const codeToCompile = cleanCode + '\\n\\nconst root = ReactDOM.createRoot(document.getElementById("root"));\\nroot.render(React.createElement(' + componentName + '));';
 
@@ -78,7 +61,7 @@ export default function PreviewPanel({ code }) {
   }, [code]);
 
   return (
-    <div className="w-full h-full bg-white relative">
+    <div className="w-full h-full bg-gry-900 relative">
       <iframe
         key={renderKey}
         title="preview"
