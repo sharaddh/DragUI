@@ -1,30 +1,22 @@
 import Editor from "@monaco-editor/react";
 
-export default function MonacoEditor({
-  code,
-  setCode,
-}) {
-
+export default function MonacoEditor({ code, setCode }) {
   return (
-
     <Editor
       height="100%"
       defaultLanguage="javascript"
-      theme="vs-dark"
+      theme="vs-dark" // Standard dark theme, fits perfectly into our layout
       value={code}
-      onChange={(value) =>
-        setCode(value)
-      }
+      onChange={(value) => setCode(value)}
       options={{
+        fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
         fontSize: 14,
-        minimap: {
-          enabled: true,
-        },
+        minimap: { enabled: false }, // Turned off for a cleaner UI in limited space
         automaticLayout: true,
         wordWrap: "on",
+        padding: { top: 16 },
+        scrollBeyondLastLine: false,
       }}
     />
-
   );
-
 }
