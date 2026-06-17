@@ -2,12 +2,10 @@ import { useEffect, useState } from "react";
 
 export default function PreviewPanel({ code }) {
   const [srcDoc, setSrcDoc] = useState("");
+  const [renderKey, setRenderKey] = useState(0); // Forces React to recreate the iframe cleanly
 
   useEffect(() => {
-    // 600ms debounce so we don't compile on every single keystroke
     const timeout = setTimeout(() => {
-      
-      // Escape backticks and dollar signs so they don't break the HTML string injection
       const escapedCode = code.replace(/`/g, '\\`').replace(/\$/g, '\\$');
 
       const html = `
@@ -29,46 +27,45 @@ export default function PreviewPanel({ code }) {
             </div>
             
             <script>
-              // Wait a tiny bit to ensure React/Babel scripts are fully loaded
               setTimeout(() => {
                 try {
                   const rawCode = \`${escapedCode}\`;
                   
-                  // 1. Strip import statements (Browsers crash on bare imports)
-                  let cleanCode = rawCode.replace(/import\\s+.*?from\\s+['"].*?['"];?/g, '// import stripped\\n');
+                  // Clean up potential multi-line and single-line imports
+                  let cleanCode = rawCode.replace(/import\\s+[\\s\\S]*?from\\s+['"].*?['"];?/g, '// import stripped\\n');
+                  cleanCode = cleanCode.replace(/import\\s+['"].*?['"];?/g, '// side-effect import stripped\\n');
                   
-                  // 2. Remove 'export default' so we can evaluate the function locally
+                  // Strip export default syntax
                   cleanCode = cleanCode.replace(/export\\s+default\\s+/, '');
                   
-                  // 3. Find the component name (e.g., 'Button' or 'Component')
-                  const match = cleanCode.match(/(?:function|const|class)\\s+(\\w+)/);
+                  // Match your exact component name (handles: const App =, function App(), etc.)
+                  const match = cleanCode.match(/(?:function|const|let|class)\\s+(\\w+)/);
                   const componentName = match ? match[1] : null;
 
                   if (!componentName) {
-                    throw new Error("Could not detect a component name. Ensure you use 'function YourComponentName()'");
+                    throw new Error("Could not find a valid React component name in your code declaration.");
                   }
 
-                  // 4. Append the React 18 mount logic
+                  // Build mounting script
                   const codeToCompile = cleanCode + '\\n\\nconst root = ReactDOM.createRoot(document.getElementById("root"));\\nroot.render(React.createElement(' + componentName + '));';
 
-                  // 5. Transpile JSX into plain JavaScript using Babel programmatically
+                  // Transpile to browser ES5
                   const compiled = Babel.transform(codeToCompile, { presets: ['react'] }).code;
                   
-                  // 6. Execute the compiled code!
                   eval(compiled);
                   
                 } catch (err) {
-                  // If there is an error (like a missing closing tag), show it on screen!
                   document.getElementById('root').innerHTML = '<div style="color: #dc2626; font-family: monospace; padding: 20px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; max-width: 90%; white-space: pre-wrap;"><strong>Build Error:</strong><br/>' + err.toString() + '</div>';
                 }
-              }, 50);
+              }, 30);
             </script>
           </body>
         </html>
       `;
       
       setSrcDoc(html);
-    }, 600);
+      setRenderKey(prev => prev + 1); // Bump key to completely wipe the iframe state clean
+    }, 500);
 
     return () => clearTimeout(timeout);
   }, [code]);
@@ -76,6 +73,7 @@ export default function PreviewPanel({ code }) {
   return (
     <div className="w-full h-full bg-white relative">
       <iframe
+        key={renderKey} // 👈 Critical: Hard resets the iframe element on update
         title="preview"
         className="w-full h-full border-none bg-white"
         srcDoc={srcDoc}
