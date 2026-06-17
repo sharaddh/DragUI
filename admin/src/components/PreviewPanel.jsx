@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 
 export default function PreviewPanel({ code }) {
   const [srcDoc, setSrcDoc] = useState("");
-  const [renderKey, setRenderKey] = useState(0); // Forces React to recreate the iframe cleanly
+  const [renderKey, setRenderKey] = useState(0);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
+      // Escape backticks and dollars to prevent string interpolation crashes
       const escapedCode = code.replace(/`/g, '\\`').replace(/\$/g, '\\$');
 
       const html = `
@@ -23,7 +24,7 @@ export default function PreviewPanel({ code }) {
           </head>
           <body>
             <div id="root">
-               <div style="color: #aaa; font-family: sans-serif; font-size: 14px;">Rendering...</div>
+               <div style="color: #aaa; font-family: sans-serif; font-size: 14px;">Compiling...</div>
             </div>
             
             <script>
@@ -31,27 +32,33 @@ export default function PreviewPanel({ code }) {
                 try {
                   const rawCode = \`${escapedCode}\`;
                   
-                  // Clean up potential multi-line and single-line imports
-                  let cleanCode = rawCode.replace(/import\\s+[\\s\\S]*?from\\s+['"].*?['"];?/g, '// import stripped\\n');
-                  cleanCode = cleanCode.replace(/import\\s+['"].*?['"];?/g, '// side-effect import stripped\\n');
+                  // 1. Aggressively strip all user-defined imports
+                  let cleanCode = rawCode.replace(/import\\s+[\\s\\S]*?from\\s+['"].*?['"];?/g, '');
+                  cleanCode = cleanCode.replace(/import\\s+['"].*?['"];?/g, '');
                   
-                  // Strip export default syntax
-                  cleanCode = cleanCode.replace(/export\\s+default\\s+/, '');
+                  // 2. Strip all 'export default' and 'export' keywords
+                  cleanCode = cleanCode.replace(/export\\s+default\\s+/g, '');
+                  cleanCode = cleanCode.replace(/export\\s+/g, '');
                   
-                  // Match your exact component name (handles: const App =, function App(), etc.)
-                  const match = cleanCode.match(/(?:function|const|let|class)\\s+(\\w+)/);
+                  // 3. Find the component name (e.g., function App() -> App)
+                  const match = cleanCode.match(/(?:function|const|let|var|class)\\s+(\\w+)/);
                   const componentName = match ? match[1] : null;
 
                   if (!componentName) {
-                    throw new Error("Could not find a valid React component name in your code declaration.");
+                    throw new Error("Could not find a valid React component name.");
                   }
 
-                  // Build mounting script
+                  // 4. Create the final execution script
                   const codeToCompile = cleanCode + '\\n\\nconst root = ReactDOM.createRoot(document.getElementById("root"));\\nroot.render(React.createElement(' + componentName + '));';
 
-                  // Transpile to browser ES5
-                  const compiled = Babel.transform(codeToCompile, { presets: ['react'] }).code;
+                  // 5. TRANSLATE TO ES5 (Forcing the 'classic' runtime to prevent hidden imports)
+                  const compiled = Babel.transform(codeToCompile, { 
+                    presets: [
+                      ['react', { runtime: 'classic' }] // <-- This prevents the hidden JSX import crash!
+                    ] 
+                  }).code;
                   
+                  // 6. Execute!
                   eval(compiled);
                   
                 } catch (err) {
@@ -64,8 +71,8 @@ export default function PreviewPanel({ code }) {
       `;
       
       setSrcDoc(html);
-      setRenderKey(prev => prev + 1); // Bump key to completely wipe the iframe state clean
-    }, 500);
+      setRenderKey(prev => prev + 1); // Hard reset the iframe to clear previous crashes
+    }, 600);
 
     return () => clearTimeout(timeout);
   }, [code]);
@@ -73,7 +80,7 @@ export default function PreviewPanel({ code }) {
   return (
     <div className="w-full h-full bg-white relative">
       <iframe
-        key={renderKey} // 👈 Critical: Hard resets the iframe element on update
+        key={renderKey}
         title="preview"
         className="w-full h-full border-none bg-white"
         srcDoc={srcDoc}
