@@ -1,1 +1,6 @@
 @import "tailwindcss";
+html, body, #root {
+  background-color: #050505; /* Your dark theme background */
+  height: 100%;
+  margin: 0;
+}
