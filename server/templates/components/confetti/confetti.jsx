@@ -35,7 +35,7 @@ export default function Component() {
         angle: 120,
         spread: 55,
         origin: { x, y },
-        colors: ['#6366f1', '#a855f7', '#ec4899', '#3b82f6', '#fbbf24'],
+        colors: ['#6366f1', '#a855f7', '#ec4899', '#48f63bff', '#fbbf24'],
         gravity: 1.1,
         decay: 0.94,
         drift: 0,
