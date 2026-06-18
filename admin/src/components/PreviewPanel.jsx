@@ -17,7 +17,6 @@ export default function PreviewPanel({ code, assets = [] }) {
     const timeout = setTimeout(() => {
       let escapedCode = code.replace(/`/g, '\\`').replace(/\$/g, '\\$');
 
-      // 1. ASSET INJECTOR
       if (assets && assets.length > 0) {
         assets.forEach((asset) => {
           const assetRegex = new RegExp(`['"\`][./]*${asset.name}['"\`]`, 'g');
@@ -29,8 +28,16 @@ export default function PreviewPanel({ code, assets = [] }) {
         <!DOCTYPE html>
         <html class="${isDark ? 'dark' : ''}">
           <head>
-            <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-            <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+            <script type="importmap">
+              {
+                "imports": {
+                  "react": "https://esm.sh/react@18.2.0",
+                  "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+                  "react-dom": "https://esm.sh/react-dom@18.2.0",
+                  "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime" 
+                }
+              }
+            </script>
             <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
             <script src="https://cdn.tailwindcss.com"></script>
             <script>tailwind.config = { darkMode: 'class' }</script>
@@ -58,17 +65,16 @@ export default function PreviewPanel({ code, assets = [] }) {
                   const rawCode = \`${escapedCode}\`;
                   let cleanCode = rawCode;
                   
-                  // 2. STRIP REACT IMPORTS (Because we already load React globally in the <head>)
-                  cleanCode = cleanCode.replace(/import\\s+[\\s\\S]*?\\s+from\\s+['"]react['"];?/g, '');
-                  
-                  // 3. ✨ MAGIC NPM IMPORTS ✨
-                  // Converts: import confetti from "canvas-confetti" 
-                  // Into: import confetti from "https://esm.sh/canvas-confetti?external=react,react-dom"
+                  // 1. REWRITE NPM IMPORTS
                   cleanCode = cleanCode.replace(/import\\s+([\\s\\S]*?)\\s+from\\s+['"]([^.\\/][^'"]+)['"];?/g, function(match, imports, packageName) {
+                    // Leave react imports alone so the Import Map handles them!
+                    if (packageName === 'react' || packageName === 'react-dom' || packageName === 'react-dom/client') {
+                      return match; 
+                    }
                     return 'import ' + imports + ' from "https://esm.sh/' + packageName + '?external=react,react-dom";';
                   });
 
-                  // 4. STRIP EXPORTS
+                  // 2. STRIP EXPORTS
                   cleanCode = cleanCode.replace(/export\\s+default\\s+/g, '');
                   cleanCode = cleanCode.replace(/export\\s+/g, '');
                   
@@ -77,12 +83,22 @@ export default function PreviewPanel({ code, assets = [] }) {
 
                   if (!componentName) throw new Error("Could not find a valid React component name.");
 
-                  // 5. COMPILE JSX TO JS
-                  const codeToCompile = cleanCode + '\\n\\nconst root = ReactDOM.createRoot(document.getElementById("root"));\\nroot.render(React.createElement(' + componentName + '));';
+                  // 3. INJECT REACT GLOBALLY (To prevent 'React is not defined' Babel errors)
+                  const codeToCompile = \`
+                    import * as __React__ from "react";
+                    import { createRoot as __createRoot__ } from "react-dom/client";
+                    window.React = __React__; 
+                    
+                    \${cleanCode}
+                    
+                    const __root__ = __createRoot__(document.getElementById("root"));
+                    __root__.render(__React__.createElement(\${componentName}));
+                  \`;
+
+                  // 4. COMPILE JSX
                   const compiled = Babel.transform(codeToCompile, { presets: [['react', { runtime: 'classic' }]] }).code;
                   
-                  // 6. ✨ BLOB MODULE EXECUTION (Replaces eval) ✨
-                  // This tricks the browser into thinking your compiled code is a real file, allowing it to fetch the NPM packages!
+                  // 5. EXECUTE BLOB
                   const blob = new Blob([compiled], { type: 'application/javascript' });
                   const url = URL.createObjectURL(blob);
                   await import(url);
