@@ -6,7 +6,7 @@ export default function PreviewPanel({ code }) {
   const [renderKey, setRenderKey] = useState(0);
   const [isDark, setIsDark] = useState(false);
   const iframeRef = useRef(null);
-
+  
   // 1. Send an instant message to the iframe when the theme changes
   useEffect(() => {
     if (iframeRef.current && iframeRef.current.contentWindow) {

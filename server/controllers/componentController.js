@@ -3,6 +3,12 @@ import ComponentVersion from "../models/ComponentVersion.js";
 import * as componentService from "../services/componentService.js";
 import ComponentManifest
 from "../models/ComponentManifest.js";
+import slugify from "slugify";
+import extractProps from "../utils/extractProps.js";
+import extractDependencies from "../utils/extractDependencies.js";
+import { saveTemplate } from "../services/templateService.js";
+
+/*
 /*
 =====================================
 CREATE COMPONENT
@@ -183,41 +189,74 @@ export const search = async (
 UPDATE
 =====================================
 */
-
-export const update = async (
-  req,
-  res
-) => {
+export const update = async (req, res) => {
   try {
-    const component =
-      await Component.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        {
-          new: true,
-        }
-      );
+    const { id } = req.params;
+    const { name, code, category, type, description } = req.body;
 
-    if (!component) {
-      return res.status(404).json({
-        success: false,
-        message:
-          "Component not found",
-      });
+    // 1. Find the existing component
+    const existingComponent = await Component.findById(id);
+    if (!existingComponent) {
+      return res.status(404).json({ success: false, message: "Component not found" });
     }
+
+    // 2. If the user changed the code or name, we must update the physical file
+    let updatedTemplatePath = existingComponent.template;
+    let newSlug = existingComponent.slug;
+
+    if (name) {
+      newSlug = slugify(name, { lower: true });
+    }
+
+    if (code) {
+      const template = await saveTemplate({
+        type: type || existingComponent.type || "components",
+        slug: newSlug,
+        code,
+        name: name || existingComponent.name
+      });
+      updatedTemplatePath = template.path;
+    }
+
+    // 3. Extract new props and dependencies from the updated code
+    const updatedProps = code ? extractProps(code) : existingComponent.props;
+    const updatedDependencies = code ? extractDependencies(code) : existingComponent.dependencies;
+
+    // 4. Update the database
+    const updatedComponent = await Component.findByIdAndUpdate(
+      id,
+      {
+        ...req.body,
+        slug: newSlug,
+        template: updatedTemplatePath,
+        props: updatedProps,
+        dependencies: updatedDependencies,
+      },
+      { new: true }
+    );
 
     res.json({
       success: true,
-      component,
+      component: updatedComponent,
     });
   } catch (error) {
+    // 👇 This will tell us EXACTLY why your frontend is currently throwing an error!
+    console.error("🔥 UPDATE COMPONENT ERROR:", error);
+    
+    // Catch duplicate name edits
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "Another component with this name already exists.",
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
-
 /*
 =====================================
 DELETE

@@ -6,9 +6,19 @@ export default function AssetManager({ assets, setAssets }) {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Assuming your uploadFile returns a { url }
-    const result = await uploadFile(file);
-    setAssets([...assets, { name: file.name, url: result.url, type: file.type }]);
+    try {
+      toast.loading("Uploading asset...", { id: "upload" });
+      
+      // Call your backend API
+      const result = await uploadFile(file); 
+      
+      // Update the global draft state!
+      setAssets([...assets, { name: file.name, url: result.url, type: file.type }]);
+      
+      toast.success("Asset uploaded!", { id: "upload" });
+    } catch (error) {
+      toast.error("Upload failed", { id: "upload" });
+    }
   };
 
   return (

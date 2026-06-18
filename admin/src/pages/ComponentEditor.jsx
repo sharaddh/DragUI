@@ -7,7 +7,7 @@ import { Monitor, Tablet, Smartphone, Maximize2, MoveHorizontal } from "lucide-r
 import MarketplaceSettings from "../components/MarketplaceSettings";
 import MonacoEditor from "../components/MonacoEditor";
 import AssetManager from "../components/AssetManager";
-import PreviewPanel from "../components/PreviewPanel"; // Pass size settings here
+import PreviewPanel from "../components/PreviewPanel";
 import FileExplorer from "../components/FileExplorer";
 import VersionModal from "../components/VersionModal";
 import ComponentToolbar from "../components/ComponentToolbar";
@@ -17,20 +17,23 @@ import PropertyBuilder from "../components/PropertyBuilder";
 import { createVersion } from "../api/versionApi";
 import { getComponent, createComponent, updateComponent } from "../api/componentApi";
 
-const DEFAULT_CODE = `export default function Component() {\n  return (\n    <div className="p-6 text-center bg-purple-600/10 border border-purple-500/30 rounded-2xl">\n      <h2 className="text-xl font-bold">Hello World</h2>\n      <p className="text-sm text-white/60 mt-1">Responsive Workspace Live</p>\n    </div>\n  );\n}`;
+const DEFAULT_CODE = `export default function Component() {\n  return (\n    <div className="p-6 text-center bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl transition-colors">\n      <h2 className="text-xl font-bold text-black dark:text-white">Hello World</h2>\n      <p className="text-sm text-zinc-500 mt-1">Responsive Workspace Live</p>\n    </div>\n  );\n}`;
 
 export default function ComponentEditor() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  
   const [versionOpen, setVersionOpen] = useState(false);
-  const navigate = useNavigate(); // <-- Add this hook
-  // Layout resizing state
-  const [leftWidth, setLeftWidth] = useState(256); // Default: 64rem / 256px
-  const [rightWidth, setRightWidth] = useState(450); // Default: 450px
 
+  // Layout resizing state
+  const [leftWidth, setLeftWidth] = useState(256);
+  const [rightWidth, setRightWidth] = useState(450);
+  
   // Responsiveness state
-  const [deviceMode, setDeviceMode] = useState("desktop"); // desktop, tablet, mobile, custom
+  const [deviceMode, setDeviceMode] = useState("desktop");
   const [frameWidth, setFrameWidth] = useState("100%");
 
+  // Unified Workspace State
   const [draft, setDraft] = useState({
     activeFile: "Component.jsx",
     files: [{ name: "Component.jsx", code: DEFAULT_CODE }],
@@ -38,6 +41,8 @@ export default function ComponentEditor() {
     assets: [],
     marketplace: { title: "", description: "", tags: [] },
   });
+
+  const iframeRef = useRef(null);
 
   const currentFile = useMemo(
     () => draft.files.find((f) => f.name === draft.activeFile) || draft.files[0],
@@ -48,7 +53,6 @@ export default function ComponentEditor() {
     if (id) loadComponent();
   }, [id]);
 
-  // Adjust pre-configured screen size mappings
   useEffect(() => {
     if (deviceMode === "desktop") setFrameWidth("100%");
     else if (deviceMode === "tablet") setFrameWidth("768px");
@@ -84,10 +88,21 @@ export default function ComponentEditor() {
     );
   };
 
-  // Make sure to import useNavigate at the top!
+  // --- NEW: Rename Handler ---
+  const handleRename = (newName) => {
+    const safeName = newName || "Untitled";
+    const newFileName = `${safeName}.jsx`;
 
-  // ... (rest of your state)
+    setDraft((prev) => ({
+      ...prev,
+      activeFile: newFileName,
+      files: prev.files.map((f) => 
+        f.name === prev.activeFile ? { ...f, name: newFileName } : f
+      )
+    }));
+  };
 
+  // --- UPGRADED: Save Handler with Redirect ---
   const handleSave = async () => {
     try {
       const payload = {
@@ -99,28 +114,22 @@ export default function ComponentEditor() {
       };
 
       if (id) {
-        // If we are already editing an existing component, just update it
         await updateComponent(id, payload);
         toast.success("Component Updated!");
       } else {
-        // If this is a brand new component, create it...
         const response = await createComponent(payload);
         toast.success("Component Created!");
-
-        // ...AND redirect the URL to the edit page so we don't cause a duplicate error!
-        // (Make sure this matches your actual route, e.g., `/components/${response.component._id}`)
-        const newId = response.component._id || response._id;
-        navigate(`/components/${newId}`);
+        // Stop duplicate slug errors by redirecting to the edit view
+        const newId = response.component?._id || response._id;
+        if (newId) navigate(`/components/${newId}`);
       }
-
     } catch (error) {
-      toast.error("Failed to save component. Name might already be taken!");
+      toast.error("Failed to save. Name might already exist.");
+      console.error(error);
     }
   };
 
-
-
-  // Drag handlers to resize workspace windows
+  // --- Drag Resizers ---
   const handleLeftResize = (e) => {
     const startX = e.clientX;
     const startWidth = leftWidth;
@@ -141,7 +150,7 @@ export default function ComponentEditor() {
     const startWidth = rightWidth;
     const onMouseMove = (moveEvent) => {
       const currentWidth = startWidth - (moveEvent.clientX - startX);
-      if (currentWidth > 300 && currentWidth < 600) setRightWidth(currentWidth);
+      if (currentWidth > 300 && currentWidth < 700) setRightWidth(currentWidth);
     };
     const onMouseUp = () => {
       document.removeEventListener("mousemove", onMouseMove);
@@ -151,7 +160,6 @@ export default function ComponentEditor() {
     document.addEventListener("mouseup", onMouseUp);
   };
 
-  // Directly scaling the live preview iframe manually via drag handle
   const handleFrameResize = (e) => {
     e.preventDefault();
     setDeviceMode("custom");
@@ -160,7 +168,7 @@ export default function ComponentEditor() {
     const startWidth = iframeRef.current ? iframeRef.current.clientWidth : containerWidth;
 
     const onMouseMove = (moveEvent) => {
-      let calculatedWidth = startWidth + (moveEvent.clientX - startX) * 2; // Symmetric tracking
+      let calculatedWidth = startWidth + (moveEvent.clientX - startX) * 2; 
       calculatedWidth = Math.max(320, Math.min(calculatedWidth, containerWidth - 40));
       setFrameWidth(`${calculatedWidth}px`);
     };
@@ -173,20 +181,20 @@ export default function ComponentEditor() {
     document.addEventListener("mouseup", onMouseUp);
   };
 
-  const iframeRef = useRef(null);
-
   return (
     <div className="h-screen w-full flex flex-col bg-[#050505] font-sans text-white overflow-hidden divide-y divide-white/[0.05]">
-
-      <ComponentToolbar
-        onSave={handleSave}
-        onOpenVersion={() => setVersionOpen(true)}
+      
+      {/* Dynamic Toolbar */}
+      <ComponentToolbar 
+        onSave={handleSave} 
+        onOpenVersion={() => setVersionOpen(true)} 
         componentName={draft.activeFile.replace(".jsx", "")}
+        onNameChange={handleRename}
       />
 
       <div className="flex flex-1 overflow-hidden select-none">
-
-        {/* Left Panel: File Explorer */}
+        
+        {/* Left Panel */}
         <aside style={{ width: `${leftWidth}px` }} className="shrink-0 bg-[#0a0a0c] overflow-y-auto">
           <FileExplorer
             files={draft.files}
@@ -195,102 +203,79 @@ export default function ComponentEditor() {
           />
         </aside>
 
-        {/* Resizer Handle Left */}
-        <div
-          onMouseDown={handleLeftResize}
-          className="w-1 hover:w-1.5 bg-transparent hover:bg-purple-500/50 cursor-col-resize transition-all shrink-0 active:bg-purple-500"
+        <div 
+          onMouseDown={handleLeftResize} 
+          className="w-1 hover:w-1.5 bg-transparent hover:bg-purple-500/50 cursor-col-resize transition-all shrink-0 active:bg-purple-500 z-20" 
         />
 
-        {/* Center Panel: Main Source Code Editor */}
-        <main className="flex-1 bg-[#050505] relative flex flex-col min-w-0">
+        {/* Center Panel */}
+        <main className="flex-1 bg-[#050505] relative flex flex-col min-w-0 z-10">
           <MonacoEditor code={currentFile.code} setCode={updateCode} />
         </main>
 
-        {/* Resizer Handle Right */}
-        <div
-          onMouseDown={handleRightResize}
-          className="w-1 hover:w-1.5 bg-transparent hover:bg-purple-500/50 cursor-col-resize transition-all shrink-0 active:bg-purple-500"
+        <div 
+          onMouseDown={handleRightResize} 
+          className="w-1 hover:w-1.5 bg-transparent hover:bg-purple-500/50 cursor-col-resize transition-all shrink-0 active:bg-purple-500 z-20" 
         />
 
-        {/* Right Panel: Enhanced Live Preview & Settings Canvas */}
+        {/* Right Panel */}
         <aside style={{ width: `${rightWidth}px` }} className="shrink-0 bg-[#0a0a0c] flex flex-col divide-y divide-white/[0.05] min-w-0">
-
-          {/* Top Frame Segment: Interactive Screen Responsive Viewport */}
+          
+          {/* Top Half: Responsive Preview */}
           <div className="flex-1 relative flex flex-col bg-[#111113]">
-
-            {/* Viewport Scale Control Strip */}
             <div className="w-full px-4 py-2 bg-[#0a0a0c] border-b border-white/[0.05] flex items-center justify-between z-10 shrink-0">
               <span className="text-[11px] font-bold text-white/40 uppercase tracking-widest">
                 Responsive Viewport
               </span>
-
-              {/* Presets Button Array */}
+              
               <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-lg border border-white/[0.05]">
-                <button
-                  onClick={() => setDeviceMode("desktop")}
-                  className={`p-1.5 rounded-md transition-all ${deviceMode === "desktop" ? "bg-purple-600 text-white" : "text-white/40 hover:text-white"}`}
-                  title="Desktop View (100%)"
-                >
-                  <Monitor className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => setDeviceMode("tablet")}
-                  className={`p-1.5 rounded-md transition-all ${deviceMode === "tablet" ? "bg-purple-600 text-white" : "text-white/40 hover:text-white"}`}
-                  title="Tablet View (768px)"
-                >
-                  <Tablet className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => setDeviceMode("mobile")}
-                  className={`p-1.5 rounded-md transition-all ${deviceMode === "mobile" ? "bg-purple-600 text-white" : "text-white/40 hover:text-white"}`}
-                  title="Mobile View (375px)"
-                >
-                  <Smartphone className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => setDeviceMode("custom")}
-                  className={`p-1.5 rounded-md transition-all ${deviceMode === "custom" ? "bg-purple-600 text-white" : "text-white/40 hover:text-white"}`}
-                  title="Free Resize Mode"
-                >
-                  <Maximize2 className="w-3.5 h-3.5" />
-                </button>
+                {["desktop", "tablet", "mobile", "custom"].map((mode) => {
+                  const Icon = mode === "desktop" ? Monitor : mode === "tablet" ? Tablet : mode === "mobile" ? Smartphone : Maximize2;
+                  return (
+                    <button 
+                      key={mode}
+                      onClick={() => setDeviceMode(mode)}
+                      className={`p-1.5 rounded-md transition-all ${deviceMode === mode ? "bg-purple-600 text-white" : "text-white/40 hover:text-white hover:bg-white/5"}`}
+                      title={`${mode.charAt(0).toUpperCase() + mode.slice(1)} View`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Dynamic Iframe Centered Canvas Housing */}
-            <div className="flex-1 overflow-auto p-4 flex items-center justify-center relative">
-              <div
+            <div className="flex-1 overflow-auto p-4 flex items-center justify-center relative bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAACVJREFUKFNjZCASMDKgAnv37v3PwIDEACvw////P1RhKCaowfAAAF1yF182lX9XAAAAAElFTkSuQmCC')]">
+              <div 
                 ref={iframeRef}
-                style={{ width: frameWidth }}
-                className="h-full relative transition-all duration-200 shadow-2xl bg-white border border-white/[0.05] rounded-xl overflow-hidden"
+                style={{ width: frameWidth }} 
+                className="h-full relative transition-all duration-200 shadow-2xl bg-white rounded-xl overflow-hidden ring-1 ring-white/10"
               >
                 <PreviewPanel code={currentFile.code} />
-
-                {/* Visual Drag Adjuster Handle (Active during manual view modes) */}
+                
                 {deviceMode === "custom" && (
-                  <div
+                  <div 
                     onMouseDown={handleFrameResize}
-                    className="absolute top-1/2 -right-1 -translate-y-1/2 w-3 h-12 bg-purple-600 hover:bg-purple-500 rounded-l-md border-l border-y border-purple-400/30 flex items-center justify-center cursor-ew-resize active:scale-95 transition-all z-50"
+                    className="absolute top-1/2 -right-1 -translate-y-1/2 w-3 h-12 bg-purple-600 hover:bg-purple-500 rounded-l-md border-l border-y border-purple-400/30 flex items-center justify-center cursor-ew-resize active:scale-95 transition-all z-50 shadow-lg"
                   >
                     <MoveHorizontal className="w-2.5 h-2.5 text-white" />
                   </div>
                 )}
               </div>
             </div>
-
-            {/* Viewport Dimension Metadata Tag */}
-            <div className="bg-[#0a0a0c]/80 text-[10px] text-center font-mono py-1 border-t border-white/[0.03] text-white/30 tracking-wide shrink-0">
-              Width Constraint: {frameWidth === "100%" ? "Fluid (100%)" : frameWidth}
+            
+            <div className="bg-[#0a0a0c]/90 text-[10px] text-center font-mono py-1.5 border-t border-white/[0.05] text-white/40 tracking-wide shrink-0">
+              {frameWidth === "100%" ? "Fluid Width (100%)" : `Constrained Width: ${frameWidth}`}
             </div>
           </div>
 
-          {/* Bottom Frame Segment: Parameter Settings Panel */}
+          {/* Bottom Half: Settings */}
           <div className="h-[45%] overflow-y-auto p-6 flex flex-col gap-6 divide-y divide-white/[0.05] bg-[#0a0a0c]">
             <PropertyBuilder
               propsData={draft.properties}
               setPropsData={(data) => updateDraft("properties", data)}
             />
-
+            
             <div className="pt-6">
               <AssetManager
                 assets={draft.assets}
