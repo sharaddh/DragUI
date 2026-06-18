@@ -40,11 +40,9 @@ export const uploadAsset = async (
 
   } catch (error) {
 
-    return res.status(500).json({
-      success: false,
-      message:
-        error.message
-    });
+    console.error("🔥 ASSET UPLOAD ERROR:", error);
+    
+    res.status(500).json({ message: error.message || "Upload Failed" });
 
   }
 

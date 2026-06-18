@@ -142,12 +142,12 @@ gallery: [String],
 video: String,
 
 assets: [
- {
-  name: String,
-  url: String,
-  type: String
- }
-],
+    {
+      name: { type: String },
+      url: { type: String },
+      type: { type: String } // e.g., 'image/jpeg'
+    }
+  ],
 status: {
  type: String,
  enum: [
