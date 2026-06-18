@@ -8,23 +8,24 @@ from "../models/ComponentManifest.js";
 CREATE COMPONENT
 =====================================
 */
-
 export const create = async (req, res) => {
   try {
-    const component =
-      await componentService.createComponent(
-        req.body,
-        req.adminId
-      );
+    const component = await componentService.createComponent(
+      req.body,
+      req.adminId
+    );
 
     res.status(201).json({
       success: true,
       component,
     });
   } catch (error) {
+    // 👇 THIS IS THE MAGIC LINE. It will print the exact MongoDB rejection!
+    console.error("🔥 CREATE COMPONENT ERROR:", error); 
+
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message || "An unknown server error occurred",
     });
   }
 };
