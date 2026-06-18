@@ -53,7 +53,7 @@ export default function Components() {
   );
 
   return (
-    <div className="p-6 md:p-10 space-y-8 font-sans">
+    <div className="p-6 md:p-10 space-y-8 font-sans bg-[#050505] min-h-screen">
       
       {/* --- Header Section --- */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -89,69 +89,34 @@ export default function Components() {
         />
       </div>
 
-      {/* --- Components List --- */}
+      {/* --- Components Grid --- */}
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-20">
+        <div className="flex flex-col items-center justify-center py-32">
           <div className="w-10 h-10 border-4 border-white/10 border-t-purple-500 rounded-full animate-spin mb-4" />
-          <p className="text-white/40 text-sm">Loading registry...</p>
+          <p className="text-white/40 text-sm font-medium tracking-wide">Loading registry...</p>
         </div>
       ) : (
-        <div className="grid gap-3">
+        <>
           {filtered.length > 0 ? (
-            filtered.map((component) => (
-              <div
-                key={component._id}
-                className="group flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 rounded-2xl bg-[#0a0a0c] border border-white/[0.04] hover:border-white/[0.1] hover:bg-white/[0.02] transition-all duration-300 gap-4"
-              >
-                
-                {/* Component Info */}
-                <div className="flex items-center gap-4 flex-1">
-                  <div className="w-12 h-12 rounded-xl bg-white/[0.03] border border-white/[0.05] flex items-center justify-center group-hover:border-purple-500/30 group-hover:bg-purple-500/10 transition-colors">
-                    <PackageOpen className="w-6 h-6 text-white/50 group-hover:text-purple-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-semibold text-white/90 group-hover:text-white mb-0.5">
-                      {component.name}
-                    </h3>
-                    <p className="text-xs text-white/40 font-mono">
-                      {component.category || "Uncategorized"}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Status Pill */}
-                <div className="flex items-center gap-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                    component.status === 'Published' 
-                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
-                      : component.status === 'Archived'
-                      ? 'bg-red-500/10 text-red-400 border-red-500/20'
-                      : 'bg-blue-500/10 text-blue-400 border-blue-500/20' // Draft/Other
-                  }`}>
-                    {component.status || "Draft"}
-                  </span>
-                </div>
-
-                {/* Actions Wrapper (Assuming ComponentCard renders action buttons/menus) */}
-                <div className="sm:ml-4 border-t sm:border-t-0 sm:border-l border-white/[0.05] pt-4 sm:pt-0 sm:pl-4 w-full sm:w-auto flex justify-end">
-                  <ComponentCard
-                    component={component}
-                    onDelete={remove}
-                    onPublish={publish}
-                    onArchive={archive}
-                  />
-                </div>
-
-              </div>
-            ))
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filtered.map((component) => (
+                <ComponentCard
+                  key={component._id}
+                  component={component}
+                  onDelete={remove}
+                  onPublish={publish}
+                  onArchive={archive}
+                />
+              ))}
+            </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-16 px-4 rounded-2xl bg-white/[0.01] border border-white/[0.03] border-dashed">
-              <PackageOpen className="w-12 h-12 text-white/20 mb-4" />
-              <p className="text-white/60 font-medium">No components found.</p>
+            <div className="flex flex-col items-center justify-center py-24 px-4 rounded-3xl bg-white/[0.01] border border-white/[0.03] border-dashed">
+              <PackageOpen className="w-16 h-16 text-white/10 mb-4" />
+              <p className="text-white/60 font-medium text-lg">No components found.</p>
               <p className="text-white/30 text-sm mt-1">Try adjusting your search or create a new one.</p>
             </div>
           )}
-        </div>
+        </>
       )}
     </div>
   );
