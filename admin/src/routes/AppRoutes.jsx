@@ -12,9 +12,8 @@ import ProtectedRoute from "../middleware/ProtectedRoute";
 
 import AdminLayout from "../layouts/AdminLayout";
 import Components from "../pages/Components";
-import Marketplace
-  from "../pages/Marketplace";
-  import AIStudio from "../pages/AIStudio";
+import Marketplace from "../pages/Marketplace";
+import AIStudio from "../pages/AIStudio";
 import ComponentEditor from "../pages/ComponentEditor";
 export default function AppRoutes() {
 
@@ -26,16 +25,16 @@ export default function AppRoutes() {
         path="/login"
         element={<Login />}
       />
-<Route
- path="/ai-studio"
- element={
-  <ProtectedRoute>
-   <AdminLayout>
-    <AIStudio />
-   </AdminLayout>
-  </ProtectedRoute>
- }
-/>
+      <Route
+        path="/ai-studio"
+        element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <AIStudio />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/"
         element={
