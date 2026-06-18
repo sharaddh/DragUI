@@ -114,7 +114,7 @@ export default function PreviewPanel({ code }) {
       {/* Floating Theme Toggle */}
       <button
         onClick={() => setIsDark(!isDark)}
-        className="absolute top-4 right-4 z-50 p-2.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 text-white shadow-lg transition-all active:scale-95"
+        className="absolute top-4 right-4 z-50 p-2.5 rounded-xl bg-gray-300/10 hover:bg-white/20 backdrop-blur-md border border-white/10 text-black shadow-lg transition-all active:scale-95"
         title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
       >
         {isDark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
