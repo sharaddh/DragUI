@@ -19,7 +19,7 @@ export default function Component() {
         angle: 60,
         spread: 55,
         origin: { x, y },
-        colors: ['#6366f1', '#a855f7', '#ec4899', '#3b82f6', '#fbbf24'],
+        colors: ['#6366f1', '#63239eff', '#ec4899', '#3b82f6', '#fbbf24'],
         gravity: 1.1,      // Natural pull
         decay: 0.94,       // Slow down over time
         drift: 0,          // No wind
