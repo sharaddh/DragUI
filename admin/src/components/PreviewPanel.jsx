@@ -17,7 +17,7 @@ export default function PreviewPanel({ code, assets = [] }) {
     const timeout = setTimeout(() => {
       let escapedCode = code.replace(/`/g, '\\`').replace(/\$/g, '\\$');
 
-      // 🟢 ASSET INJECTOR: Replaces './image.png' with the live URL from your AssetManager
+      // 1. ASSET INJECTOR
       if (assets && assets.length > 0) {
         assets.forEach((asset) => {
           const assetRegex = new RegExp(`['"\`][./]*${asset.name}['"\`]`, 'g');
@@ -46,19 +46,29 @@ export default function PreviewPanel({ code, assets = [] }) {
                <div style="color: #aaa; font-family: sans-serif; font-size: 14px;">Compiling...</div>
             </div>
             
-            <script>
+            <script type="module">
               window.addEventListener('message', (event) => {
                 if (event.data.type === 'SET_THEME') {
                   event.data.isDark ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark');
                 }
               });
 
-              setTimeout(() => {
+              setTimeout(async () => {
                 try {
                   const rawCode = \`${escapedCode}\`;
+                  let cleanCode = rawCode;
                   
-                  let cleanCode = rawCode.replace(/import\\s+[\\s\\S]*?from\\s+['"].*?['"];?/g, '');
-                  cleanCode = cleanCode.replace(/import\\s+['"].*?['"];?/g, '');
+                  // 2. STRIP REACT IMPORTS (Because we already load React globally in the <head>)
+                  cleanCode = cleanCode.replace(/import\\s+[\\s\\S]*?\\s+from\\s+['"]react['"];?/g, '');
+                  
+                  // 3. ✨ MAGIC NPM IMPORTS ✨
+                  // Converts: import confetti from "canvas-confetti" 
+                  // Into: import confetti from "https://esm.sh/canvas-confetti?external=react,react-dom"
+                  cleanCode = cleanCode.replace(/import\\s+([\\s\\S]*?)\\s+from\\s+['"]([^.\\/][^'"]+)['"];?/g, function(match, imports, packageName) {
+                    return 'import ' + imports + ' from "https://esm.sh/' + packageName + '?external=react,react-dom";';
+                  });
+
+                  // 4. STRIP EXPORTS
                   cleanCode = cleanCode.replace(/export\\s+default\\s+/g, '');
                   cleanCode = cleanCode.replace(/export\\s+/g, '');
                   
@@ -67,10 +77,15 @@ export default function PreviewPanel({ code, assets = [] }) {
 
                   if (!componentName) throw new Error("Could not find a valid React component name.");
 
+                  // 5. COMPILE JSX TO JS
                   const codeToCompile = cleanCode + '\\n\\nconst root = ReactDOM.createRoot(document.getElementById("root"));\\nroot.render(React.createElement(' + componentName + '));';
-
                   const compiled = Babel.transform(codeToCompile, { presets: [['react', { runtime: 'classic' }]] }).code;
-                  eval(compiled);
+                  
+                  // 6. ✨ BLOB MODULE EXECUTION (Replaces eval) ✨
+                  // This tricks the browser into thinking your compiled code is a real file, allowing it to fetch the NPM packages!
+                  const blob = new Blob([compiled], { type: 'application/javascript' });
+                  const url = URL.createObjectURL(blob);
+                  await import(url);
                   
                 } catch (err) {
                   document.getElementById('root').innerHTML = '<div style="color: #dc2626; padding: 20px;"><strong>Build Error:</strong><br/>' + err.toString() + '</div>';
@@ -84,6 +99,7 @@ export default function PreviewPanel({ code, assets = [] }) {
       setSrcDoc(html);
       setRenderKey(prev => prev + 1);
     }, 600);
+    
     return () => clearTimeout(timeout);
   }, [code, assets]);
 
