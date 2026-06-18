@@ -20,7 +20,7 @@ const DEFAULT_CODE = `export default function Component() {\n  return (\n    <di
 export default function ComponentEditor() {
   const { id } = useParams();
   const navigate = useNavigate();
-  
+  const [isFetching, setIsFetching] = useState(!!id);
   const [versionOpen, setVersionOpen] = useState(false);
   const [leftWidth, setLeftWidth] = useState(256);
   const [rightWidth, setRightWidth] = useState(450);
@@ -54,12 +54,14 @@ export default function ComponentEditor() {
 
   const loadComponent = async () => {
     try {
-      const data = await getComponent(id);
-      if (data) {
+      const response = await getComponent(id);
+      const data = response?.component || response?.data?.component || response;
+
+      if (data && data.name) {
         setDraft((prev) => ({
           ...prev,
           activeFile: `${data.name}.jsx`,
-          files: [{ name: `${data.name}.jsx`, code: data.code }],
+          files: [{ name: `${data.name}.jsx`, code: data.code || DEFAULT_CODE }],
           properties: data.props || [],
           assets: data.assets || [],
           marketplace: data.marketplace || prev.marketplace,
@@ -67,6 +69,10 @@ export default function ComponentEditor() {
       }
     } catch (error) {
       toast.error("Failed to load component");
+      console.error(error);
+    } finally {
+      // 🌟 NEW: Turn off the loading screen
+      setIsFetching(false);
     }
   };
 
@@ -89,7 +95,7 @@ export default function ComponentEditor() {
     setDraft((prev) => ({
       ...prev,
       activeFile: newFileName,
-      files: prev.files.map((f) => 
+      files: prev.files.map((f) =>
         f.name === prev.activeFile ? { ...f, name: newFileName } : f
       )
     }));
@@ -98,17 +104,30 @@ export default function ComponentEditor() {
   // 🟢 SAVING LOGIC
   const handleSave = async () => {
     try {
+      console.log("🛑 1. SAVE BUTTON CLICKED");
+      
+      if (!currentFile) {
+        alert("CRASH: currentFile is missing!");
+        return;
+      }
+
+      console.log("🛑 2. BUILDING PAYLOAD...");
       const payload = {
         name: draft.activeFile.replace(".jsx", ""),
         code: currentFile.code,
-        props: draft.properties,
-        assets: draft.assets,
-        marketplace: draft.marketplace,
+        props: draft.properties || [],
+        assets: draft.assets || [],
+        marketplace: draft.marketplace || {},
       };
+      
+      console.log("🛑 3. PAYLOAD BUILT: ", payload);
 
       if (id) {
+        console.log("🛑 4. SENDING PUT REQUEST TO BACKEND FOR ID:", id);
+        // If it crashes here, your updateComponent API function is broken!
         await updateComponent(id, payload);
         toast.success("Component Updated!");
+        console.log("✅ 5. SAVE SUCCESSFUL!");
       } else {
         const response = await createComponent(payload);
         toast.success("Component Created!");
@@ -116,26 +135,32 @@ export default function ComponentEditor() {
         if (newId) navigate(`/components/${newId}`);
       }
     } catch (error) {
-      // Print the exact reason why it failed to save!
-      const errorMsg = error.response?.data?.message || "Failed to save.";
-      toast.error(errorMsg);
-      console.error("Save Error:", error);
+      console.error("🔥 FRONTEND SAVE CRASH:", error);
+      alert(`Save Failed: ${error.message || "Check console"}`);
     }
   };
-
+  if (isFetching) {
+    return (
+      <div className="h-screen w-full flex flex-col items-center justify-center bg-[#050505] text-white">
+        <div className="w-8 h-8 border-4 border-white/10 border-t-purple-500 rounded-full animate-spin mb-4" />
+        <p className="text-white/50 text-sm font-medium tracking-widest uppercase">Loading Workspace...</p>
+      </div>
+    );
+  }
   return (
     <div className="h-screen w-full flex flex-col bg-[#050505] font-sans text-white overflow-hidden divide-y divide-white/[0.05]">
-      
+    {/* ... Rest of your UI ... */}
+
       {/* 🟢 PASS THE RENAME HANDLER HERE */}
-      <ComponentToolbar 
-        onSave={handleSave} 
-        onOpenVersion={() => setVersionOpen(true)} 
+      <ComponentToolbar
+        onSave={handleSave}
+        onOpenVersion={() => setVersionOpen(true)}
         componentName={draft.activeFile.replace(".jsx", "")}
         onNameChange={handleRename}
       />
 
       <div className="flex flex-1 overflow-hidden select-none">
-        
+
         <aside style={{ width: `${leftWidth}px` }} className="shrink-0 bg-[#0a0a0c] overflow-y-auto">
           <FileExplorer
             files={draft.files}
@@ -149,7 +174,7 @@ export default function ComponentEditor() {
         </main>
 
         <aside style={{ width: `${rightWidth}px` }} className="shrink-0 bg-[#0a0a0c] flex flex-col divide-y divide-white/[0.05] min-w-0">
-          
+
           <div className="flex-1 relative flex flex-col bg-[#111113]">
             <div className="w-full px-4 py-2 bg-[#0a0a0c] border-b border-white/[0.05] flex items-center justify-between z-10 shrink-0">
               <span className="text-[11px] font-bold text-white/40 uppercase tracking-widest">Responsive Viewport</span>
@@ -157,7 +182,7 @@ export default function ComponentEditor() {
                 {["desktop", "tablet", "mobile"].map((mode) => {
                   const Icon = mode === "desktop" ? Monitor : mode === "tablet" ? Tablet : Smartphone;
                   return (
-                    <button 
+                    <button
                       key={mode}
                       onClick={() => setDeviceMode(mode)}
                       className={`p-1.5 rounded-md transition-all ${deviceMode === mode ? "bg-purple-600 text-white" : "text-white/40 hover:text-white"}`}
@@ -179,7 +204,7 @@ export default function ComponentEditor() {
 
           <div className="h-[45%] overflow-y-auto p-6 flex flex-col gap-6 divide-y divide-white/[0.05] bg-[#0a0a0c]">
             <PropertyBuilder propsData={draft.properties} setPropsData={(data) => updateDraft("properties", data)} />
-            
+
             {/* 🟢 PASS ASSETS TO MANAGER */}
             <div className="pt-6">
               <AssetManager assets={draft.assets} setAssets={(data) => updateDraft("assets", data)} />
@@ -193,7 +218,7 @@ export default function ComponentEditor() {
 
       </div>
 
-      <VersionModal open={versionOpen} onClose={() => setVersionOpen(false)} onSave={() => {}} />
+      <VersionModal open={versionOpen} onClose={() => setVersionOpen(false)} onSave={() => { }} />
     </div>
   );
 }

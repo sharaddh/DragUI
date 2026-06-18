@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+        "react-dom": "https://esm.sh/react-dom@18.2.0",
+        "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime"
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body { margin:0; padding:0; width:1200px; height:630px; display:flex; justify-content:center; align-items:center; background:#0f172a; }
+    #root { width:100%; height:100%; display:flex; justify-content:center; align-items:center; }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div style="color: #aaa; font-family: sans-serif;">Compiling Thumbnail...</div>
+  </div>
+
+  <script type="module">
+    setTimeout(async () => {
+      try {
+        const rawCode = `import { motion } from 'framer-motion';
+import confetti from 'canvas-confetti';
+
+export default function Component() {
+  const handleClick = (e) => {
+    const rect = e.target.getBoundingClientRect();
+    // Calculate center of the button relative to viewport (0.0 to 1.0)
+    const x = (rect.left + rect.width / 2) / window.innerWidth;
+    const y = (rect.top + rect.height / 2) / window.innerHeight;
+
+    const duration = 900; // Extended for natural fall time
+    const end = Date.now() + duration;
+
+    const frame = () => {
+      const timeLeft = end - Date.now();
+      const progress = 1 - (timeLeft / duration);
+      confetti({
+        particleCount: 4,
+        angle: 60,
+        spread: 55,
+        origin: { x, y },
+        colors: ['#6366f1', '#a855f7', '#ec4899', '#3b82f6', '#fbbf24'],
+        gravity: 1.1,      // Natural pull
+        decay: 0.94,       // Slow down over time
+        drift: 0,          // No wind
+        flat: false,       // Enable 3D tumbling
+        scalar: 0.8 + Math.random() * 0.4, // Randomize size (0.8x to 1.2x)
+      });
+
+      // Burst 2: Right angle
+      confetti({
+        particleCount: 4,
+        angle: 120,
+        spread: 55,
+        origin: { x, y },
+        colors: ['#6366f1', '#a855f7', '#ec4899', '#3b82f6', '#fbbf24'],
+        gravity: 1.1,
+        decay: 0.94,
+        drift: 0,
+        flat: false,       // Enable 3D tumbling
+        scalar: 0.8 + Math.random() * 0.4,
+      });
+
+      if (timeLeft > 0) {
+        requestAnimationFrame(frame);
+      }
+    };
+    console.log("test")
+    frame();
+  };
+
+  return (
+    <motion.button
+      whileHover={{ scale: 1.05, boxShadow: "0px 10px 20px rgba(99, 102, 241, 0.2)" }}
+      whileTap={{ scale: 0.92, boxShadow: "0px 2px 5px rgba(99, 102, 241, 0.1)" }}
+      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      className="relative overflow-hidden bg-gradient-to-br from-zinc-100 to-white px-8 py-4 font-bold text-zinc-800 rounded-xl shadow-sm border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+      onClick={handleClick}
+      type="button"
+    >
+      <span className="relative z-10 flex items-center gap-2">
+        Click Me
+        <motion.span
+          animate={{ rotate: [0, 10, -10, 0] }}
+          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+        >
+          ✨
+        </motion.span>
+      </span>
+      {/* Subtle sheen effect on hover */}
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent -translate-x-full"
+        whileHover={{ x: "100%" }}
+        transition={{ duration: 0.6, ease: "easeInOut" }}
+      />
+    </motion.button>
+  );
+}   `;
+        let cleanCode = rawCode;
+        
+        // 1. Rewrite NPM Imports
+        cleanCode = cleanCode.replace(/import\s+([\s\S]*?)\s+from\s+['"]([^.\/][^'"]+)['"];?/g, function(match, imports, packageName) {
+          if (packageName === 'react' || packageName === 'react-dom' || packageName === 'react-dom/client') return match;
+          return 'import ' + imports + ' from "https://esm.sh/' + packageName + '?external=react,react-dom";';
+        });
+
+        // 2. Strip Exports
+        cleanCode = cleanCode.replace(/export\s+default\s+/g, '');
+        cleanCode = cleanCode.replace(/export\s+/g, '');
+        
+        // 3. Find Component Name (Fixes the "App" bug!)
+        const match = cleanCode.match(/(?:function|const|let|var|class)\s+(\w+)/);
+        const componentName = match ? match[1] : null;
+
+        if (!componentName) throw new Error("No component name found");
+
+        const codeToCompile = `
+          import * as __React__ from "react";
+          import { createRoot as __createRoot__ } from "react-dom/client";
+          window.React = __React__; 
+          
+          ${cleanCode}
+          
+          const __root__ = __createRoot__(document.getElementById("root"));
+          __root__.render(__React__.createElement(${componentName}));
+          
+          // 🟢 CRITICAL: Tell Playwright we are done rendering!
+          window.__RENDER_COMPLETE__ = true;
+        `;
+
+        const compiled = Babel.transform(codeToCompile, { presets: [['react', { runtime: 'classic' }]] }).code;
+        const blob = new Blob([compiled], { type: 'application/javascript' });
+        await import(URL.createObjectURL(blob));
+        
+      } catch (err) {
+        console.error(err);
+        document.getElementById('root').innerHTML = '<div style="color: red;">Build Error</div>';
+        window.__RENDER_COMPLETE__ = true; // Unblock Playwright even on error
+      }
+    }, 50);
+  </script>
+</body>
+</html>
