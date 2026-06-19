@@ -655,28 +655,7 @@ export default function Genrate({
                   activeTestimonial === i
                     ? `w-8 bg-indigo-500`
                     : `${dark ? 'bg-gray-700' : 'bg-gray-300'} hover:bg-indigo-300`
-                }`}
-                aria-label={`Testimonial ${i + 1}`}
-              />
-              <button key={i} onClick={() => setActiveTestimonial(i)}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                  activeTestimonial === i
-                    ? `w-8 bg-indigo-500`
-                    : `${dark ? 'bg-gray-700' : 'bg-gray-300'} hover:bg-indigo-300`
-                }`}
-                aria-label={`Testimonial ${i + 1}`}
-              />
-              <button key={i} onClick={() => setActiveTestimonial(i)}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                  activeTestimonial === i
-                    ? `w-8 bg-indigo-500`
-                    : `${dark ? 'bg-gray-700' : 'bg-gray-300'} hover:bg-indigo-300`
-                }`}
-                aria-label={`Testimonial ${i + 1}`}
-              />
-            </div>
-          </div>
-        </div>
+          
       </section>
 
       {/* CTA */}
