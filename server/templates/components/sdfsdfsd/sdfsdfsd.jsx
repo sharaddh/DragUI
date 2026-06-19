@@ -60,15 +60,7 @@ export default function Component() {
       onClick={handleClick}
       type="button"
     >
-      <span className="relative z-10 flex items-center gap-2">
-        Click Me
-        <motion.span
-          animate={{ rotate: [0, 10, -10, 0] }}
-          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-        >
-          ✨
-        </motion.span>
-      </span>
+      <img src ="./ChatGPT Image Mar 20, 2026, 11_54_36 PM.png"/>
       {/* Subtle sheen effect on hover */}
       <motion.div
         className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent -translate-x-full"

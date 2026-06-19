@@ -4,6 +4,7 @@ import {
 } from "react-router-dom";
 
 import Login from "../pages/Login";
+import GiveMe from "../pages/GiveMe";
 
 import Dashboard from "../pages/Dashboard";
 import Collaboration
@@ -43,6 +44,20 @@ export default function AppRoutes() {
             <AdminLayout>
 
               <Dashboard />
+
+            </AdminLayout>
+
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/1"
+        element={
+          <ProtectedRoute>
+
+            <AdminLayout>
+
+              <GiveMe/>
 
             </AdminLayout>
 

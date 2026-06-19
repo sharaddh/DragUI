@@ -232,6 +232,36 @@ app.use(
 );
 // DB
 
+app.post('/api/generate', (req, res) => {
+    // Extract the prompt from the request body
+    const { prompt } = req.body;
+
+    // Basic validation
+    if (!prompt) {
+        return res.status(400).json({ error: "A 'prompt' field is required in the body." });
+    }
+
+    console.log(`Received prompt: "${prompt}"`);
+
+    // Mocking the generated data response
+    // In a real app, this is where you would call your LLM or generation service
+    const mockResponseCode = `
+        <nav>
+            <div class="logo">Logo</div>
+            <ul>
+                <li>Home</li>
+                <li>About</li>
+            </ul>
+            <button>Sign Up</button>
+        </nav>
+    `;
+
+    // Send the response back in the format your frontend expects: { data: ... }
+    res.json({
+        data: mockResponseCode
+    });
+});
+
 connectDB();
 
 // Start
