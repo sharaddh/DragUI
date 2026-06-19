@@ -55,11 +55,9 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute>
 
-            <AdminLayout>
 
               <GiveMe/>
 
-            </AdminLayout>
 
           </ProtectedRoute>
         }
