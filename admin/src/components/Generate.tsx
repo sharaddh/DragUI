@@ -651,63 +651,277 @@ export default function Genrate({
             {/* Dots */}
             <div className="flex justify-center gap-2 mt-8">
                             <button key={i} onClick={() => setActiveTestimonial(i)}
-                className=export default function ActivityFeed({
- activities
-}){
+                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                  activeTestimonial === i
+                    ? `w-8 bg-indigo-500`
+                    : `${dark ? 'bg-gray-700' : 'bg-gray-300'} hover:bg-indigo-300`
+                }`}
+                aria-label={`Testimonial ${i + 1}`}
+              />
+              <button key={i} onClick={() => setActiveTestimonial(i)}
+                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                  activeTestimonial === i
+                    ? `w-8 bg-indigo-500`
+                    : `${dark ? 'bg-gray-700' : 'bg-gray-300'} hover:bg-indigo-300`
+                }`}
+                aria-label={`Testimonial ${i + 1}`}
+              />
+              <button key={i} onClick={() => setActiveTestimonial(i)}
+                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                  activeTestimonial === i
+                    ? `w-8 bg-indigo-500`
+                    : `${dark ? 'bg-gray-700' : 'bg-gray-300'} hover:bg-indigo-300`
+                }`}
+                aria-label={`Testimonial ${i + 1}`}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
 
- return(
+      {/* CTA */}
+      <section id="cta" className={`relative py-24 overflow-hidden ${
+        dark ? 'bg-gray-950' : 'bg-indigo-50'
+      }`}>
+        <div className="absolute inset-0 overflow-hidden">
+          <div className={`absolute top-0 left-0 right-0 h-32 bg-gradient-to-b ${
+            dark ? 'from-gray-900 to-transparent' : 'from-white to-transparent'
+          }`} />
+        </div>
+        <div className="relative max-w-3xl mx-auto px-4 sm:px-6 text-center">
+          <div className={`p-8 md:p-12 rounded-3xl border backdrop-blur-sm ${
+            dark
+              ? 'bg-gray-800/50 border-white/10'
+              : 'bg-white/80 border-gray-200'
+          }`}
+            style={{ boxShadow: `0 0 60px ${accentColor}15` }}
+          >
+            <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${
+              dark ? 'text-white' : 'text-gray-900'
+            }`}>
+              Ready to Get Started?
+            </h2>
+            <p className={`text-lg mb-8 max-w-lg mx-auto ${
+              dark ? 'text-gray-400' : 'text-gray-600'
+            }`}>
+              Join 50,000+ teams already building smarter. Start your free trial today — no credit card required.
+            </p>
 
- <div
- className="
- bg-white
- border
- rounded-xl
- p-5
- "
- >
+            <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <input type="email" placeholder="Enter your email"
+                className={`flex-1 px-5 py-3 rounded-xl text-sm border outline-none transition-all duration-200 focus:ring-2 ${
+                  dark
+                    ? 'bg-gray-900 border-white/10 text-white placeholder-gray-500 focus:border-indigo-500 focus:ring-indigo-500/20'
+                    : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500/20'
+                }`}
+              />
+              <button className="px-6 py-3 rounded-xl text-white font-semibold text-sm transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                style={{ background: `linear-gradient(135deg, ${accentColor}, #7c3aed)` }}
+              >Get Started <ArrowIcon /></button>
+            </div>
 
-  <h2
-   className="
-   font-semibold
-   mb-4
-   "
-  >
-   Activity Feed
-  </h2>
+            <div className="flex items-center justify-center gap-6 mt-6">
+              <div className="flex items-center gap-1.5 text-xs text-gray-400"><CheckIcon /> No credit card</div>
+              <div className="flex items-center gap-1.5 text-xs text-gray-400"><CheckIcon /> 14-day free trial</div>
+              <div className="flex items-center gap-1.5 text-xs text-gray-400"><CheckIcon /> Cancel anytime</div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-  <div
-   className="
-   space-y-3
-   "
-  >
+      {/* Footer */}
+      <footer className={`relative border-t ${
+        dark ? 'border-white/10 bg-gray-950' : 'border-gray-200 bg-gray-50'
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+            <div className="col-span-2 md:col-span-1">
+              <a href="#" className="flex items-center gap-2 mb-4">
+                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center text-white font-bold text-sm`}>A</div>
+                <span className={`font-bold text-lg ${
+                  dark ? 'text-white' : 'text-gray-900'
+                }`}>Acme</span>
+              </a>
+              <p className={`text-sm mb-6 max-w-xs ${
+                dark ? 'text-gray-500' : 'text-gray-500'
+              }`}>Building the future of work, one feature at a time.</p>
+              <div className="flex gap-3">
+                {['twitter', 'github', 'linkedin'].map(platform => (
+                  <a key={platform} href="#" className={`p-2 rounded-lg transition-all hover:scale-110 ${
+                    dark ? 'text-gray-500 hover:text-indigo-400 hover:bg-indigo-900/20' : 'text-gray-400 hover:text-indigo-600 hover:bg-indigo-100'
+                  }`} aria-label={platform}>
+                    <SocialIcon type={platform} />
+                  </a>
+                ))}
+              </div>
+            </div>
+                        <div>
+              <h3 className={`font-semibold text-sm mb-4 ${
+                dark ? 'text-white' : 'text-gray-900'
+              }`}>Product</h3>
+              <ul className="space-y-3">
+                                <li>
+                  <a href="#" className={`text-sm transition-colors ${
+                    dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}>Features</a>
+                </li>
+                <li>
+                  <a href="#" className={`text-sm transition-colors ${
+                    dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}>Pricing</a>
+                </li>
+                <li>
+                  <a href="#" className={`text-sm transition-colors ${
+                    dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}>Integrations</a>
+                </li>
+                <li>
+                  <a href="#" className={`text-sm transition-colors ${
+                    dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}>Changelog</a>
+                </li>
+                <li>
+                  <a href="#" className={`text-sm transition-colors ${
+                    dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}>Roadmap</a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className={`font-semibold text-sm mb-4 ${
+                dark ? 'text-white' : 'text-gray-900'
+              }`}>Company</h3>
+              <ul className="space-y-3">
+                                <li>
+                  <a href="#" className={`text-sm transition-colors ${
+                    dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}>About</a>
+                </li>
+                <li>
+                  <a href="#" className={`text-sm transition-colors ${
+                    dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}>Careers</a>
+                </li>
+                <li>
+                  <a href="#" className={`text-sm transition-colors ${
+                    dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}>Blog</a>
+                </li>
+                <li>
+                  <a href="#" className={`text-sm transition-colors ${
+                    dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}>Press</a>
+                </li>
+                <li>
+                  <a href="#" className={`text-sm transition-colors ${
+                    dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}>Partners</a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className={`font-semibold text-sm mb-4 ${
+                dark ? 'text-white' : 'text-gray-900'
+              }`}>Resources</h3>
+              <ul className="space-y-3">
+                                <li>
+                  <a href="#" className={`text-sm transition-colors ${
+                    dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}>Documentation</a>
+                </li>
+                <li>
+                  <a href="#" className={`text-sm transition-colors ${
+                    dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}>API Reference</a>
+                </li>
+                <li>
+                  <a href="#" className={`text-sm transition-colors ${
+                    dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}>Guides</a>
+                </li>
+                <li>
+                  <a href="#" className={`text-sm transition-colors ${
+                    dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}>Community</a>
+                </li>
+                <li>
+                  <a href="#" className={`text-sm transition-colors ${
+                    dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}>Status</a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className={`font-semibold text-sm mb-4 ${
+                dark ? 'text-white' : 'text-gray-900'
+              }`}>Legal</h3>
+              <ul className="space-y-3">
+                                <li>
+                  <a href="#" className={`text-sm transition-colors ${
+                    dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}>Privacy</a>
+                </li>
+                <li>
+                  <a href="#" className={`text-sm transition-colors ${
+                    dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}>Terms</a>
+                </li>
+                <li>
+                  <a href="#" className={`text-sm transition-colors ${
+                    dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}>Security</a>
+                </li>
+                <li>
+                  <a href="#" className={`text-sm transition-colors ${
+                    dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}>Cookies</a>
+                </li>
+                <li>
+                  <a href="#" className={`text-sm transition-colors ${
+                    dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}>GDPR</a>
+                </li>
+              </ul>
+            </div>
+          </div>
 
-   {activities.map(
-    activity=>(
+          <div className={`mt-12 pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4 ${
+            dark ? 'border-white/10' : 'border-gray-200'
+          }`}>
+            <p className={`text-xs ${
+              dark ? 'text-gray-600' : 'text-gray-400'
+            }`}>&copy; {new Date().getFullYear()} Acme Inc. All rights reserved.</p>
+            <div className="flex gap-6 text-xs">
+              <a href="#" className={dark ? 'text-gray-600 hover:text-gray-400' : 'text-gray-400 hover:text-gray-600'}>Privacy Policy</a>
+              <a href="#" className={dark ? 'text-gray-600 hover:text-gray-400' : 'text-gray-400 hover:text-gray-600'}>Terms of Service</a>
+              <a href="#" className={dark ? 'text-gray-600 hover:text-gray-400' : 'text-gray-400 hover:text-gray-600'}>Cookie Policy</a>
+            </div>
+          </div>
+        </div>
 
-     <div
-      key={
-       activity._id
-      }
-
-      className="
-      border-b
-      pb-2
-      "
-     >
-
-      {
-       activity.message
-      }
-
-     </div>
-
-    )
-   )}
-
-  </div>
-
- </div>
-
- );
-
+        {/* Back to top */}
+        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className={`fixed bottom-6 right-6 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 z-40 ${
+            scrolled
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-4 pointer-events-none'
+          } ${
+            dark ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-white text-gray-700 hover:bg-gray-50'
+          }`}
+          style={{ boxShadow: scrolled ? `0 4px 20px ${accentColor}30` : 'none' }}
+          aria-label="Back to top"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+          </svg>
+        </button>
+      </footer>
+    </div>
+  );
 }
+
+Genrate.propTypes = {
+  accentColor: PropTypes.string,
+  dark: PropTypes.bool,
+  onThemeToggle: PropTypes.func,
+};
