@@ -1,4 +1,4 @@
-import { saveProject } from "../api/Project";
+import { saveProject } from "../api/projects";
 import { useBuilderStore } from "../store/useBuilderStore";
 import { useState } from "react";
 
@@ -12,22 +12,12 @@ export default function SaveButton({ projectName }) {
       return;
     }
 
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      alert("Login first");
-      return;
-    }
-
     try {
-      await saveProject(
-        {
-          name: projectName,
-          design: tree,
-          isPublic,
-        },
-        token
-      );
+      await saveProject({
+        name: projectName,
+        design: tree,
+        isPublic,
+      });
       alert("Saved successfully");
     } catch (error) {
       console.error(error);
