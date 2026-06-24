@@ -44,9 +44,7 @@ export default function Canvas({ tree }) {
                 </svg>
               </div>
               <p className="text-sm font-medium text-slate-500">Drop components here</p>
-              <p className="mt-1 text-xs text-slate-400">Drag elements from the sidebar or click
-                Drag elements from the sidebar or click to add
-              </p>
+              <p className="mt-1 text-xs text-slate-400">Drag elements from the sidebar or click Add to start building</p>
             </div>
           </div>
         ) : (
