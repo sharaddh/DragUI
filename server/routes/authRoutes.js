@@ -2,9 +2,10 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/user.js";
+import authMiddleware from "../middleware/auth.middleware.js";
+import passport from "../config/Passport.js";
 
 const router = express.Router();
-import passport from "../config/Passport.js";
 
 
 
@@ -91,5 +92,11 @@ router.get(
     res.redirect(`http://localhost:5173/auth-success?token=${token}`);
   }
 );
+
+// ================= PROFILE =================
+router.get("/profile", authMiddleware, async (req, res) => {
+  const user = await User.findById(req.userId).select("-password");
+  res.json({ user });
+});
 
 export default router;
