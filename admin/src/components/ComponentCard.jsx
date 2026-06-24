@@ -27,7 +27,6 @@ export default function ComponentCard({
           </div>
         )}
 
-        {/* Floating Status Pill */}
         <div className="absolute top-3 left-3">
           <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border backdrop-blur-md ${
             component.status === 'published' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' :
