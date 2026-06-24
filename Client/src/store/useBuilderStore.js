@@ -271,4 +271,10 @@ export const useBuilderStore = create((set, get) => ({
   setZoom: (zoom) => set({ zoom: Math.max(25, Math.min(200, zoom)) }),
   toggleGrid: () => set((s) => ({ showGrid: !s.showGrid })),
   toggleSnap: () => set((s) => ({ snapToGrid: !s.snapToGrid })),
+  resetProject: () => set({
+    tree: { id: 'root', type: 'root', props: { className: 'min-h-screen bg-white' }, children: [] },
+    selectedIds: [], history: [], future: [], clipboard: null,
+    projectId: null, projectName: 'Untitled Project',
+  }),
 }));
+
