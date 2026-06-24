@@ -39,11 +39,14 @@ async (
 
   try {
 
-    const project =
+    const id = req.params.projectId;
+    let project =
       await Project.findOne({
-        projectId:
-          req.params.projectId
+        projectId: id
       });
+    if (!project) {
+      project = await Project.findById(id);
+    }
 
     if (!project) {
       return res.status(404).json({
