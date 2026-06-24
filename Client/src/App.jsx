@@ -3,10 +3,11 @@ import Login from "./pages/Login";
 import Builder from "./pages/Builder";
 import ProtectedRoute from "./middleware/ProtectedRoute";
 import AuthSuccess from "./pages/AuthSuccess";
+import CliLogin from "./pages/CliLogin";
 import Dashboard from "./pages/Dashboard";
-import CliLogin from "./pages/CliLogin2";
-import CliLogin from "./pages/CliLogin889";
-import CliLogin from "./pages/CliLogin52";
+import Projects from "./pages/Projects";
+import ThemeEditor from "./pages/ThemeEditor";
+import UserLayout from "./layouts/UserLayout";
 
 export default function App() {
   return (
@@ -16,7 +17,37 @@ export default function App() {
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/auth-success" element={<AuthSuccess />} />
-        <Route path="/dashboard" element={<Dashboard/>} />
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <UserLayout>
+                <Dashboard />
+              </UserLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects"
+          element={
+            <ProtectedRoute>
+              <UserLayout>
+                <Projects />
+              </UserLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/theme"
+          element={
+            <ProtectedRoute>
+              <UserLayout>
+                <ThemeEditor />
+              </UserLayout>
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/builder"
           element={
