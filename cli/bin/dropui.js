@@ -15,6 +15,8 @@ import doctorCommand
     from "../commands/doctor.js";
 import whoamiCommand
     from "../commands/whoami.js";
+import pullCommand
+    from "../commands/pull.js";
 const workspace =
  program.command(
   "workspace"
@@ -72,6 +74,10 @@ program
     .action(
         doctorCommand
     );
+program
+    .command("pull <projectId>")
+    .description("Pull a project design")
+    .action(pullCommand);
 program
     .command(
         "update <component>"
