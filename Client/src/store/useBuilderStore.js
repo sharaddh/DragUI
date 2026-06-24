@@ -122,4 +122,153 @@ export const useBuilderStore = create((set, get) => ({
     }
     return search(get().tree, null);
   },
+
+  mapTree: (fn) => {
+    get().saveHistory();
+    const newTree = clone(get().tree);
+    function map(node) { fn(node); (node.children || []).forEach(map); }
+    map(newTree);
+    set({ tree: newTree });
+  },
+
+  addComponent: (type, parentId = "root", index) => {
+    get().saveHistory();
+    const node = createComponentNode(type);
+    const newTree = clone(get().tree);
+    function add(node) {
+      if (node.id === parentId) {
+        if (typeof index === "number") { node.children.splice(index, 0, node); }
+        else { node.children.push(node); }
+        return true;
+      }
+      for (const child of node.children || []) { if (add(child)) return true; }
+      return false;
+    }
+    add(newTree);
+    set({ tree: newTree, selectedIds: [node.id] });
+  },
+
+  updateProps: (id, newProps) => {
+    get().saveHistory();
+    const newTree = clone(get().tree);
+    function update(node) {
+      if (node.id === id) { node.props = { ...node.props, ...newProps }; return; }
+      (node.children || []).forEach(update);
+    }
+    update(newTree);
+    set({ tree: newTree });
+  },
+
+  updateComponentProp: (id, key, value) => { get().updateProps(id, { [key]: value }); },
+
+  updateStyle: (id, styleProps) => {
+    get().saveHistory();
+    const newTree = clone(get().tree);
+    function update(node) {
+      if (node.id === id) { node.props.style = { ...(node.props.style || {}), ...styleProps }; return; }
+      (node.children || []).forEach(update);
+    }
+    update(newTree);
+    set({ tree: newTree });
+  },
+
+  deleteComponent: (id) => {
+    get().saveHistory();
+    function remove(node) {
+      node.children = node.children.filter((c) => c.id !== id);
+      node.children.forEach(remove);
+    }
+    const newTree = clone(get().tree);
+    remove(newTree);
+    set({ tree: newTree, selectedIds: get().selectedIds.filter((i) => i !== id) });
+  },
+
+  deleteSelected: () => {
+    const { selectedIds } = get();
+    if (!selectedIds.length) return;
+    selectedIds.forEach((id) => { if (id !== "root") get().deleteComponent(id); });
+  },
+
+  duplicateComponent: (id) => {
+    get().saveHistory();
+    const newTree = clone(get().tree);
+    let newId = null;
+    function duplicate(node) {
+      node.children.forEach((child, i) => {
+        if (child.id === id) {
+          const copy = clone(child); copy.id = genId();
+          node.children.splice(i + 1, 0, copy); newId = copy.id;
+        } else { duplicate(child); }
+      });
+    }
+    duplicate(newTree);
+    set({ tree: newTree, selectedIds: newId ? [newId] : get().selectedIds });
+  },
+
+  duplicateSelected: () => { get().selectedIds.forEach((id) => { if (id !== "root") get().duplicateComponent(id); }); },
+
+  moveComponent: (id, newParentId, insertIndex) => {
+    get().saveHistory();
+    const node = get().findNode(id);
+    if (!node) return;
+    const copy = clone(node); copy.id = genId();
+    const newTree = clone(get().tree);
+    function remove(n) { n.children = n.children.filter((c) => c.id !== id); n.children.forEach(remove); }
+    remove(newTree);
+    function add(n) {
+      if (n.id === newParentId) {
+        if (typeof insertIndex === "number") { n.children.splice(insertIndex, 0, copy); }
+        else { n.children.push(copy); }
+        return true;
+      }
+      for (const child of n.children || []) { if (add(child)) return true; }
+      return false;
+    }
+    add(newTree);
+    set({ tree: newTree, selectedIds: [copy.id] });
+  },
+
+  reorderChildren: (parentId, fromIndex, toIndex) => {
+    get().saveHistory();
+    const newTree = clone(get().tree);
+    function reorder(node) {
+      if (node.id === parentId) {
+        const [removed] = node.children.splice(fromIndex, 1);
+        node.children.splice(toIndex, 0, removed); return;
+      }
+      (node.children || []).forEach(reorder);
+    }
+    reorder(newTree);
+    set({ tree: newTree });
+  },
+
+  copySelected: () => {
+    const { selectedIds, tree } = get();
+    const items = selectedIds.map((id) => {
+      const node = (function search(n) { if (n.id === id) return n; for (const c of n.children || []) { const f = search(c); if (f) return f; } return null; })(tree);
+      return node ? clone(node) : null;
+    }).filter(Boolean);
+    set({ clipboard: items });
+  },
+
+  pasteClipboard: () => {
+    const { clipboard } = get();
+    if (!clipboard?.length) return;
+    get().saveHistory();
+    const newTree = clone(get().tree);
+    const newIds = [];
+    clipboard.forEach((item) => {
+      function assignIds(node) { node.id = genId(); newIds.push(node.id); (node.children || []).forEach(assignIds); }
+      const copy = clone(item); assignIds(copy);
+      newTree.children.push(copy);
+    });
+    set({ tree: newTree, selectedIds: newIds });
+  },
+
+  setTree: (newTree) => set({ tree: newTree, history: [], future: [], selectedIds: [] }),
+  setProjectName: (name) => set({ projectName: name }),
+  setProjectId: (id) => set({ projectId: id }),
+  setZoom: (zoom) => set({ zoom: Math.max(25, Math.min(200, zoom)) }),
+  toggleGrid: () => set((s) => ({ showGrid: !s.showGrid })),
+  toggleSnap: () => set((s) => ({ snapToGrid: !s.snapToGrid })),
 }));
