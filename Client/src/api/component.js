@@ -1,13 +1,7 @@
-import axios from "axios";
-
-const API = "http://localhost:5000/api";
-
-
-// Create a component (send only props and template reference)
-export const createComponent = (data, token) =>
-  axios.post(`${API}/admin/components/create`, data, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+import API from "./index";
 
 export const getComponents = () =>
-  axios.get(`${API}/component/all`);
+  API.get("/components/public");
+
+export const getComponent = (id) =>
+  API.get(`/components/${id}`);
