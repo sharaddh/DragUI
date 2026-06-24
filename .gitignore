@@ -1,1 +1,7 @@
+node_modules/
+dist/
+.tmp
+*.bak
+*.orig
 .env
+.env.local
