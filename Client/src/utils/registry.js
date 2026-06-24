@@ -65,3 +65,26 @@ export const styleFieldMeta = {
   cursor: { label: "Cursor", type: "select", options: ["default", "pointer", "text", "move", "grab", "not-allowed"] },
   transition: { label: "Transition", type: "text" },
 };
+
+export const elementCategories = [
+  { name: "Layout", items: ["div", "container", "section", "card", "navbar", "hero", "footer"] },
+  { name: "Typography", items: ["heading", "text", "paragraph", "link", "list"] },
+  { name: "Media", items: ["image", "icon", "video", "divider"] },
+  { name: "Forms", items: ["button", "input"] },
+];
+
+export const getElementDefaults = (type) => ({
+  ...defaultComponentProps[type] || defaultComponentProps.div,
+  type,
+  label: componentLabels[type] || type,
+});
+
+export const registry = Object.entries(componentLabels).map(([type, label]) => ({
+  type, label, template: "",
+  defaultProps: { ...(defaultComponentProps[type] || defaultComponentProps.div) },
+  propsSchema: Object.entries(defaultComponentProps[type] || defaultComponentProps.div).reduce((acc, [key]) => {
+    if (key === "style") return acc;
+    acc[key] = { type: typeof defaultComponentProps[type]?.[key], label: key };
+    return acc;
+  }, {}),
+}));
