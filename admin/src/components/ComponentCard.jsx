@@ -51,7 +51,14 @@ export default function ComponentCard({
 
         {/* --- Action Buttons Grid --- */}
         <div className="flex items-center justify-between pt-4 border-t border-white/[0.05] mt-auto">
-          
+          <div className="absolute top-3 left-3">
+          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border backdrop-blur-md ${
+            component.status === 'published' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' :
+            component.status === 'archived' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' :
+            'bg-blue-500/20 text-blue-300 border-blue-500/30'
+          }`}>
+            {component.status || "Draft"}
+          </span>
           <button
             onClick={() => navigate(`/components/edit/${component._id}`)}
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] hover:bg-purple-500/20 text-white/60 hover:text-purple-400 transition-colors text-sm font-medium"
