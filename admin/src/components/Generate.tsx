@@ -655,13 +655,7 @@ export default function Genrate({
                   activeTestimonial === i
                     ? `w-8 bg-indigo-500`
                     : `${dark ? 'bg-gray-700' : 'bg-gray-300'} hover:bg-indigo-300`
-          
-      </section>
-
-      {/* CTA */}
-      <section id="cta" className={`relative py-24 overflow-hidden ${
-        dark ? 'bg-gray-950' : 'bg-indigo-50'
-      }`}>      }`}
+                }`}
                 aria-label={`Testimonial ${i + 1}`}
               />
               <button key={i} onClick={() => setActiveTestimonial(i)}
@@ -683,6 +677,12 @@ export default function Genrate({
             </div>
           </div>
         </div>
+      </section>
+
+      {/* CTA */}
+      <section id="cta" className={`relative py-24 overflow-hidden ${
+        dark ? 'bg-gray-950' : 'bg-indigo-50'
+      }`}>
         <div className="absolute inset-0 overflow-hidden">
           <div className={`absolute top-0 left-0 right-0 h-32 bg-gradient-to-b ${
             dark ? 'from-gray-900 to-transparent' : 'from-white to-transparent'
