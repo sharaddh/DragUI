@@ -15,36 +15,6 @@ export default function MarketplaceSettings({ marketplace, setMarketplace }) {
           onChange={(e) => setMarketplace({ ...marketplace, title: e.target.value })}
           className="w-full bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all"
         />
-        <input
-          value={marketplace.title}
-          placeholder="Marketplace Display Title"
-          onChange={(e) => setMarketplace({ ...marketplace, title: e.target.value })}
-          className="w-full bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all"
-        />
-        <input
-          value={marketplace.title}
-          placeholder="Marketplace Display Title"
-          onChange={(e) => setMarketplace({ ...marketplace, title: e.target.value })}
-          className="w-full bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all"
-        />
-        <input
-          value={marketplace.title}
-          placeholder="Marketplace Display Title"
-          onChange={(e) => setMarketplace({ ...marketplace, title: e.target.value })}
-          className="w-full bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all"
-        />
-        <input
-          value={marketplace.title}
-          placeholder="Marketplace Display Title"
-          onChange={(e) => setMarketplace({ ...marketplace, title: e.target.value })}
-          className="w-full bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all"
-        />
-        <input
-          value={marketplace.title}
-          placeholder="Marketplace Display Title"
-          onChange={(e) => setMarketplace({ ...marketplace, title: e.target.value })}
-          className="w-full bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all"
-        />
 
         <textarea
           value={marketplace.description}
