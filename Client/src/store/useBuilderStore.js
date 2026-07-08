@@ -23,7 +23,7 @@ export const defaultComponentProps = {
   hero: { className: "", style: { padding: "80px 24px", textAlign: "center", backgroundColor: "#f8fafc" }, title: "Hero Title", subtitle: "Subtitle goes here" },
   container: { className: "", style: { maxWidth: "1200px", margin: "0 auto", padding: "0 24px" } },
   section: { className: "", style: { padding: "60px 24px" } },
-  footer: { className: "", style: { backgroundColor: "#0f172a", color: "#ffffff", padding: "40px 24px", textAlign: "center" }, text: "© 2026 Your Company. All rights reserved." },
+  footer: { className: "", style: { backgroundColor: "#0f172a", color: "#ffffff", padding: "40px 24px", textAlign: "center" }, text: "(c) 2026 Your Company. All rights reserved." },
 };
 
 export const componentLabels = {
