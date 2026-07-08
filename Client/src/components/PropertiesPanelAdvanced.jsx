@@ -517,7 +517,9 @@ import { useBuilderStore } from "../store/useBuilderStore";
 const TEXT_COMPONENTS = ["text", "heading", "button", "link", "paragraph", "label"];
 
 export default function PropertiesPanelAdvanced() {
-  const { selectedId, updateComponentProp, tree } = useBuilderStore();
+  const selectedIds = useBuilderStore((s) => s.selectedIds);
+  const updateComponentProp = useBuilderStore((s) => s.updateComponentProp);
+  const tree = useBuilderStore((s) => s.tree);
   const [expandedSections, setExpandedSections] = useState({
     text: true,
     colors: true,
@@ -526,6 +528,8 @@ export default function PropertiesPanelAdvanced() {
     spacing: false,
     borders: false,
   });
+
+  const selectedId = selectedIds[0];
 
   if (!selectedId || selectedId === "root") {
     return (
