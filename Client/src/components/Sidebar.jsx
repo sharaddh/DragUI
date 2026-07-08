@@ -240,13 +240,7 @@ export default function Sidebar() {
     : [];
 
   const handleDirectAdd = (comp) => {
-    addComponent("root", {
-      id: Date.now().toString(),
-      type: comp.type,
-      template: comp.template,
-      props: { ...comp.defaultProps },
-      children: [],
-    });
+    addComponent(comp.type);
   };
 
   return (
