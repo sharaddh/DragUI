@@ -7,6 +7,8 @@ import CliLogin from "./pages/CliLogin";
 import Dashboard from "./pages/Dashboard";
 import Projects from "./pages/Projects";
 import ThemeEditor from "./pages/ThemeEditor";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 import UserLayout from "./layouts/UserLayout";
 
 export default function App() {
@@ -44,6 +46,26 @@ export default function App() {
             <ProtectedRoute>
               <UserLayout>
                 <ThemeEditor />
+              </UserLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <UserLayout>
+                <Profile />
+              </UserLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <UserLayout>
+                <Settings />
               </UserLayout>
             </ProtectedRoute>
           }
