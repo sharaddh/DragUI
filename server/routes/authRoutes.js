@@ -99,4 +99,41 @@ router.get("/profile", authMiddleware, async (req, res) => {
   res.json({ user });
 });
 
+// ================= UPDATE PROFILE =================
+router.put("/profile", authMiddleware, async (req, res) => {
+  try {
+    const { username, avatar } = req.body;
+    const update = {};
+    if (username !== undefined) update.username = username;
+    if (avatar !== undefined) update.avatar = avatar;
+    const user = await User.findByIdAndUpdate(req.userId, update, { new: true }).select("-password");
+    res.json({ success: true, user });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+// ================= CHANGE PASSWORD =================
+router.post("/change-password", authMiddleware, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const user = await User.findById(req.userId);
+    if (!user.password) {
+      return res.status(400).json({ success: false, message: "OAuth users cannot change password here" });
+    }
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) return res.status(400).json({ success: false, message: "Current password is incorrect" });
+    user.password = newPassword;
+    await user.save();
+    res.json({ success: true, message: "Password updated successfully" });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+// ================= NOTIFICATIONS (stub) =================
+router.get("/notifications", authMiddleware, async (req, res) => {
+  res.json({ success: true, notifications: [] });
+});
+
 export default router;
