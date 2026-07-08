@@ -155,4 +155,4 @@ export function generatePackageJson(projectName = "dropui-project") {
     },
   }, null, 2);
 }
-export const SUPPORTED_EXPORTS = ['html', 'react', 'json'] as const;
+export const SUPPORTED_EXPORTS = ['html', 'react', 'json'];
