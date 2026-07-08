@@ -1,12 +1,28 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getProjects, deleteProject } from "../api/projects";
-import { Plus, Trash2, ExternalLink, Search, Box, Loader2 } from "lucide-react";
+import {
+  Plus, Trash2, ExternalLink, Search, Box, Loader2,
+  ArrowUpDown, Grid3X3, List,
+} from "lucide-react";
+import CreateProjectModal from "../components/CreateProjectModal";
+import { ProjectCardSkeleton } from "../components/LoadingSkeleton";
+import EmptyState from "../components/EmptyState";
+
+const SORT_OPTIONS = [
+  { value: "newest", label: "Newest First" },
+  { value: "oldest", label: "Oldest First" },
+  { value: "name", label: "Name A-Z" },
+];
 
 export default function Projects() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [deleting, setDeleting] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [sort, setSort] = useState("newest");
+  const [view, setView] = useState("grid");
   const navigate = useNavigate();
 
   useEffect(() => {
