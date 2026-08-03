@@ -1,5 +1,5 @@
 import { useState, useContext, useEffect } from "react";
-import { AuthContext } from "../context/authContext";
+import { AuthContext } from "../context/auth-context";
 import { updateProfile, changePassword } from "../api/profile";
 import {
   User, Mail, Shield, Save, Loader2, Check, AlertCircle, Camera, Lock, KeyRound

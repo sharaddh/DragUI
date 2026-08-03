@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useBuilderStore, componentLabels } from "../store/useBuilderStore";
-import { styleFieldMeta, STYLE_FIELDS, elementCategories } from "../utils/registry";
+import { styleFieldMeta, STYLE_FIELDS } from "../utils/registry";
 
 const STYLE_TABS = [
   { id: "content", label: "Content", icon: "Aa" },
@@ -159,7 +159,6 @@ export default function PropertyEditor() {
   const selectedIds = useBuilderStore((s) => s.selectedIds);
   const tree = useBuilderStore((s) => s.tree);
   const updateStyle = useBuilderStore((s) => s.updateStyle);
-  const updateComponentProp = useBuilderStore((s) => s.updateComponentProp);
   const updateProps = useBuilderStore((s) => s.updateProps);
   const deleteComponent = useBuilderStore((s) => s.deleteComponent);
   const duplicateComponent = useBuilderStore((s) => s.duplicateComponent);

@@ -1,7 +1,8 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useBuilderStore, componentLabels } from "../store/useBuilderStore";
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import RuntimeComponent from "./RuntimeComponent";
+import { useState } from "react";
 
 const TEXT_TYPES = new Set(["text", "heading", "paragraph", "link", "button"]);
 
@@ -157,7 +158,7 @@ function renderElement(node, isSelected, selectComponent, updateProps, editingTe
           />
         </div>
       );
-    case "list":
+    case "list": {
       const ListTag = p.ordered ? "ol" : "ul";
       return (
         <ListTag style={combinedStyle} className={p.className} onClick={(e) => { e.stopPropagation(); selectComponent(node.id); }}>
@@ -166,6 +167,7 @@ function renderElement(node, isSelected, selectComponent, updateProps, editingTe
           ))}
         </ListTag>
       );
+    }
     case "card":
     case "div":
     case "container":
@@ -180,7 +182,31 @@ function renderElement(node, isSelected, selectComponent, updateProps, editingTe
           className={p.className}
           onClick={(e) => { e.stopPropagation(); selectComponent(node.id); }}
         >
-          {p.text && <span>{p.text}</span>}
+          {!componentLabels[node.type] ? (
+            <div className="flex min-h-[80px] w-full flex-col rounded-lg border border-dashed border-slate-300 bg-slate-50/60">
+              <div className="px-2 pt-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                {node.label || node.type}
+              </div>
+              <div className="p-2">
+                {node.code ? (
+                  <RuntimeComponent code={node.code} props={p} />
+                ) : node.thumbnail ? (
+                  <img
+                    src={node.thumbnail}
+                    alt={node.label || node.type}
+                    draggable={false}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="text-center text-xs text-slate-400">
+                    {node.label || node.type}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            p.text && <span>{p.text}</span>
+          )}
         </div>
       );
   }
@@ -192,7 +218,6 @@ export default function Renderer({ node, depth = 0 }) {
   const updateProps = useBuilderStore((s) => s.updateProps);
   const editingTextId = useBuilderStore((s) => s.editingTextId);
   const setEditingText = useBuilderStore((s) => s.setEditingText);
-  const tree = useBuilderStore((s) => s.tree);
   const [hovered, setHovered] = useState(false);
 
   const isSelected = selectedIds.includes(node.id);

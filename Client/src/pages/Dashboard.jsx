@@ -1,9 +1,9 @@
 import { useEffect, useState, useContext } from "react";
 import { Link } from "react-router-dom";
-import { AuthContext } from "../context/authContext";
+import { AuthContext } from "../context/auth-context";
 import { getProjects } from "../api/projects";
 import {
-  LayoutDashboard, Box, Puzzle, Palette, ArrowRight, Plus,
+  Box, Puzzle, Palette, ArrowRight, Plus,
   TrendingUp, FileText, Sparkles, Clock, User,
 } from "lucide-react";
 import { CardSkeleton, TableRowSkeleton } from "../components/LoadingSkeleton";
@@ -22,7 +22,7 @@ export default function Dashboard() {
   const loadProjects = async () => {
     try {
       const res = await getProjects();
-      const list = res.data.projects || [];
+      const list = res.data?.projects || [];
       setProjects(list.slice(0, 4));
       setStats({
         total: list.length,
@@ -34,6 +34,12 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "—";
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? "—" : d.toLocaleDateString();
   };
 
   const isNewUser = !loading && stats.total === 0;
@@ -200,7 +206,7 @@ export default function Dashboard() {
                   <div className="min-w-0">
                     <p className="truncate font-medium text-slate-900">{project.name}</p>
                     <p className="truncate text-sm text-slate-500">
-                      {project.type || "frontend"} &middot; {new Date(project.updatedAt).toLocaleDateString()}
+                      {project.type || "frontend"} &middot; {formatDate(project.updatedAt)}
                     </p>
                   </div>
                 </div>

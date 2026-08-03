@@ -8,8 +8,7 @@ const COLORS = [
 ];
 
 const AutoDraggableCell = ({ id }) => {
-  const [color, setColor] = useState(COLORS[0]);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [color] = useState(() => COLORS[Math.floor(Math.random() * COLORS.length)]);
   const [isAutoDragging, setIsAutoDragging] = useState(false);
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
@@ -22,17 +21,9 @@ const AutoDraggableCell = ({ id }) => {
     transition: isAutoDragging ? 'none' : 'transform 0.3s ease',
   };
 
-  // Random color on mount
-  useEffect(() => {
-    setColor(COLORS[Math.floor(Math.random() * COLORS.length)]);
-  }, []);
-
   // Auto-move every few seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      const dx = (Math.random() - 0.5) * 100;
-      const dy = (Math.random() - 0.5) * 100;
-      setPosition({ x: dx, y: dy });
       setIsAutoDragging(true);
 
       const timeout = setTimeout(() => {

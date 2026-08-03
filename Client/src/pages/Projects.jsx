@@ -53,6 +53,12 @@ export default function Projects() {
     }
   };
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "—";
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? "—" : d.toLocaleDateString();
+  };
+
   let filtered = projects.filter((p) =>
     p.name?.toLowerCase().includes(search.toLowerCase())
   );
@@ -224,7 +230,7 @@ export default function Projects() {
                     <div className="min-w-0">
                       <p className="truncate font-medium text-slate-900">{project.name}</p>
                       <p className="truncate text-sm text-slate-500">
-                        {project.description || "No description"} &middot; {new Date(project.updatedAt || project.createdAt).toLocaleDateString()}
+                        {project.description || "No description"} &middot; {formatDate(project.updatedAt || project.createdAt)}
                       </p>
                     </div>
                   </div>

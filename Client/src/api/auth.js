@@ -1,8 +1,12 @@
 import API from "./index";
 
-// EMAIL LOGIN / REGISTER
+// EMAIL LOGIN
 export const loginAPI = (data) =>
   API.post("/auth/login", data);
+
+// EMAIL REGISTER
+export const registerAPI = (data) =>
+  API.post("/auth/register", data);
 
 // GOOGLE LOGIN
 export const googleLogin = () => {

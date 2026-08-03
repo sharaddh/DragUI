@@ -1,9 +1,9 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
-import { AuthContext } from "../context/authContext";
+import { AuthContext } from "../context/auth-context";
 import {
   LayoutDashboard, Puzzle, Palette, LogOut, Box, Menu, X, ChevronRight,
-  Settings, User, Bell,
+  Settings, User,
 } from "lucide-react";
 import NotificationBell from "../components/NotificationBell";
 
@@ -119,7 +119,7 @@ export default function UserLayout({ children }) {
       )}
 
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 transform border-r border-slate-200 bg-white shadow-xl transition-transform duration-300 ease-in-out lg:static lg:z-auto lg:translate-x-0 lg:shadow-none ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 transform border-r border-slate-200 bg-white shadow-xl transition-transform duration-300 ease-in-out lg:hidden ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >

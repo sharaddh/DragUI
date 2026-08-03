@@ -1,6 +1,6 @@
 import { useEffect, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/authContext";
+import { AuthContext } from "../context/auth-context";
 
 export default function AuthSuccess() {
   const auth = useContext(AuthContext) || {};
@@ -18,6 +18,7 @@ export default function AuthSuccess() {
     } else {
       navigate("/login");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <div className="p-10">Logging you in...</div>;

@@ -1,5 +1,4 @@
-import { useState, useContext } from "react";
-import { AuthContext } from "../context/authContext";
+import { useState } from "react";
 import { Bell, Globe, Shield, Palette, ChevronRight, Moon, Sun } from "lucide-react";
 
 const SETTINGS_SECTIONS = [
@@ -10,7 +9,6 @@ const SETTINGS_SECTIONS = [
 ];
 
 export default function Settings() {
-  const { user } = useContext(AuthContext);
   const [activeSection, setActiveSection] = useState("notifications");
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("dropui-dark") === "true");
   const [emailNotifications, setEmailNotifications] = useState(true);

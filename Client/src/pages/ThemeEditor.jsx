@@ -22,10 +22,6 @@ export default function ThemeEditor() {
   const [saved, setSaved] = useState(false);
   const [activeTab, setActiveTab] = useState("colors");
 
-  useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
-
   const applyTheme = (t) => {
     const root = document.documentElement;
     root.style.setProperty("--du-primary", t.primary);
@@ -39,6 +35,10 @@ export default function ThemeEditor() {
     root.style.setProperty("--du-radius", t.borderRadius);
     root.style.setProperty("--du-font", t.fontFamily);
   };
+
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
 
   const saveTheme = () => {
     localStorage.setItem("dropui-theme", JSON.stringify(theme));

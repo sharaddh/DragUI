@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useSearchParams, useNavigate, Link } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import {
   DndContext,
   DragOverlay,
@@ -7,11 +7,6 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-  arrayMove,
-} from "@dnd-kit/sortable";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import Canvas from "../components/Canvas";
@@ -20,34 +15,27 @@ import CanvasToolbar from "../components/CanvasToolbar";
 import SaveButton from "../components/SaveButton";
 import { useBuilderStore, componentLabels } from "../store/useBuilderStore";
 import { getProject } from "../api/projects";
-import { generateHTML, generateReactJSX, generatePackageJson } from "../utils/codeGenerator";
+import { generateHTML, generateReactJSX } from "../utils/codeGenerator";
 import { Loader2, ArrowLeft, Code, X, Check } from "lucide-react";
 
 export default function Builder() {
   const addComponent = useBuilderStore((s) => s.addComponent);
-  const moveComponent = useBuilderStore((s) => s.moveComponent);
-  const reorderChildren = useBuilderStore((s) => s.reorderChildren);
+  const liveReorder = useBuilderStore((s) => s.liveReorder);
+  const saveHistory = useBuilderStore((s) => s.saveHistory);
   const tree = useBuilderStore((s) => s.tree);
   const setTree = useBuilderStore((s) => s.setTree);
   const setProjectName = useBuilderStore((s) => s.setProjectName);
   const projectName = useBuilderStore((s) => s.projectName);
-  const selectedIds = useBuilderStore((s) => s.selectedIds);
   const clearSelection = useBuilderStore((s) => s.clearSelection);
-  const [projectId, setProjectIdState] = useState(null);
+  const [, setProjectIdState] = useState(null);
   const [activeDrag, setActiveDrag] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showCode, setShowCode] = useState(false);
   const [codeTab, setCodeTab] = useState("html");
   const [copied, setCopied] = useState(false);
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    const id = searchParams.get("project");
-    if (id) loadProject(id);
-  }, []);
-
-  const loadProject = async (id) => {
+  const loadProject = useCallback(async (id) => {
     setLoading(true);
     try {
       const res = await getProject(id);
@@ -62,7 +50,12 @@ export default function Builder() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [setProjectName, setProjectIdState, setTree]);
+
+  useEffect(() => {
+    const id = searchParams.get("project");
+    if (id) loadProject(id);
+  }, [searchParams, loadProject]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
@@ -76,6 +69,7 @@ export default function Builder() {
         label: data.label || componentLabels[data.type] || data.type || "Component",
       });
     } else {
+      saveHistory();
       setActiveDrag({ id: active.id, type: "move" });
     }
   };
@@ -84,15 +78,7 @@ export default function Builder() {
     if (!over || active.id === over.id) return;
     const activeTool = active.id?.toString().startsWith("tool-");
     if (activeTool) return;
-
-    const activeIdx = (tree.children || []).findIndex((c) => c.id === active.id);
-    const overIdx = (tree.children || []).findIndex((c) => c.id === over.id);
-    if (activeIdx < 0 || overIdx < 0) return;
-
-    if (activeIdx !== overIdx) {
-      const newChildren = arrayMove([...tree.children], activeIdx, overIdx);
-      setTree({ ...tree, children: newChildren });
-    }
+    liveReorder(active.id, over.id);
   };
 
   const handleDragEnd = ({ active, over }) => {
@@ -105,10 +91,13 @@ export default function Builder() {
     if (isTool) {
       const type = data.type || active.id.split("tool-")[1]?.split("-")[0] || "div";
       const parentId = over.id === "canvas" ? "root" : over.id?.toString() || "root";
-      addComponent(type, parentId);
-    } else {
-      const overId = over.id?.toString();
-      if (overId === "canvas" || overId === active.id) return;
+      addComponent(type, parentId, undefined, {
+        props: data.props || {},
+        code: data.template || "",
+        template: data.template || "",
+        thumbnail: data.thumbnail || "",
+        label: data.label || componentLabels[type] || type,
+      });
     }
   };
 

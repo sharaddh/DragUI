@@ -1,33 +1,41 @@
 import { useState, useContext } from "react";
-import { loginAPI, googleLogin, githubLogin } from "../api/auth";
-import { AuthContext } from "../context/authContext";
+import { loginAPI, registerAPI, googleLogin, githubLogin } from "../api/auth";
+import { AuthContext } from "../context/auth-context";
 import { useNavigate } from "react-router-dom";
 import { FaGithub } from "react-icons/fa";
 import {
-  Mail, Lock, LogIn, Loader2, AlertCircle, Eye, EyeOff
+  Mail, Lock, LogIn, Loader2, AlertCircle, Eye, EyeOff, User
 } from "lucide-react";
 
 export default function Login() {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [mode, setMode] = useState("login");
+  const [form, setForm] = useState({ email: "", password: "", username: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleEmailLogin = async () => {
+  const handleSubmit = async () => {
     setError("");
-    if (!form.email || !form.password) {
-      setError("Please enter both email and password");
+    if (!form.email || !form.password || (mode === "register" && !form.username)) {
+      setError(mode === "register" ? "Please fill in all fields" : "Please enter both email and password");
       return;
     }
     setIsLoading(true);
     try {
-      const res = await loginAPI(form);
+      const res =
+        mode === "register"
+          ? await registerAPI({ email: form.email, password: form.password, username: form.username })
+          : await loginAPI({ email: form.email, password: form.password });
       login(res.data.token);
       navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed. Check your credentials.");
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data ||
+        (mode === "register" ? "Registration failed. Please try again." : "Login failed. Check your credentials.");
+      setError(typeof msg === "string" ? msg : "Something went wrong. Please try again.");
       setTimeout(() => setError(""), 5000);
     } finally {
       setIsLoading(false);
@@ -35,7 +43,12 @@ export default function Login() {
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === "Enter") handleEmailLogin();
+    if (e.key === "Enter") handleSubmit();
+  };
+
+  const toggleMode = () => {
+    setError("");
+    setMode((m) => (m === "login" ? "register" : "login"));
   };
 
   return (
@@ -51,7 +64,9 @@ export default function Login() {
               <LogIn className="h-8 w-8 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-slate-900">DropUI</h1>
-            <p className="mt-1 text-sm text-slate-500">Sign in to your account</p>
+            <p className="mt-1 text-sm text-slate-500">
+              {mode === "register" ? "Create your account" : "Sign in to your account"}
+            </p>
           </div>
 
           {error && (
@@ -62,6 +77,24 @@ export default function Login() {
           )}
 
           <div className="space-y-4">
+            {mode === "register" && (
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-slate-700">Name</label>
+                <div className="relative">
+                  <User className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Your name"
+                    value={form.username}
+                    onChange={(e) => setForm({ ...form, username: e.target.value })}
+                    onKeyDown={handleKeyPress}
+                    className="w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-4 text-sm transition focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                    autoFocus
+                  />
+                </div>
+              </div>
+            )}
+
             <div>
               <label className="mb-1.5 block text-sm font-medium text-slate-700">Email</label>
               <div className="relative">
@@ -73,7 +106,7 @@ export default function Login() {
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   onKeyDown={handleKeyPress}
                   className="w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-4 text-sm transition focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200"
-                  autoFocus
+                  autoFocus={mode === "login"}
                 />
               </div>
             </div>
@@ -111,23 +144,41 @@ export default function Login() {
             </div>
 
             <button
-              onClick={handleEmailLogin}
+              onClick={handleSubmit}
               disabled={isLoading}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 py-2.5 text-sm font-semibold text-white shadow-lg shadow-cyan-500/20 transition hover:from-cyan-600 hover:to-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Signing in...
+                  {mode === "register" ? "Creating account..." : "Signing in..."}
                 </>
               ) : (
                 <>
                   <Mail className="h-4 w-4" />
-                  Continue with Email
+                  {mode === "register" ? "Create Account" : "Continue with Email"}
                 </>
               )}
             </button>
           </div>
+
+          <p className="mt-6 text-center text-sm text-slate-500">
+            {mode === "register" ? (
+              <>
+                Already have an account?{" "}
+                <button onClick={toggleMode} className="font-medium text-cyan-600 transition hover:text-cyan-700">
+                  Sign in
+                </button>
+              </>
+            ) : (
+              <>
+                Don&apos;t have an account?{" "}
+                <button onClick={toggleMode} className="font-medium text-cyan-600 transition hover:text-cyan-700">
+                  Create one
+                </button>
+              </>
+            )}
+          </p>
 
           <div className="my-6 flex items-center gap-4">
             <div className="flex-1 border-t border-slate-200" />

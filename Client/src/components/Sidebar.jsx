@@ -125,29 +125,7 @@ import { useRegistry } from "../hooks/useRegistry";
 import { useBuilderStore } from "../store/useBuilderStore";
 import { components } from "../DropUi/index";
 import { CSS_STYLE_KEYS } from "../utils/cssProps";
-
-// 1. DYNAMIC PREVIEW COMPONENT
-function DynamicToolPreview({ label, props }) {
-  const previewProps = props || {};
-  return (
-    <div className="flex h-full w-full flex-col justify-center rounded-2xl bg-slate-50 p-3 text-left text-xs text-slate-500">
-      <div className="font-bold text-slate-800 truncate">{label}</div>
-      {Object.keys(previewProps).length > 0 ? (
-        <div className="mt-1.5 space-y-0.5 text-[10px] text-slate-500 font-mono">
-          {Object.entries(previewProps).slice(0, 3).map(([key, value]) => (
-            <div key={key} className="truncate">
-              <span className="text-slate-400">{key}:</span> {String(value)}
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="mt-1 text-[11px] text-slate-400 italic">No configuration properties</div>
-      )}
-    </div>
-  );
-}
-
-const MemoDynamicToolPreview = React.memo(DynamicToolPreview);
+import ComponentPreview from "./ComponentPreview";
 
 // 2. CORE INTERACTIVE DRAGGABLE ITEM COMPONENT
 function ToolItem({ comp, index, onDirectAdd }) {
@@ -156,7 +134,8 @@ function ToolItem({ comp, index, onDirectAdd }) {
     data: {
       type: comp.type,
       props: comp.defaultProps,
-      template: comp.template,
+      template: comp.code || comp.template || "",
+      thumbnail: comp.thumbnail || "",
       label: comp.label,
     },
   });
@@ -203,7 +182,15 @@ function ToolItem({ comp, index, onDirectAdd }) {
               <Comp {...cleanProps} />
             </div>
           ) : (
-            <MemoDynamicToolPreview label={comp.label} props={cleanProps} />
+            <ComponentPreview
+              comp={{
+                label: comp.label,
+                code: comp.code,
+                template: comp.template,
+                thumbnail: comp.thumbnail,
+                defaultProps: comp.defaultProps,
+              }}
+            />
           )}
         </div>
 

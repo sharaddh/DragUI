@@ -37,11 +37,17 @@ export const componentLabels = {
 export const createComponentNode = (type, overrides = {}) => ({
   id: genId(),
   type,
-  props: { ...clone(defaultComponentProps[type] || defaultComponentProps.div), ...overrides },
+  props: {
+    ...clone(defaultComponentProps[type] || defaultComponentProps.div),
+    ...(overrides.props || {}),
+  },
   children: [],
   locked: false,
   visible: true,
-  ...overrides,
+  code: overrides.code || "",
+  template: overrides.template || "",
+  thumbnail: overrides.thumbnail || "",
+  label: overrides.label || componentLabels[type] || type,
 });
 
 export const useBuilderStore = create((set, get) => ({
@@ -131,21 +137,39 @@ export const useBuilderStore = create((set, get) => ({
     set({ tree: newTree });
   },
 
-  addComponent: (type, parentId = "root", index) => {
+  addComponent: (type, parentId = "root", index, overrides = {}) => {
     get().saveHistory();
-    const node = createComponentNode(type);
+    const node = createComponentNode(type, overrides);
     const newTree = clone(get().tree);
-    function add(node) {
-      if (node.id === parentId) {
-        if (typeof index === "number") { node.children.splice(index, 0, node); }
-        else { node.children.push(node); }
+    let added = false;
+    function add(n) {
+      if (n.id === parentId) {
+        if (typeof index === "number") { n.children.splice(index, 0, node); }
+        else { n.children.push(node); }
+        added = true;
         return true;
       }
-      for (const child of node.children || []) { if (add(child)) return true; }
+      for (const child of n.children || []) { if (add(child)) return true; }
       return false;
     }
     add(newTree);
-    set({ tree: newTree, selectedIds: [node.id] });
+    if (added) {
+      set({ tree: newTree, selectedIds: [node.id] });
+    } else {
+      set({ selectedIds: [] });
+    }
+  },
+
+  liveReorder: (activeId, overId) => {
+    const { tree } = get();
+    const children = tree.children || [];
+    const from = children.findIndex((c) => c.id === activeId);
+    const to = children.findIndex((c) => c.id === overId);
+    if (from < 0 || to < 0 || from === to) return;
+    const newChildren = [...children];
+    const [moved] = newChildren.splice(from, 1);
+    newChildren.splice(to, 0, moved);
+    set({ tree: { ...tree, children: newChildren } });
   },
 
   updateProps: (id, newProps) => {
