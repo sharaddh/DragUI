@@ -11,23 +11,77 @@ const router = express.Router();
 
 // ================= EMAIL LOGIN =================
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  let user = await User.findOne({ email });
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
 
-  if (!user) {
-    // 🔥 AUTO REGISTER
-    const hashed = await bcrypt.hash(password, 10);
-    user = await User.create({ email, password: hashed });
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // AUTO REGISTER: pass the plaintext password, the pre-save hook hashes it once
+      user = await User.create({ email, password });
+    }
+
+    if (!user.password) {
+      return res.status(400).json({
+        message: "This email is linked to a social account. Sign in with Google or GitHub.",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ message: "Invalid email or password" });
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
+
+    res.json({
+      token,
+      user: { _id: user._id, email: user.email, username: user.username },
+    });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
+});
 
-  const isMatch = await bcrypt.compare(password, user.password);
+// ================= EMAIL REGISTER =================
+router.post("/register", async (req, res) => {
+  try {
+    const { email, password, username } = req.body;
 
-  if (!isMatch) return res.status(400).json("Invalid password");
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
 
-  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Please enter a valid email address" });
+    }
 
-  res.json({ token });
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
+    }
+
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(400).json({ message: "An account with this email already exists. Please sign in." });
+    }
+
+    const data = { email, password, provider: "local" };
+    if (username && username.trim()) data.username = username.trim();
+
+    const user = await User.create(data);
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
+
+    res.status(201).json({
+      token,
+      user: { _id: user._id, email: user.email, username: user.username },
+    });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 });
 
 

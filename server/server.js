@@ -91,7 +91,6 @@ import {
 } from "./middleware/rateLimiter.js";
 
 app.use(apiLimiter);
-app.use(errorHandler);
 // Routes
 
 import authRoutes from "./routes/authRoutes.js";
@@ -261,6 +260,9 @@ app.post('/api/generate', (req, res) => {
         data: mockResponseCode
     });
 });
+
+// Error handler (must be last)
+app.use(errorHandler);
 
 connectDB();
 

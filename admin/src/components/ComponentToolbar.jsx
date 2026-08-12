@@ -4,7 +4,6 @@ export default function ComponentToolbar({ onSave, onVersion, onLock, isLocked, 
   return (
     <div className="h-14 flex items-center justify-between px-4 font-sans border-b border-white/[0.05] bg-[#0a0a0c] shrink-0">
       
-      {/* 🟢 EDITABLE COMPONENT NAME (Removed static "Editor" text) */}
       <div className="flex items-center gap-2 group">
         <div className="w-6 h-6 rounded-md bg-purple-600 flex items-center justify-center mr-2 shrink-0">
           <div className="w-2 h-2 bg-white rounded-full" />
