@@ -40,6 +40,9 @@ new mongoose.Schema(
 }
 );
 
+// Every query filters by component - keep it indexed
+componentAnalyticsSchema.index({ component: 1 });
+
 export default mongoose.model(
   "ComponentAnalytics",
   componentAnalyticsSchema

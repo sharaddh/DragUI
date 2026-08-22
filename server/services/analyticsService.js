@@ -2,6 +2,7 @@ import Component from "../models/Component.js";
 import Project from "../models/Project.js";
 import Asset from "../models/Asset.js";
 import User from "../models/User.js";
+import ComponentAnalytics from "../models/ComponentAnalytics.js";
 
 export const getDashboardStats =
   async () => {
