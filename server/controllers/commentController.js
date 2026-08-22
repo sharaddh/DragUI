@@ -6,10 +6,27 @@ async(req,res)=>{
 
  try{
 
+  // Whitelist fields; author always comes from the authenticated admin
+  const {
+    componentId,
+    line,
+    message,
+  } = req.body;
+
+  if (!componentId || !message) {
+    return res.status(400).json({
+      success: false,
+      message: "componentId and message are required",
+    });
+  }
+
   const comment =
-   await Comment.create(
-    req.body
-   );
+   await Comment.create({
+    componentId,
+    line,
+    message,
+    author: req.adminId,
+   });
 
   res.json({
    success:true,
@@ -19,6 +36,7 @@ async(req,res)=>{
  }catch(error){
 
   res.status(500).json({
+   success:false,
    message:
     error.message
   });
@@ -30,17 +48,29 @@ async(req,res)=>{
 export const getComments =
 async(req,res)=>{
 
- const comments =
-  await Comment.find({
+ try{
 
-   componentId:
-    req.params.id
+  const comments =
+   await Comment.find({
 
+    componentId:
+     req.params.id
+
+  }).populate("author", "adminId email avatar");
+
+  res.json({
+   success:true,
+   comments
   });
 
- res.json({
-  success:true,
-  comments
- });
+ }catch(error){
+
+  res.status(500).json({
+   success:false,
+   message:
+    error.message
+  });
+
+ }
 
 };
