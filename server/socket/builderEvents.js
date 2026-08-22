@@ -1,3 +1,5 @@
+import RealtimeSession from "../models/RealtimeSession.js";
+
 export default function registerBuilderEvents(
   io,
   socket
@@ -11,7 +13,7 @@ export default function registerBuilderEvents(
 
   socket.on(
     "project:join",
-    ({
+    async ({
       projectId,
       user
     }) => {
@@ -19,6 +21,17 @@ export default function registerBuilderEvents(
       socket.join(
         projectId
       );
+
+      // Persist the session so collaborationController.getActiveUsers has data
+      try {
+        await RealtimeSession.create({
+          project: projectId,
+          user: socket.data.userId || undefined,
+          socketId: socket.id,
+        });
+      } catch {
+        // non-fatal - project ids may not be ObjectIds
+      }
 
       socket.to(
         projectId
@@ -111,5 +124,13 @@ export default function registerBuilderEvents(
 
     }
   );
+
+  socket.on("disconnect", async () => {
+    try {
+      await RealtimeSession.deleteMany({ socketId: socket.id });
+    } catch {
+      // non-fatal
+    }
+  });
 
 }
