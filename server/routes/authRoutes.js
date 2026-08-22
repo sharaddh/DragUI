@@ -1,16 +1,46 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import User from "../models/user.js";
+import User from "../models/User.js";
 import authMiddleware from "../middleware/auth.middleware.js";
+import { authLimiter } from "../middleware/rateLimiter.js";
 import passport from "../config/Passport.js";
 
 const router = express.Router();
 
+const TOKEN_TTL = "7d";
 
+// Allowed post-OAuth redirect targets (prevents open-redirect token theft)
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  process.env.ADMIN_URL,
+  "http://localhost:5173",
+].filter(Boolean);
+
+function safeClientRedirect(candidate) {
+  try {
+    const url = new URL(candidate);
+    if (
+      (url.protocol === "http:" || url.protocol === "https:") &&
+      allowedOrigins.includes(url.origin)
+    ) {
+      return url.toString();
+    }
+  } catch {
+    // fall through
+  }
+  const base = process.env.CLIENT_URL || "http://localhost:5173";
+  return `${base}/auth-success`;
+}
+
+function signUserToken(user) {
+  return jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+    expiresIn: TOKEN_TTL,
+  });
+}
 
 // ================= EMAIL LOGIN =================
-router.post("/login", async (req, res) => {
+router.post("/login", authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -18,23 +48,24 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
-    let user = await User.findOne({ email });
+    const user = await User.findOne({ email });
 
-    if (!user) {
-      // AUTO REGISTER: pass the plaintext password, the pre-save hook hashes it once
-      user = await User.create({ email, password });
-    }
-
-    if (!user.password) {
-      return res.status(400).json({
-        message: "This email is linked to a social account. Sign in with Google or GitHub.",
-      });
+    // Unknown emails get the same generic error - no auto-registration,
+    // no account enumeration
+    if (!user || !user.password) {
+      const socialOnly = user && !user.password;
+      if (socialOnly) {
+        return res.status(400).json({
+          message: "This email is linked to a social account. Sign in with Google or GitHub.",
+        });
+      }
+      return res.status(400).json({ message: "Invalid email or password" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid email or password" });
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
+    const token = signUserToken(user);
 
     res.json({
       token,
@@ -46,7 +77,7 @@ router.post("/login", async (req, res) => {
 });
 
 // ================= EMAIL REGISTER =================
-router.post("/register", async (req, res) => {
+router.post("/register", authLimiter, async (req, res) => {
   try {
     const { email, password, username } = req.body;
 
@@ -73,7 +104,7 @@ router.post("/register", async (req, res) => {
 
     const user = await User.create(data);
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
+    const token = signUserToken(user);
 
     res.status(201).json({
       token,
@@ -94,20 +125,16 @@ router.get(
   "/user/google/callback",
   passport.authenticate("google", { session: false }),
   (req, res) => {
-    const token = jwt.sign(
-      { userId: req.user._id },
-      process.env.JWT_SECRET
-    );
+    const token = signUserToken(req.user);
 
-    res.redirect(`http://localhost:5173/auth-success?token=${token}`);
+    res.redirect(`${process.env.CLIENT_URL || "http://localhost:5173"}/auth-success?token=${token}`);
   }
 );
 
 router.get(
   "/google",
   (req, res, next) => {
-    const redirect = req.query.redirect;
-    req.session.redirect = redirect;
+    req.session.redirect = req.query.redirect;
     next();
   },
   passport.authenticate("google", { scope: ["profile", "email"] })
@@ -116,18 +143,10 @@ router.get(
   "/google/callback",
   passport.authenticate("google", { session: false }),
   (req, res) => {
-    const token = jwt.sign(
-      { userId: req.user._id },
-      process.env.JWT_SECRET
-    );
+    const token = signUserToken(req.user);
 
-    const redirect = req.query.redirect || req.session?.redirect;
-
-    if (redirect) {
-      return res.redirect(`${redirect}?token=${token}`);
-    }
-
-    res.redirect(`http://localhost:5173/auth-success?token=${token}`);
+    const redirect = safeClientRedirect(req.query.redirect || req.session?.redirect);
+    res.redirect(`${redirect}${redirect.includes("?") ? "&" : "?"}token=${token}`);
   }
 );
 
@@ -138,12 +157,9 @@ router.get(
   "/github/callback",
   passport.authenticate("github", { session: false }),
   (req, res) => {
-    const token = jwt.sign(
-      { userId: req.user._id },
-      process.env.JWT_SECRET
-    );
+    const token = signUserToken(req.user);
 
-    res.redirect(`http://localhost:5173/auth-success?token=${token}`);
+    res.redirect(`${process.env.CLIENT_URL || "http://localhost:5173"}/auth-success?token=${token}`);
   }
 );
 
@@ -171,6 +187,9 @@ router.put("/profile", authMiddleware, async (req, res) => {
 router.post("/change-password", authMiddleware, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: "New password must be at least 6 characters" });
+    }
     const user = await User.findById(req.userId);
     if (!user.password) {
       return res.status(400).json({ success: false, message: "OAuth users cannot change password here" });
@@ -188,6 +207,10 @@ router.post("/change-password", authMiddleware, async (req, res) => {
 // ================= NOTIFICATIONS (stub) =================
 router.get("/notifications", authMiddleware, async (req, res) => {
   res.json({ success: true, notifications: [] });
+});
+
+router.patch("/notifications/mark-all-read", authMiddleware, async (req, res) => {
+  res.json({ success: true });
 });
 
 export default router;
