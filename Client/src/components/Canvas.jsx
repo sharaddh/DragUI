@@ -14,6 +14,7 @@ export default function Canvas({ tree }) {
   return (
     <div
       ref={setNodeRef}
+      data-canvas-area="true"
       className={`min-h-[70vh] rounded-xl border-2 transition-all duration-150 ${
         isOver
           ? "border-cyan-400 bg-cyan-50/50 shadow-lg shadow-cyan-200/20"

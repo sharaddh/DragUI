@@ -5,6 +5,16 @@ const clone = (obj) => JSON.parse(JSON.stringify(obj));
 let idCounter = Date.now();
 const genId = () => `el_${++idCounter}_${Math.random().toString(36).slice(2, 6)}`;
 
+// Deep-clone a node, regenerating ids for the node and every descendant
+function cloneWithFreshIds(node) {
+  const copy = clone(node);
+  (function assignIds(n) {
+    n.id = genId();
+    (n.children || []).forEach(assignIds);
+  })(copy);
+  return copy;
+}
+
 export const defaultComponentProps = {
   div: { className: "", style: { minHeight: "60px" }, text: "" },
   text: { className: "", style: { fontSize: "16px", color: "#0f172a" }, text: "Double-click to edit text" },
@@ -220,7 +230,7 @@ export const useBuilderStore = create((set, get) => ({
     function duplicate(node) {
       node.children.forEach((child, i) => {
         if (child.id === id) {
-          const copy = clone(child); copy.id = genId();
+          const copy = cloneWithFreshIds(child);
           node.children.splice(i + 1, 0, copy); newId = copy.id;
         } else { duplicate(child); }
       });
