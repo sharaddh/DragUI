@@ -26,7 +26,11 @@ async(req,res)=>{
   await Component.findOne({
 
    slug:
-    req.params.slug
+    req.params.slug,
+
+   // Public registry only exposes published components - no draft leaks
+   status:
+    "published"
 
   });
 
