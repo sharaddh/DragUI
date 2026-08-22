@@ -10,7 +10,6 @@ import morgan from "morgan";
 
 import passport from "./config/Passport.js";
 import connectDB from "./config/db.js";
-import mongoSanitize from "express-mongo-sanitize";
 
 const app = express();
 
@@ -19,15 +18,31 @@ app.use(helmet());
 
 // Compression
 
+// Logging (single morgan instance - was logging twice)
 app.use(
- morgan("combined")
+ morgan("dev")
 );
 mongoose.set('sanitizeFilter', true);
 app.use(compression());
 
-// Logging
-
-app.use(morgan("dev"));
+// Sanitize request bodies against NoSQL operator injection ($-prefixed /
+// dotted keys). express-mongo-sanitize can't be used here because it
+// reassigns req.query, which is a read-only getter in Express 5.
+const stripMongoOperators = (value) => {
+  if (Array.isArray(value)) {
+    return value.map(stripMongoOperators);
+  }
+  if (value && typeof value === "object") {
+    const clean = {};
+    for (const [key, val] of Object.entries(value)) {
+      if (!key.startsWith("$") && !key.includes(".")) {
+        clean[key] = stripMongoOperators(val);
+      }
+    }
+    return clean;
+  }
+  return value;
+};
 
 // CORS
 
@@ -47,6 +62,14 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Strip NoSQL operator injection from parsed bodies (must run after body parsing)
+app.use((req, res, next) => {
+  if (req.body && typeof req.body === "object") {
+    req.body = stripMongoOperators(req.body);
+  }
+  next();
+});
+
 // Session
 
 app.use(
@@ -61,7 +84,7 @@ app.use(
     cookie: {
       httpOnly: true,
 
-      secure: false,
+      secure: process.env.NODE_ENV === "production",
 
       maxAge:
         1000 * 60 * 60 * 24 * 7,
@@ -226,8 +249,15 @@ import registryRoutes
 from "./routes/registryRoutes.js";
 
 app.use(
- "/api/registry",
- registryRoutes
+  "/api/registry",
+  registryRoutes
+);
+import auditRoutes
+from "./routes/auditRoutes.js";
+
+app.use(
+  "/api/audit",
+  auditRoutes
 );
 // DB
 
@@ -281,7 +311,11 @@ const server =
   http.createServer(
     app
   );
-  server.listen(
+
+// Attach the realtime layer (was imported but never initialized)
+initializeSocket(server);
+
+server.listen(
   PORT,
   () => {
 
