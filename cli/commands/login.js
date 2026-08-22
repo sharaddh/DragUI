@@ -1,111 +1,67 @@
-import inquirer
-from "inquirer";
+import http from "http";
+import { exec } from "child_process";
+import { platform } from "os";
 
-import axios
-from "axios";
+import { saveToken } from "../utils/auth.js";
 
-import {
- saveToken
-}
-from "../utils/auth.js";
+const CLIENT_URL = "http://localhost:5173";
+const LOGIN_TIMEOUT_MS = 5 * 60 * 1000;
 
-export default async function login(){
-
- const {
-  accountType
- } = await inquirer.prompt([
-
-  {
-   type: "list",
-   name: "accountType",
-   message: "Login as",
-   choices: ["User", "Admin"]
+function openBrowser(url) {
+  if (platform() === "win32") {
+    exec(`start "" "${url}"`);
+  } else if (platform() === "darwin") {
+    exec(`open "${url}"`);
+  } else {
+    exec(`xdg-open "${url}"`);
   }
+}
 
- ]);
+export default async function login() {
+  const server = http.createServer((req, res) => {
+    const url = new URL(req.url, "http://127.0.0.1");
 
- if (accountType === "User") {
+    if (url.pathname !== "/callback") {
+      res.writeHead(404);
+      res.end();
+      return;
+    }
 
-  const {
-   email,
-   password
-  } = await inquirer.prompt([
+    const token = url.searchParams.get("token");
 
-   {
-    name:"email",
-    message:"Email"
-   },
+    if (!token) {
+      res.writeHead(400, { "Content-Type": "text/html" });
+      res.end("<h2>DropUI CLI</h2><p>No token received. Please try again.</p>");
+      return;
+    }
 
-   {
-    type:"password",
+    saveToken(token, "user");
 
-    name:"password",
+    res.writeHead(200, { "Content-Type": "text/html" });
+    res.end(
+      "<h2>&#10003; DropUI CLI</h2><p>Logged in successfully. You can close this window and return to your terminal.</p>"
+    );
 
-    message:"Password"
-   }
+    console.log("Logged in");
+    server.close(() => process.exit(0));
+  });
 
-  ]);
+  server.listen(0, "127.0.0.1", () => {
+    const port = server.address().port;
+    const redirect = `http://127.0.0.1:${port}/callback`;
+    const url = `${CLIENT_URL}/cli-login?redirect=${encodeURIComponent(redirect)}`;
 
-  const res =
-  await axios.post(
+    console.log("Opening browser to complete login...");
+    console.log("(If nothing opens, visit the URL below)");
+    console.log("");
+    console.log(url);
 
-   "http://localhost:5000/api/auth/login",
+    openBrowser(url);
+  });
 
-   {
-    email,
-    password
-   }
-
-  );
-
-  saveToken(
-   res.data.token,
-   "user"
-  );
-
- } else {
-
-  const {
-   adminId,
-   password
-  } = await inquirer.prompt([
-
-   {
-    name:"adminId",
-    message:"Admin ID"
-   },
-
-   {
-    type:"password",
-
-    name:"password",
-
-    message:"Password"
-   }
-
-  ]);
-
-  const res =
-  await axios.post(
-
-   "http://localhost:5000/api/admin-auth/login",
-
-   {
-    adminId,
-    password
-   }
-
-  );
-
-  saveToken(
-   res.data.token,
-   "admin"
-  );
-
- }
-
- console.log(
-  `Logged in as ${accountType.toLowerCase()}`
- );
-
+  setTimeout(() => {
+    console.log("Login timed out. Run 'dropui login' again to retry.");
+    server.close();
+    process.exit(1);
+  }, LOGIN_TIMEOUT_MS);
 }

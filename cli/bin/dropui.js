@@ -9,6 +9,7 @@ import listCommand from "../commands/list.js";
 import removeCommand from "../commands/remove.js";
 import updateCommand from "../commands/update.js";
 import loginCommand from "../commands/login.js";
+import adminLoginCommand from "../commands/adminLogin.js";
 import logoutCommand from "../commands/logout.js";
 import doctorCommand from "../commands/doctor.js";
 import whoamiCommand from "../commands/whoami.js";
@@ -31,7 +32,8 @@ workspace
     .description("List workspaces")
     .action(workspaceListCommand);
 
-program.command("login").action(loginCommand);
+program.command("login").description("Log in as a DropUI user (email + password)").action(loginCommand);
+program.command("admin-login").description("Log in as a platform admin (admin ID + password)").action(adminLoginCommand);
 program.command("logout").action(logoutCommand);
 program.command("whoami").action(whoamiCommand);
 program.command("publish").description("Publish components to the registry").action(publishCommand);

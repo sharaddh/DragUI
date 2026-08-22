@@ -20,9 +20,13 @@ const allowedOrigins = [
 function safeClientRedirect(candidate) {
   try {
     const url = new URL(candidate);
+    // Loopback targets are CLI login callbacks - token goes to the
+    // user's own machine, so they are safe to allow on any port.
+    const isLoopback =
+      url.hostname === "localhost" || url.hostname === "127.0.0.1";
     if (
       (url.protocol === "http:" || url.protocol === "https:") &&
-      allowedOrigins.includes(url.origin)
+      (allowedOrigins.includes(url.origin) || isLoopback)
     ) {
       return url.toString();
     }
