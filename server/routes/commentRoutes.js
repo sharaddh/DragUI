@@ -7,11 +7,15 @@ import {
 }
 from "../controllers/commentController.js";
 
+import adminAuth
+from "../middleware/adminAuth.js";
+
 const router =
  express.Router();
 
 router.post(
  "/",
+ adminAuth,
  createComment
 );
 
