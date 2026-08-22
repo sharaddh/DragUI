@@ -5,6 +5,7 @@ import RuntimeComponent from "./RuntimeComponent";
 import { useState } from "react";
 
 const TEXT_TYPES = new Set(["text", "heading", "paragraph", "link", "button"]);
+const CONTAINER_TYPES = new Set(["card", "div", "container", "section", "navbar", "hero", "footer"]);
 
 function ResizeHandle({ position, onResize }) {
   const posClass = {
@@ -29,7 +30,8 @@ function ResizeHandle({ position, onResize }) {
   );
 }
 
-function renderElement(node, isSelected, selectComponent, updateProps, editingTextId, setEditingText) {
+function renderElement(node, ctx) {
+  const { isSelected, selectComponent, updateProps, editingTextId, setEditingText, childrenNode } = ctx;
   const p = node.props || {};
   const style = p.style || {};
   const combinedStyle = { ...style, position: "relative" };
@@ -171,10 +173,98 @@ function renderElement(node, isSelected, selectComponent, updateProps, editingTe
     case "card":
     case "div":
     case "container":
-    case "section":
-    case "navbar":
-    case "hero":
-    case "footer":
+    case "section": {
+      const isEmpty = !(node.children || []).length && !p.text;
+      if (isEmpty) {
+        combinedStyle.minHeight = combinedStyle.minHeight || "72px";
+        if (!isSelected) {
+          combinedStyle.outline = "1px dashed #94a3b8";
+          combinedStyle.outlineOffset = "-1px";
+        }
+      }
+      return (
+        <div
+          style={combinedStyle}
+          className={p.className}
+          onClick={(e) => { e.stopPropagation(); selectComponent(node.id); }}
+        >
+          {isEmpty ? (
+            <div className="pointer-events-none flex h-full min-h-[inherit] w-full items-center justify-center">
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                {node.label || componentLabels[node.type] || node.type}
+              </span>
+            </div>
+          ) : (
+            p.text ? <span>{p.text}</span> : null
+          )}
+          {childrenNode}
+        </div>
+      );
+    }
+    case "navbar": {
+      const isEmpty = !(node.children || []).length;
+      const links = Array.isArray(p.links) ? p.links : [];
+      return (
+        <div
+          style={{ ...combinedStyle, display: combinedStyle.display || "flex", alignItems: combinedStyle.alignItems || "center", justifyContent: combinedStyle.justifyContent || "space-between" }}
+          className={p.className}
+          onClick={(e) => { e.stopPropagation(); selectComponent(node.id); }}
+        >
+          <span className="font-semibold">{p.text || "Brand"}</span>
+          {!isEmpty && childrenNode}
+          {isEmpty && (
+            <>
+              <div className="flex gap-6 text-sm opacity-70">
+                {(links.length ? links : ["Home", "About", "Contact"]).map((l, i) => (
+                  <span key={i}>{l}</span>
+                ))}
+              </div>
+              <span className="absolute -bottom-5 right-0 rounded bg-slate-200 px-1.5 text-[9px] font-semibold uppercase tracking-wide text-slate-500">Navbar</span>
+            </>
+          )}
+        </div>
+      );
+    }
+    case "hero": {
+      const isEmpty = !(node.children || []).length;
+      return (
+        <div
+          style={combinedStyle}
+          className={p.className}
+          onClick={(e) => { e.stopPropagation(); selectComponent(node.id); }}
+        >
+          {isEmpty ? (
+            <div className="pointer-events-none flex flex-col items-center gap-2 py-6 text-center">
+              <h2 className="m-0 text-3xl font-bold" style={{ color: "#0f172a" }}>{p.title || "Hero Title"}</h2>
+              <p className="m-0" style={{ color: "#475569" }}>{p.subtitle || "Subtitle goes here"}</p>
+            </div>
+          ) : null}
+          {childrenNode}
+        </div>
+      );
+    }
+    case "footer": {
+      const isEmpty = !(node.children || []).length && !p.text;
+      if (isEmpty) {
+        combinedStyle.minHeight = combinedStyle.minHeight || "56px";
+        if (!isSelected) {
+          combinedStyle.outline = "1px dashed #94a3b8";
+          combinedStyle.outlineOffset = "-1px";
+        }
+      }
+      return (
+        <div
+          style={combinedStyle}
+          className={p.className}
+          onClick={(e) => { e.stopPropagation(); selectComponent(node.id); }}
+        >
+          {!isEmpty ? null : (
+            <span style={{ color: "#ffffff" }}>{p.text || "(c) 2026 Your Company. All rights reserved."}</span>
+          )}
+          {childrenNode}
+        </div>
+      );
+    }
     default:
       return (
         <div
@@ -207,6 +297,7 @@ function renderElement(node, isSelected, selectComponent, updateProps, editingTe
           ) : (
             p.text && <span>{p.text}</span>
           )}
+          {childrenNode}
         </div>
       );
   }
@@ -333,11 +424,24 @@ export default function Renderer({ node, depth = 0 }) {
 
       {/* The actual element */}
       <div data-element-id={node.id}>
-        {renderElement(node, isSelected, selectComponent, updateProps, editingTextId, setEditingText)}
+        {renderElement(node, {
+          isSelected,
+          selectComponent,
+          updateProps,
+          editingTextId,
+          setEditingText,
+          childrenNode: children.length > 0 ? (
+            <div className={CONTAINER_TYPES.has(node.type) ? "space-y-1" : node.type === "list" ? "" : "space-y-1"}>
+              {children.map((child) => (
+                <Renderer key={child.id} node={child} depth={depth + 1} />
+              ))}
+            </div>
+          ) : null,
+        })}
 
-        {/* Children */}
-        {children.length > 0 && (
-          <div className={node.type === "list" || node.type === "navbar" || node.type === "hero" ? "" : "space-y-1"}>
+        {/* Children of leaf elements render after the element itself */}
+        {children.length > 0 && !CONTAINER_TYPES.has(node.type) && (
+          <div className="space-y-1">
             {children.map((child) => (
               <Renderer key={child.id} node={child} depth={depth + 1} />
             ))}
