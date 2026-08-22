@@ -6,11 +6,11 @@ export default function CliLogin() {
   const redirectQuery = redirect ? `?redirect=${encodeURIComponent(redirect)}` : "";
 
   const googleLogin = () => {
-    window.location.href = `http://localhost:5000/api/auth/google${redirectQuery}`;
+    window.location.href = `${import.meta.env.VITE_API_URL}/auth/google${redirectQuery}`;
   };
 
   const githubLogin = () => {
-    window.location.href = `http://localhost:5000/api/auth/github${redirectQuery}`;
+    window.location.href = `${import.meta.env.VITE_API_URL}/auth/github${redirectQuery}`;
   };
 
   return (

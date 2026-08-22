@@ -17,6 +17,7 @@ export default function SaveButton({ projectName }) {
         name: projectName,
         design: tree,
         isPublic,
+        isPublished: isPublic,
       });
       alert("Saved successfully");
     } catch (error) {

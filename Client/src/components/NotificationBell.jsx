@@ -17,7 +17,7 @@ export default function NotificationBell() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  useEffect(() => {
+  const loadNotifications = () => {
     import("../api/notifications").then(({ getNotifications }) => {
       getNotifications().then((res) => {
         setNotifications(res.data.notifications || []);
@@ -25,7 +25,21 @@ export default function NotificationBell() {
         setNotifications([]);
       }).finally(() => setLoading(false));
     });
+  };
+
+  useEffect(() => {
+    loadNotifications();
   }, []);
+
+  const handleMarkAllRead = async () => {
+    try {
+      const { markAllRead } = await import("../api/notifications");
+      await markAllRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    } catch {
+      // keep optimistic state even if the request fails
+    }
+  };
 
   const unread = notifications.filter((n) => !n.read).length;
 
@@ -49,7 +63,7 @@ export default function NotificationBell() {
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
             <h3 className="text-sm font-semibold text-slate-900">Notifications</h3>
             {unread > 0 && (
-              <button className="text-xs font-medium text-cyan-600 hover:text-cyan-700">Mark all read</button>
+              <button onClick={handleMarkAllRead} className="text-xs font-medium text-cyan-600 hover:text-cyan-700">Mark all read</button>
             )}
           </div>
 
@@ -85,7 +99,7 @@ export default function NotificationBell() {
           </div>
 
           <div className="border-t border-slate-100 px-4 py-2.5 text-center">
-            <button className="text-xs font-medium text-slate-500 hover:text-slate-700">
+            <button onClick={() => setOpen(false)} className="text-xs font-medium text-slate-500 hover:text-slate-700">
               View all notifications
             </button>
           </div>
