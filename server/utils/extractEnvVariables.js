@@ -1,5 +1,5 @@
 const REGEX =
-/process\.env\.([A-Z0-9_]+)/g;
+/process\.env\.([A-Za-z0-9_]+)/g;
 
 export default function extractEnvVariables(
  code
