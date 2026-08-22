@@ -4,13 +4,16 @@ import { chromium } from "playwright";
 import cloudinary from "../config/cloudinary.js";
 
 // 🌟 UPGRADED TEMPLATE: Matches your frontend PreviewPanel exactly!
+const escapeRegExp = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 const TEMPLATE = (code, assets = []) => {
   let escapedCode = code.replace(/`/g, '\\`').replace(/\$/g, '\\$');
 
   // Inject asset URLs if there are images
   if (assets && assets.length > 0) {
     assets.forEach((asset) => {
-      const assetRegex = new RegExp(`['"\`][./]*${asset.name}['"\`]`, 'g');
+      // Escape the filename - raw names with dots/brackets broke the regex
+      const assetRegex = new RegExp(`['"\`][./]*${escapeRegExp(asset.name)}['"\`]`, 'g');
       escapedCode = escapedCode.replace(assetRegex, `"${asset.url}"`);
     });
   }
