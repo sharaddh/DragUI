@@ -50,6 +50,10 @@ const projectSchema =
 
       backend: [Object],
 
+      // Full drag-and-drop tree snapshot written by projectService.saveProject
+      // and read by Client/src/pages/Builder.jsx (p.design)
+      design: mongoose.Schema.Types.Mixed,
+
       installs: {
         type: Number,
         default: 0,
@@ -64,11 +68,6 @@ const projectSchema =
       },
 
       downloads: {
-        type: Number,
-        default: 0
-      },
-
-      installs: {
         type: Number,
         default: 0
       },
