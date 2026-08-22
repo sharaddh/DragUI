@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
+import Admin from "../models/Admin.js";
 
-export default function adminAuth(
+export default async function adminAuth(
   req,
   res,
   next
@@ -11,7 +12,7 @@ export default function adminAuth(
     const authHeader =
       req.headers.authorization;
 
-    if (!authHeader) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
         success: false,
         message: "No token",
@@ -26,6 +27,26 @@ export default function adminAuth(
         token,
         process.env.JWT_SECRET
       );
+
+    // Must carry an admin claim - user JWTs ({ userId }) are rejected here
+    if (!decoded.adminId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const admin =
+      await Admin.findById(
+        decoded.adminId
+      ).select("isActive");
+
+    if (!admin || !admin.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
 
     req.adminId =
       decoded.adminId;
