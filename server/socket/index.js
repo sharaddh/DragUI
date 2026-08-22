@@ -1,6 +1,8 @@
 import { Server }
 from "socket.io";
 
+import jwt from "jsonwebtoken";
+
 import registerBuilderEvents
 from "./builderEvents.js";
 
@@ -17,6 +19,14 @@ from "./comments.js";
 
 let io;
 
+// Same origins as the Express app - no wildcard in production paths
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  process.env.ADMIN_URL,
+  "http://localhost:5173",
+  "http://localhost:3001",
+].filter(Boolean);
+
 export const initializeSocket =
 (server)=>{
 
@@ -24,14 +34,34 @@ export const initializeSocket =
   server,
   {
    cors:{
-    origin:"*",
+    origin: allowedOrigins,
     methods:[
      "GET",
      "POST"
-    ]
+    ],
+    credentials:true,
    }
   }
  );
+
+ // Handshake auth - require a valid user OR admin JWT before any events flow
+ io.use((socket, next) => {
+   try {
+     const token = socket.handshake.auth?.token;
+     if (!token) {
+       return next(new Error("Authentication required"));
+     }
+     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+     socket.data.userId = decoded.userId || undefined;
+     socket.data.adminId = decoded.adminId || undefined;
+     if (!socket.data.userId && !socket.data.adminId) {
+       return next(new Error("Authentication required"));
+     }
+     next();
+   } catch {
+     next(new Error("Invalid token"));
+   }
+ });
 
  io.on(
   "connection",
