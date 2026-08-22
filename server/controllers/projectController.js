@@ -11,7 +11,11 @@ export const create = async (req, res) => {
 
 export const getOne = async (req, res) => {
   try {
-    const project = await projectService.getProject(req.params.projectId);
+    // userId is undefined for anonymous requests - public projects remain viewable
+    const project = await projectService.getProject(
+      req.params.projectId,
+      req.userId
+    );
     if (!project) {
       return res.status(404).json({ success: false });
     }
