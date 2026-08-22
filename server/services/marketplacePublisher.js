@@ -11,6 +11,10 @@ async (
   projectId
  );
 
+ if (!project) {
+  throw new Error("Project not found");
+ }
+
  project.isMarketplace =
  true;
 
