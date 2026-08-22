@@ -1,5 +1,26 @@
 const rooms = {};
 
+// Per-socket registry so disconnects can be cleaned up even if the client
+// never sent presence:leave (was leaking forever before).
+const socketRooms = new Map();
+
+function joinRoom(io, socket, componentId, user) {
+  const room = rooms[componentId] || (rooms[componentId] = []);
+  room.push({ ...user, socketId: socket.id });
+  socketRooms.set(socket.id, componentId);
+}
+
+function leaveRoom(io, socket) {
+  const componentId = socketRooms.get(socket.id);
+  if (componentId && rooms[componentId]) {
+    rooms[componentId] = rooms[componentId].filter(
+      (u) => u.socketId !== socket.id
+    );
+    io.to(componentId).emit("presence:update", rooms[componentId]);
+  }
+  socketRooms.delete(socket.id);
+}
+
 export function registerPresence(
   io,
   socket
@@ -12,48 +33,23 @@ export function registerPresence(
       user
     }) => {
 
-      socket.join(
-        componentId
-      );
+      if (!componentId || !user?.id) return;
 
-      if (
-        !rooms[
-          componentId
-        ]
-      ) {
+      // Prefer the authenticated identity over the client-supplied one
+      const authenticatedId =
+        socket.data.userId || socket.data.adminId;
+      const safeUser =
+        authenticatedId ? { ...user, id: String(authenticatedId) } : user;
 
-        rooms[
-          componentId
-        ] = [];
+      socket.join(componentId);
 
-      }
-
-      const exists =
-        rooms[
-          componentId
-        ].find(
-          (u) =>
-            u.id ===
-            user.id
-        );
-
-      if (!exists) {
-
-        rooms[
-          componentId
-        ].push(
-          user
-        );
-
-      }
+      joinRoom(io, socket, componentId, safeUser);
 
       io.to(
         componentId
       ).emit(
         "presence:update",
-        rooms[
-          componentId
-        ]
+        rooms[componentId]
       );
 
     }
@@ -61,40 +57,13 @@ export function registerPresence(
 
   socket.on(
     "presence:leave",
-    ({
-      componentId,
-      user
-    }) => {
-
-      if (
-        rooms[
-          componentId
-        ]
-      ) {
-
-        rooms[
-          componentId
-        ] =
-          rooms[
-            componentId
-          ].filter(
-            (u) =>
-              u.id !==
-              user.id
-          );
-
-      }
-
-      io.to(
-        componentId
-      ).emit(
-        "presence:update",
-        rooms[
-          componentId
-        ]
-      );
-
+    () => {
+      leaveRoom(io, socket);
     }
   );
+
+  socket.on("disconnect", () => {
+    leaveRoom(io, socket);
+  });
 
 }
