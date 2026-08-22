@@ -16,7 +16,32 @@ export const registerAdmin = async (req, res, next) => {
       adminId,
       password,
       email,
+      setupKey,
     } = req.body;
+
+    // Registration is closed by default:
+    // - open only while no admins exist (first-run bootstrap), or
+    // - when the caller supplies ADMIN_SETUP_KEY matching the server env
+    const adminCount =
+      await Admin.countDocuments();
+
+    const setupKeyValid =
+      process.env.ADMIN_SETUP_KEY &&
+      setupKey === process.env.ADMIN_SETUP_KEY;
+
+    if (adminCount > 0 && !setupKeyValid) {
+      return res.status(403).json({
+        success: false,
+        message: "Admin registration is disabled",
+      });
+    }
+
+    if (!adminId || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "adminId and password are required",
+      });
+    }
 
     const exists =
       await Admin.findOne({
@@ -77,6 +102,13 @@ export const loginAdmin = async (req, res, next) => {
       });
     }
 
+    if (!admin.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: "Account disabled",
+      });
+    }
+
     const match =
       await admin.comparePassword(
         password
@@ -88,6 +120,9 @@ export const loginAdmin = async (req, res, next) => {
         message: "Invalid credentials",
       });
     }
+
+    admin.lastLogin = new Date();
+    await admin.save();
 
     res.json({
       success: true,
