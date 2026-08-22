@@ -8,6 +8,9 @@ import * as workspaceService from "../services/workspaceService.js";
 
 import { logActivity } from "../services/auditService.js";
 
+// Only these roles can be granted through invites/updates (never owner)
+const ASSIGNABLE_ROLES = ["admin", "developer", "designer", "viewer"];
+
 /*
 =================================
 CREATE
@@ -97,6 +100,20 @@ async (req, res) => {
       });
     }
 
+    // Only members (or the owner) may view a workspace
+    const isMember =
+      String(workspace.owner._id || workspace.owner) === String(req.userId) ||
+      workspace.members.some(
+        (m) => String(m.user._id || m.user) === String(req.userId)
+      );
+
+    if (!isMember) {
+      return res.status(403).json({
+        success: false,
+        message: "Not a member of this workspace",
+      });
+    }
+
     res.json({
       success: true,
       workspace,
@@ -127,6 +144,13 @@ async (req, res) => {
       email,
       role,
     } = req.body;
+
+    if (!email || !ASSIGNABLE_ROLES.includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: "Valid email and role are required",
+      });
+    }
 
     const token =
       crypto.randomBytes(32)
@@ -228,6 +252,25 @@ async (req, res) => {
         success: false,
         message:
           "Invite invalid",
+      });
+    }
+
+    // Expired invites can no longer be accepted
+    if (invite.expiresAt && invite.expiresAt < new Date()) {
+      invite.status = "expired";
+      await invite.save();
+      return res.status(400).json({
+        success: false,
+        message: "Invite has expired",
+      });
+    }
+
+    // The invite is only redeemable by the invited email address
+    const user = await User.findById(req.userId).select("email");
+    if (!user || user.email.toLowerCase() !== String(invite.email).toLowerCase()) {
+      return res.status(403).json({
+        success: false,
+        message: "This invite was sent to a different email address",
       });
     }
 
@@ -338,6 +381,27 @@ async (req, res) => {
       .populate("projects")
       .populate("components")
       .populate("assets");
+
+    if (!workspace) {
+      return res.status(404).json({
+        success: false,
+        message: "Workspace not found",
+      });
+    }
+
+    // Only members (or the owner) may view workspace stats
+    const isMember =
+      String(workspace.owner) === String(req.userId) ||
+      workspace.members.some(
+        (m) => String(m.user?._id || m.user) === String(req.userId)
+      );
+
+    if (!isMember) {
+      return res.status(403).json({
+        success: false,
+        message: "Not a member of this workspace",
+      });
+    }
 
     res.json({
       success: true,
