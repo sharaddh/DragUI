@@ -3,7 +3,7 @@ import {
   useState
 } from "react";
 
-import socket from "../socket";
+import socket, { connectSocket } from "../socket";
 
 export default function usePresence(
   componentId,
@@ -17,6 +17,17 @@ export default function usePresence(
 
   useEffect(() => {
 
+    if (!componentId || !currentUser) {
+      return;
+    }
+
+    connectSocket();
+
+    const handlePresenceUpdate =
+      (data) => {
+        setUsers(data);
+      };
+
     socket.emit(
       "presence:join",
       {
@@ -27,7 +38,7 @@ export default function usePresence(
 
     socket.on(
       "presence:update",
-      setUsers
+      handlePresenceUpdate
     );
 
     return () => {
@@ -41,12 +52,13 @@ export default function usePresence(
       );
 
       socket.off(
-        "presence:update"
+        "presence:update",
+        handlePresenceUpdate
       );
 
     };
 
-  }, []);
+  }, [componentId, currentUser]);
 
   return users;
 

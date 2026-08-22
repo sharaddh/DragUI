@@ -1,5 +1,31 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import PropTypes from 'prop-types';
+
+const testimonials = [
+  {
+    quote: 'This platform completely transformed how our team ships products. The collaboration features are game-changing.',
+    name: 'Sarah Chen',
+    avatar: 'SC',
+    role: 'CTO at TechFlow',
+  },
+  {
+    quote: 'We cut our deployment time in half within the first month. The analytics alone are worth every penny.',
+    name: 'Marcus Rodriguez',
+    avatar: 'MR',
+    role: 'VP of Engineering at NovaLabs',
+  },
+  {
+    quote: 'The best investment we made this year. Intuitive, fast, and the support team is outstanding.',
+    name: 'Emma Nilsson',
+    avatar: 'EN',
+    role: 'Product Lead at Brightside',
+  },
+  {
+    quote: 'From onboarding to daily usage, everything just works. Our whole org switched in under a week.',
+    name: 'James Donovan',
+    avatar: 'JD',
+    role: 'Founder at OrbitWorks',
+  },
+];
 
 const styles = `
 @keyframes float1 { 0%,100%{transform:translate(0,0) rotate(0deg)} 33%{transform:translate(30px,-30px) rotate(120deg)} 66%{transform:translate(-20px,20px) rotate(240deg)} }
@@ -35,7 +61,7 @@ html,body{margin:0;padding:0}
 .stagger-6{animation-delay:0.6s;opacity:0}
 `;
 
-function ThemeIcon({ dark }: { dark: boolean }) {
+function ThemeIcon({ dark }) {
   return (
     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       {dark ? (
@@ -47,7 +73,7 @@ function ThemeIcon({ dark }: { dark: boolean }) {
   );
 }
 
-function MenuIcon({ open }: { open: boolean }) {
+function MenuIcon({ open }) {
   return (
     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       {open ? (
@@ -83,7 +109,7 @@ function QuoteIcon() {
   );
 }
 
-function SocialIcon({ type }: { type: string }) {
+function SocialIcon({ type }) {
   const props = { className: "w-5 h-5", fill: "currentColor" };
   switch (type) {
     case "twitter": return <svg {...props} viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>;
@@ -93,7 +119,7 @@ function SocialIcon({ type }: { type: string }) {
   }
 }
 
-export default function Genrate({
+export default function Generate({
   accentColor = '#6366F1',
   dark: initialDark = false,
   onThemeToggle,
@@ -102,7 +128,7 @@ export default function Genrate({
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
-  const [visibleSections, setVisibleSections] = useState>(new Set());
+  const [visibleSections, setVisibleSections] = useState(new Set());
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [countsVisible, setCountsVisible] = useState(false);
   const observerRef = useRef(null);
@@ -650,30 +676,16 @@ export default function Genrate({
 
             {/* Dots */}
             <div className="flex justify-center gap-2 mt-8">
-                            <button key={i} onClick={() => setActiveTestimonial(i)}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                  activeTestimonial === i
-                    ? `w-8 bg-indigo-500`
-                    : `${dark ? 'bg-gray-700' : 'bg-gray-300'} hover:bg-indigo-300`
-                }`}
-                aria-label={`Testimonial ${i + 1}`}
-              />
-              <button key={i} onClick={() => setActiveTestimonial(i)}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                  activeTestimonial === i
-                    ? `w-8 bg-indigo-500`
-                    : `${dark ? 'bg-gray-700' : 'bg-gray-300'} hover:bg-indigo-300`
-                }`}
-                aria-label={`Testimonial ${i + 1}`}
-              />
-              <button key={i} onClick={() => setActiveTestimonial(i)}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                  activeTestimonial === i
-                    ? `w-8 bg-indigo-500`
-                    : `${dark ? 'bg-gray-700' : 'bg-gray-300'} hover:bg-indigo-300`
-                }`}
-                aria-label={`Testimonial ${i + 1}`}
-              />
+              {testimonials.map((t, i) => (
+                <button key={i} onClick={() => setActiveTestimonial(i)}
+                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                    activeTestimonial === i
+                      ? `w-8 bg-indigo-500`
+                      : `${dark ? 'bg-gray-700' : 'bg-gray-300'} hover:bg-indigo-300`
+                  }`}
+                  aria-label={`Testimonial ${i + 1}`}
+                />
+              ))}
             </div>
           </div>
         </div>
@@ -919,9 +931,3 @@ export default function Genrate({
     </div>
   );
 }
-
-Genrate.propTypes = {
-  accentColor: PropTypes.string,
-  dark: PropTypes.bool,
-  onThemeToggle: PropTypes.func,
-};

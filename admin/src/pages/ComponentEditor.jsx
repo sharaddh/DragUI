@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { Monitor, Tablet, Smartphone, Maximize2, MoveHorizontal } from "lucide-react";
+import { Monitor, Tablet, Smartphone } from "lucide-react";
 
 import MarketplaceSettings from "../components/MarketplaceSettings";
 import MonacoEditor from "../components/MonacoEditor";
@@ -11,21 +11,38 @@ import FileExplorer from "../components/FileExplorer";
 import VersionModal from "../components/VersionModal";
 import ComponentToolbar from "../components/ComponentToolbar";
 import PropertyBuilder from "../components/PropertyBuilder";
+import PresenceBar from "../components/PresenceBar";
+
+import useAutoSave from "../hooks/useAutoSave";
+import usePresence from "../hooks/usePresence";
 
 import { createVersion } from "../api/versionApi";
-import { getComponent, createComponent, updateComponent } from "../api/componentApi";
+import {
+  getComponent,
+  createComponent,
+  updateComponent,
+  lockComponent,
+  unlockComponent,
+  publishComponent,
+} from "../api/componentApi";
+import { useAuth } from "../context/AuthContext";
 
 const DEFAULT_CODE = `export default function Component() {\n  return (\n    <div className="p-6 text-center bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl">\n      <h2 className="text-xl font-bold dark:text-white">Hello World</h2>\n    </div>\n  );\n}`;
 
 export default function ComponentEditor() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+
   const [isFetching, setIsFetching] = useState(!!id);
   const [versionOpen, setVersionOpen] = useState(false);
-  const [leftWidth, setLeftWidth] = useState(256);
-  const [rightWidth, setRightWidth] = useState(450);
+  const [isLocked, setIsLocked] = useState(false);
+  const [status, setStatus] = useState("draft");
   const [deviceMode, setDeviceMode] = useState("desktop");
   const [frameWidth, setFrameWidth] = useState("100%");
+
+  const leftWidth = 256;
+  const rightWidth = 450;
 
   const [draft, setDraft] = useState({
     activeFile: "Component.jsx",
@@ -35,11 +52,25 @@ export default function ComponentEditor() {
     marketplace: { title: "", description: "", tags: [] },
   });
 
-  const iframeRef = useRef(null);
+  const savedSnapshotRef = useRef(null);
+  const isDirtyRef = useRef(false);
+  const savingRef = useRef(false);
 
   const currentFile = useMemo(
     () => draft.files.find((f) => f.name === draft.activeFile) || draft.files[0],
     [draft.files, draft.activeFile]
+  );
+
+  const signature = useMemo(
+    () =>
+      JSON.stringify({
+        name: draft.activeFile,
+        code: currentFile ? currentFile.code : "",
+        props: draft.properties || [],
+        assets: draft.assets || [],
+        marketplace: draft.marketplace || {},
+      }),
+    [draft.activeFile, currentFile, draft.properties, draft.assets, draft.marketplace]
   );
 
   useEffect(() => {
@@ -47,10 +78,39 @@ export default function ComponentEditor() {
   }, [id]);
 
   useEffect(() => {
+    if (!id) {
+      isDirtyRef.current = false;
+      return;
+    }
+    isDirtyRef.current =
+      savedSnapshotRef.current !== null &&
+      signature !== savedSnapshotRef.current;
+  }, [signature, id]);
+
+  useEffect(() => {
     if (deviceMode === "desktop") setFrameWidth("100%");
     else if (deviceMode === "tablet") setFrameWidth("768px");
     else if (deviceMode === "mobile") setFrameWidth("375px");
   }, [deviceMode]);
+
+  // Autosave: reuse the manual save routine every 10s, but only while dirty.
+  useAutoSave(() => {
+    if (!id || !isDirtyRef.current || savingRef.current) return;
+    handleSave();
+  }, signature);
+
+  const presenceUser = useMemo(
+    () =>
+      user
+        ? {
+            id: user._id || user.id || user.adminId,
+            name: user.name || user.adminId || "Admin",
+          }
+        : null,
+    [user]
+  );
+
+  const presenceUsers = usePresence(id, presenceUser);
 
   const loadComponent = async () => {
     try {
@@ -66,12 +126,22 @@ export default function ComponentEditor() {
           assets: data.assets || [],
           marketplace: data.marketplace || prev.marketplace,
         }));
+
+        setIsLocked(Boolean(data.isLocked));
+        setStatus(data.status || "draft");
+
+        savedSnapshotRef.current = JSON.stringify({
+          name: `${data.name}.jsx`,
+          code: data.code || DEFAULT_CODE,
+          props: data.props || [],
+          assets: data.assets || [],
+          marketplace: data.marketplace || {},
+        });
       }
     } catch (error) {
       toast.error("Failed to load component");
       console.error(error);
     } finally {
-      // 🌟 NEW: Turn off the loading screen
       setIsFetching(false);
     }
   };
@@ -87,7 +157,6 @@ export default function ComponentEditor() {
     );
   };
 
-  // 🟢 RENAMING LOGIC
   const handleRename = (newName) => {
     const safeName = newName || "Untitled";
     const newFileName = `${safeName}.jsx`;
@@ -101,44 +170,98 @@ export default function ComponentEditor() {
     }));
   };
 
-  // 🟢 SAVING LOGIC
   const handleSave = async () => {
+    if (!currentFile) return;
+
+    const payload = {
+      name: draft.activeFile.replace(".jsx", ""),
+      code: currentFile.code,
+      props: draft.properties || [],
+      assets: draft.assets || [],
+      marketplace: draft.marketplace || {},
+    };
+
+    savingRef.current = true;
+
     try {
-      console.log("🛑 1. SAVE BUTTON CLICKED");
-      
-      if (!currentFile) {
-        alert("CRASH: currentFile is missing!");
-        return;
-      }
-
-      console.log("🛑 2. BUILDING PAYLOAD...");
-      const payload = {
-        name: draft.activeFile.replace(".jsx", ""),
-        code: currentFile.code,
-        props: draft.properties || [],
-        assets: draft.assets || [],
-        marketplace: draft.marketplace || {},
-      };
-      
-      console.log("🛑 3. PAYLOAD BUILT: ", payload);
-
       if (id) {
-        console.log("🛑 4. SENDING PUT REQUEST TO BACKEND FOR ID:", id);
-        // If it crashes here, your updateComponent API function is broken!
         await updateComponent(id, payload);
+        savedSnapshotRef.current = signature;
+        isDirtyRef.current = false;
         toast.success("Component Updated!");
-        console.log("✅ 5. SAVE SUCCESSFUL!");
       } else {
         const response = await createComponent(payload);
         toast.success("Component Created!");
         const newId = response.component?._id || response._id;
-        if (newId) navigate(`/components/${newId}`);
+        if (newId) navigate(`/components/edit/${newId}`);
       }
     } catch (error) {
-      console.error("🔥 FRONTEND SAVE CRASH:", error);
-      alert(`Save Failed: ${error.message || "Check console"}`);
+      console.error(error);
+      toast.error(`Save Failed: ${error.message || "Check console"}`);
+    } finally {
+      savingRef.current = false;
     }
   };
+
+  const handleToggleLock = async () => {
+    if (!id) {
+      toast.error("Save the component before locking it");
+      return;
+    }
+
+    try {
+      if (isLocked) {
+        await unlockComponent(id);
+        setIsLocked(false);
+        toast.success("Component unlocked");
+      } else {
+        await lockComponent(id);
+        setIsLocked(true);
+        toast.success("Component locked");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update lock state");
+    }
+  };
+
+  const handlePublish = async () => {
+    if (!id) {
+      toast.error("Save the component before publishing it");
+      return;
+    }
+
+    try {
+      const response = await publishComponent(id);
+      const data = response?.component || response?.data?.component || response;
+      setStatus(data?.status || "published");
+      toast.success(status === "published" ? "Already Published" : "Component Published!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to publish component");
+    }
+  };
+
+  const handleVersionSave = async (changelog) => {
+    if (!id) {
+      toast.error("Save the component before committing a version");
+      return;
+    }
+
+    try {
+      await createVersion(
+        id,
+        changelog,
+        currentFile ? currentFile.code : undefined
+      );
+      toast.success("Version committed");
+      setVersionOpen(false);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to commit version");
+    }
+  };
+
   if (isFetching) {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center bg-[#050505] text-white">
@@ -149,12 +272,20 @@ export default function ComponentEditor() {
   }
   return (
     <div className="h-screen w-full flex flex-col bg-[#050505] font-sans text-white overflow-hidden divide-y divide-white/[0.05]">
-    {/* ... Rest of your UI ... */}
+
+      {presenceUsers.length > 0 && (
+        <div className="bg-[#0a0a0c] border-b border-white/[0.05]">
+          <PresenceBar users={presenceUsers} />
+        </div>
+      )}
 
       {/* 🟢 PASS THE RENAME HANDLER HERE */}
       <ComponentToolbar
         onSave={handleSave}
-        onOpenVersion={() => setVersionOpen(true)}
+        onVersion={() => setVersionOpen(true)}
+        onLock={handleToggleLock}
+        isLocked={isLocked}
+        onPublish={handlePublish}
         componentName={draft.activeFile.replace(".jsx", "")}
         onNameChange={handleRename}
       />
@@ -164,6 +295,7 @@ export default function ComponentEditor() {
         <aside style={{ width: `${leftWidth}px` }} className="shrink-0 bg-[#0a0a0c] overflow-y-auto">
           <FileExplorer
             files={draft.files}
+            assets={draft.assets}
             selected={draft.activeFile}
             setSelected={(name) => updateDraft("activeFile", name)}
           />
@@ -195,7 +327,7 @@ export default function ComponentEditor() {
             </div>
 
             <div className="flex-1 overflow-auto p-4 flex items-center justify-center relative bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAACVJREFUKFNjZCASMDKgAnv37v3PwIDEACvw////P1RhKCaowfAAAF1yF182lX9XAAAAAElFTkSuQmCC')]">
-              <div ref={iframeRef} style={{ width: frameWidth }} className="h-full relative transition-all duration-200 shadow-2xl bg-white rounded-xl overflow-hidden ring-1 ring-white/10">
+              <div style={{ width: frameWidth }} className="h-full relative transition-all duration-200 shadow-2xl bg-white rounded-xl overflow-hidden ring-1 ring-white/10">
                 {/* 🟢 PASS ASSETS TO PREVIEW SO IT CAN RENDER IMAGES */}
                 <PreviewPanel code={currentFile.code} assets={draft.assets} />
               </div>
@@ -218,7 +350,7 @@ export default function ComponentEditor() {
 
       </div>
 
-      <VersionModal open={versionOpen} onClose={() => setVersionOpen(false)} onSave={() => { }} />
+      <VersionModal open={versionOpen} onClose={() => setVersionOpen(false)} onSave={handleVersionSave} />
     </div>
   );
 }

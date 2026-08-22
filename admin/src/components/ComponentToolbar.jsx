@@ -1,6 +1,6 @@
 import { Save, Upload, Rocket, Lock, Unlock, Edit2 } from "lucide-react";
 
-export default function ComponentToolbar({ onSave, onVersion, onLock, isLocked, componentName, onNameChange }) {
+export default function ComponentToolbar({ onSave, onVersion, onLock, isLocked, onPublish, componentName, onNameChange }) {
   return (
     <div className="h-14 flex items-center justify-between px-4 font-sans border-b border-white/[0.05] bg-[#0a0a0c] shrink-0">
       
@@ -35,7 +35,7 @@ export default function ComponentToolbar({ onSave, onVersion, onLock, isLocked, 
           Save
         </button>
 
-        <button className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium bg-emerald-500 text-black hover:bg-emerald-400">
+        <button onClick={onPublish} className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium bg-emerald-500 text-black hover:bg-emerald-400">
           <Rocket className="w-4 h-4" />
           Publish
         </button>

@@ -1,5 +1,6 @@
 import {
- useEffect
+ useEffect,
+ useRef
 }
 from "react";
 
@@ -16,6 +17,38 @@ export default function useCollaboration({
 
 }){
 
+ const lastRemoteRef =
+  useRef(null);
+
+ const setCodeRef =
+  useRef(setCode);
+
+ const handleRemoteUpdateRef =
+  useRef(null);
+
+ if (!handleRemoteUpdateRef.current) {
+
+  handleRemoteUpdateRef.current =
+   data => {
+
+    lastRemoteRef.current =
+     data?.code;
+
+    setCodeRef.current(
+     data?.code
+    );
+
+   };
+
+ }
+
+ useEffect(()=>{
+
+  setCodeRef.current =
+   setCode;
+
+ },[setCode]);
+
  useEffect(()=>{
 
   socket.emit(
@@ -28,26 +61,27 @@ export default function useCollaboration({
   socket.on(
    "editor:update",
 
-   data=>{
-
-    setCode(
-     data.code
-    );
-
-   }
+   handleRemoteUpdateRef.current
   );
 
   return()=>{
 
    socket.off(
-    "editor:update"
+    "editor:update",
+    handleRemoteUpdateRef.current
    );
 
   };
 
- },[]);
+ },[componentId]);
 
  useEffect(()=>{
+
+  if (code === lastRemoteRef.current) {
+
+   return;
+
+  }
 
   socket.emit(
    "editor:update",
@@ -57,6 +91,6 @@ export default function useCollaboration({
    }
   );
 
- },[code]);
+ },[componentId, code]);
 
 }

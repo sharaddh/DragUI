@@ -3,14 +3,16 @@ import api from "./axios";
 export const createVersion =
 async(
  componentId,
- changelog
+ changelog,
+ code
 )=>{
 
  const res =
   await api.post(
    `/versions/${componentId}`,
    {
-    changelog
+    changelog,
+    code
    }
   );
 
