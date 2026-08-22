@@ -36,6 +36,8 @@ new mongoose.Schema(
 }
 );
 
+// NOTE: every key below appears exactly once - duplicate keys in a Mongoose
+// schema definition silently keep only the last occurrence.
 const componentSchema =
 new mongoose.Schema(
 {
@@ -85,6 +87,7 @@ new mongoose.Schema(
     enum: [
       "draft",
       "published",
+      "archived",
       "deprecated",
     ],
     default: "draft",
@@ -96,7 +99,15 @@ new mongoose.Schema(
 
   props: [propSchema],
 
-  thumbnail: String,
+  thumbnail: {
+    type: String,
+    default: "",
+  },
+
+  thumbnailPublicId: {
+    type: String,
+    default: "",
+  },
 
   dependencies: [String],
 
@@ -113,19 +124,12 @@ new mongoose.Schema(
       type: String,
     },
   ],
-  workspace: {
-  type: mongoose.Schema.Types.ObjectId,
-  ref: "Workspace"
-},
-thumbnail: {
-  type: String,
-  default: "",
-},
 
-thumbnailPublicId: {
-  type: String,
-  default: "",
-},
+  workspace: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Workspace"
+  },
+
   downloads: {
     type: Number,
     default: 0,
@@ -135,77 +139,59 @@ thumbnailPublicId: {
     type: Number,
     default: 0,
   },
-thumbnail: String,
 
-gallery: [String],
+  gallery: [String],
 
-video: String,
+  video: String,
 
-assets: [
+  assets: [
     {
       name: { type: String },
       url: { type: String },
       type: { type: String } // e.g., 'image/jpeg'
     }
   ],
-status: {
- type: String,
- enum: [
-  "draft",
-  "published",
-  "archived"
- ],
- default: "draft"
-},
 
-version: {
- type: String,
- default: "1.0.0"
-},
+  views: {
+    type: Number,
+    default: 0
+  },
 
-downloads: {
- type: Number,
- default: 0
-},
+  rating: {
+    type: Number,
+    default: 0
+  },
 
-views: {
- type: Number,
- default: 0
-},
+  revision: {
+    type: Number,
+    default: 1
+  },
 
-rating: {
- type: Number,
- default: 0
-},
-revision: {
-  type:Number,
-  default:1
-},
-tags: [String],
+  documentation: String,
 
-documentation: String,
+  changelog: String,
 
-changelog: String,
+  demoUrl: String,
 
-demoUrl: String,
+  featured: {
+    type: Boolean,
+    default: false
+  },
 
-featured: {
- type: Boolean,
- default: false
-},
-lockedBy: {
- type:
-  mongoose.Schema.Types.ObjectId,
+  lockedBy: {
+    type:
+      mongoose.Schema.Types.ObjectId,
 
- ref: "Admin",
+    ref: "Admin",
 
- default: null
-},
+    default: null
+  },
 
-lockedAt: {
- type: Date,
- default: null
-},
+  lockedAt: {
+    type: Date,
+    default: null
+  },
+
   createdBy: {
     type:
       mongoose.Schema.Types.ObjectId,
