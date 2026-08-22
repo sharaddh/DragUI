@@ -10,29 +10,14 @@ router.get(
   "/",
   searchController.search
 );
+
+// Convenience alias: GET /api/search/search/:query -> controller search
 router.get(
  "/search/:query",
+ (req, res) => {
+   req.query.q = req.params.query;
+   return searchController.search(req, res);
+ }
+);
 
- async(
-  req,
-  res
- )=>{
-
- const components =
- await Component.find({
-  status:"published"
- });
-
- const results =
- searchComponents(
-  components,
-  req.params.query
- );
-
- res.json({
-  success:true,
-  results
- });
-
- });
 export default router;
