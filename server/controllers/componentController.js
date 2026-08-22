@@ -197,7 +197,17 @@ UPDATE COMPONENT
 export const update = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, code, category, type, description } = req.body;
+    // Whitelist updatable fields - never spread req.body (mass-assignment guard)
+    const allowed = [
+      "name", "label", "code", "category", "type", "description",
+      "tags", "visibility", "documentation", "demoUrl", "video",
+      "gallery", "changelog", "assets",
+    ];
+    const updates = {};
+    for (const key of allowed) {
+      if (req.body[key] !== undefined) updates[key] = req.body[key];
+    }
+    const { name, code, category, type, description } = updates;
 
     const existingComponent = await Component.findById(id);
     if (!existingComponent) return res.status(404).json({ success: false, message: "Not found" });
@@ -224,7 +234,7 @@ export const update = async (req, res) => {
     const updatedComponent = await Component.findByIdAndUpdate(
       id,
       {
-        ...req.body,
+        ...updates,
         slug: newSlug,
         template: updatedTemplatePath,
         props: updatedProps,
@@ -438,7 +448,7 @@ export const getVersions =
       const versions =
         await ComponentVersion.find(
           {
-            component:
+            componentId:
               req.params.id,
           }
         ).sort({
