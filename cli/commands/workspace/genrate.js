@@ -4,34 +4,59 @@ from "inquirer";
 import axios
 from "axios";
 
+import chalk
+from "chalk";
+
+import ora
+from "ora";
+
 export default async function generate(){
 
- const {
-  prompt
- } = await inquirer.prompt([
+ const spinner =
+  ora(
+   "Generating..."
+  ).start();
 
-  {
-   name:"prompt",
+ try{
 
-   message:
-    "Describe component"
-  }
-
- ]);
-
- const res =
-  await axios.post(
-
-   "http://localhost:5000/api/ai/generate",
+  const {
+   prompt
+  } = await inquirer.prompt([
 
    {
-    prompt
+    name:"prompt",
+
+    message:
+     "Describe component"
    }
 
+  ]);
+
+  const res =
+   await axios.post(
+
+    "http://localhost:5000/api/ai/generate",
+
+    {
+     prompt
+    }
+
+   );
+
+  spinner.succeed();
+
+  console.log(
+   res.data
   );
 
- console.log(
-  res.data
- );
+ }catch(error){
+
+  spinner.fail(
+   chalk.red(
+    error.message
+   )
+  );
+
+ }
 
 }

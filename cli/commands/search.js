@@ -1,5 +1,7 @@
 import chalk from "chalk";
 
+import ora from "ora";
+
 import {
  searchComponents
 }
@@ -9,25 +11,44 @@ export default async function search(
  query
 ) {
 
- const result =
-  await searchComponents(
-   query
-  );
+ const spinner =
+  ora(
+   "Searching..."
+  ).start();
 
- console.log(
-  chalk.cyan(
-   "\nComponents\n"
-  )
- );
+ try{
 
- result.results.forEach(
-  component => {
-
-   console.log(
-    `• ${component.name}`
+  const result =
+   await searchComponents(
+    query
    );
 
-  }
- );
+  spinner.succeed();
+
+  console.log(
+   chalk.cyan(
+    "\nComponents\n"
+   )
+  );
+
+  result.results.forEach(
+   component => {
+
+    console.log(
+     `• ${component.name}`
+    );
+
+   }
+  );
+
+ }catch(error){
+
+  spinner.fail(
+   chalk.red(
+    error.message
+   )
+  );
+
+ }
 
 }

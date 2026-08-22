@@ -1,32 +1,66 @@
 import axios
 from "axios";
 
+import chalk
+from "chalk";
+
+import ora
+from "ora";
+
 import {
- getToken
+ getToken,
+ getRole
 }
 from "../utils/auth.js";
 
 export default async function whoami(){
 
- const token =
-  getToken();
+ const role =
+  getRole() || "admin";
 
- const res =
- await axios.get(
+ const spinner =
+  ora(
+   "Fetching profile..."
+  ).start();
 
-  "http://localhost:5000/api/admin-auth/profile",
+ try{
 
-  {
-   headers:{
-    Authorization:
-     `Bearer ${token}`
+  const token =
+   getToken();
+
+  const url =
+   role === "user"
+    ? "http://localhost:5000/api/auth/profile"
+    : "http://localhost:5000/api/admin-auth/profile";
+
+  const res =
+  await axios.get(
+
+   url,
+
+   {
+    headers:{
+     Authorization:
+      `Bearer ${token}`
+    }
    }
-  }
 
- );
+  );
 
- console.log(
-  res.data.admin
- );
+  spinner.succeed();
+
+  console.log(
+   role === "user" ? res.data.user : res.data.admin
+  );
+
+ }catch(error){
+
+  spinner.fail(
+   chalk.red(
+    error.response?.data?.message || error.message
+   )
+  );
+
+ }
 
 }

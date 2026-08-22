@@ -8,6 +8,9 @@ import {
 }
 from "./packageManager.js";
 
+const PACKAGE_NAME_PATTERN =
+ /^[A-Za-z0-9@\/._-]+$/;
+
 export default function installPackages(
  packages=[]
 ){
@@ -17,6 +20,24 @@ export default function installPackages(
  ){
   return;
  }
+
+ packages.forEach(
+  name=>{
+
+   if(
+    !PACKAGE_NAME_PATTERN.test(
+     name
+    )
+   ){
+
+    throw new Error(
+     `Invalid package name: ${name}`
+    );
+
+   }
+
+  }
+ );
 
  const manager =
   detectPackageManager();

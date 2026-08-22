@@ -101,7 +101,12 @@ export default async function pull(projectId) {
 
   try {
     console.log(`Fetching project ${projectId}...`);
-    const res = await axios.get(`${API}/cli/pull/${projectId}`);
+    const token = getToken();
+    const res = await axios.get(`${API}/cli/pull/${projectId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
 
     const project = res.data.project;
     if (!project) {

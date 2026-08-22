@@ -98,10 +98,7 @@ export default async function update(
   );
 
   spinner.succeed(
-
-   `${component}
-    updated`
-
+   `${component} updated`
   );
 
  }catch(error){

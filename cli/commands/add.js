@@ -67,10 +67,7 @@ export default async function add(
   );
 
   spinner.succeed(
-
-   `${manifest.name}
-    installed`
-
+   `${manifest.name} installed`
   );
 
  }catch(error){

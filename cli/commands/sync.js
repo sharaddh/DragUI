@@ -1,19 +1,37 @@
 import axios from "axios";
+import chalk from "chalk";
+import ora from "ora";
 
 export default async function sync(){
 
- const res =
-  await axios.get(
+ const spinner =
+  ora(
+   "Syncing..."
+  ).start();
 
-   "http://localhost:5000/api/registry"
+ try{
 
+  const res =
+   await axios.get(
+
+    "http://localhost:5000/api/registry"
+
+   );
+
+  spinner.succeed();
+
+  console.log(
+   `${res.data.components.length} components synced`
   );
 
- console.log(
+ }catch(error){
 
-  `${res.data.components.length}
-   components synced`
+  spinner.fail(
+   chalk.red(
+    error.message
+   )
+  );
 
- );
+ }
 
 }

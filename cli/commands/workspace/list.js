@@ -1,6 +1,12 @@
 import axios
 from "axios";
 
+import chalk
+from "chalk";
+
+import ora
+from "ora";
+
 import {
  getToken
 }
@@ -8,25 +14,44 @@ from "../../utils/auth.js";
 
 export default async function list(){
 
- const token =
-  getToken();
+ const spinner =
+  ora(
+   "Fetching workspaces..."
+  ).start();
 
- const res =
- await axios.get(
+ try{
 
-  "http://localhost:5000/api/workspaces",
+  const token =
+   getToken();
 
-  {
-   headers:{
-    Authorization:
-     `Bearer ${token}`
+  const res =
+  await axios.get(
+
+   "http://localhost:5000/api/workspaces",
+
+   {
+    headers:{
+     Authorization:
+      `Bearer ${token}`
+    }
    }
-  }
 
- );
+  );
 
- console.table(
-  res.data.workspaces
- );
+  spinner.succeed();
+
+  console.table(
+   res.data.workspaces
+  );
+
+ }catch(error){
+
+  spinner.fail(
+   chalk.red(
+    error.message
+   )
+  );
+
+ }
 
 }

@@ -1,5 +1,7 @@
 import fs from "fs";
 
+import chalk from "chalk";
+
 export default function validate(){
 
  const required = [
@@ -38,8 +40,16 @@ export default function validate(){
    "Missing:"
   );
 
-  console.log(
-   errors
+  errors.forEach(
+   file=>{
+
+    console.log(
+     chalk.red(
+      `✗ ${file}`
+     )
+    );
+
+   }
   );
 
   process.exit(1);

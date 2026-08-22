@@ -1,60 +1,54 @@
+#!/usr/bin/env node
+
 import { Command } from "commander";
 
 import initCommand from "../commands/init.js";
 import addCommand from "../commands/add.js";
 import searchCommand from "../commands/search.js";
-import listCommand
-    from "../commands/list.js";
-import removeCommand
-    from "../commands/remove.js";
-import updateCommand
-    from "../commands/update.js";
-import loginCommand
-    from "../commands/login.js";
-import doctorCommand
-    from "../commands/doctor.js";
-import whoamiCommand
-    from "../commands/whoami.js";
-import pullCommand
-    from "../commands/pull.js";
-const workspace =
- program.command(
-  "workspace"
- );
- workspace
- .command("list")
- .action(
-  workspaceList
- );
+import listCommand from "../commands/list.js";
+import removeCommand from "../commands/remove.js";
+import updateCommand from "../commands/update.js";
+import loginCommand from "../commands/login.js";
+import logoutCommand from "../commands/logout.js";
+import doctorCommand from "../commands/doctor.js";
+import whoamiCommand from "../commands/whoami.js";
+import pullCommand from "../commands/pull.js";
+import publishCommand from "../commands/publish.js";
+import syncCommand from "../commands/sync.js";
+import validateCommand from "../commands/validate.js";
+import workspaceListCommand from "../commands/workspace/list.js";
+
 const program = new Command();
 
-program
-    .command("login")
-    .action(loginCommand);
-
-program
-    .command("whoami")
-    .action(whoamiCommand);
 program
     .name("dropui")
     .description("DropUI CLI")
     .version("1.0.0");
+
+const workspace = program.command("workspace");
+workspace
+    .command("list")
+    .description("List workspaces")
+    .action(workspaceListCommand);
+
+program.command("login").action(loginCommand);
+program.command("logout").action(logoutCommand);
+program.command("whoami").action(whoamiCommand);
+program.command("publish").description("Publish components to the registry").action(publishCommand);
+program.command("sync").action(syncCommand);
+program.command("validate").action(validateCommand);
 
 program
     .command("list")
     .description(
         "List installed components"
     )
-    .action(
-        listCommand
-    );
+    .action(listCommand);
+
 program
-    .command(
-        "remove <component>"
-    )
-    .action(
-        removeCommand
-    );
+    .command("remove <component>")
+    .action(removeCommand);
+
 program
     .command("init")
     .description("Initialize DropUI")
@@ -69,20 +63,18 @@ program
     .command("search <query>")
     .description("Search components")
     .action(searchCommand);
+
 program
     .command("doctor")
-    .action(
-        doctorCommand
-    );
+    .action(doctorCommand);
+
 program
     .command("pull <projectId>")
     .description("Pull a project design")
     .action(pullCommand);
+
 program
-    .command(
-        "update <component>"
-    )
-    .action(
-        updateCommand
-    );
+    .command("update <component>")
+    .action(updateCommand);
+
 program.parse();
