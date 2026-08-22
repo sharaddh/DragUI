@@ -97,6 +97,13 @@ async (
   role
 ) => {
 
+  // Never admit a member directly as owner
+  if (!ASSIGNABLE_ROLES.has(role)) {
+    throw new Error(
+      "Invalid role"
+    );
+  }
+
   const workspace =
     await Workspace.findById(
       workspaceId
@@ -142,6 +149,12 @@ async (
       workspaceId
     );
 
+  if (!workspace) {
+    throw new Error(
+      "Workspace not found"
+    );
+  }
+
   workspace.members =
     workspace.members.filter(
       (m) =>
@@ -154,6 +167,13 @@ async (
   return workspace;
 };
 
+const ASSIGNABLE_ROLES = new Set([
+  ROLES.ADMIN,
+  ROLES.DEVELOPER,
+  ROLES.DESIGNER,
+  ROLES.VIEWER,
+]);
+
 export const updateMemberRole =
 async (
   workspaceId,
@@ -161,10 +181,24 @@ async (
   role
 ) => {
 
+  // Ownership transfers are not supported through this path -
+  // granting OWNER here would be a privilege-escalation vector.
+  if (!ASSIGNABLE_ROLES.has(role)) {
+    throw new Error(
+      "Invalid role"
+    );
+  }
+
   const workspace =
     await Workspace.findById(
       workspaceId
     );
+
+  if (!workspace) {
+    throw new Error(
+      "Workspace not found"
+    );
+  }
 
   const member =
     workspace.members.find(
