@@ -33,3 +33,10 @@ dist-ssr
 .env.production
 .env.staging
 .env.ci
+
+# Generated / runtime artifacts
+templates/
+temp/
+thumbnails/
+uploads/
+exports/
