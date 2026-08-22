@@ -6,11 +6,15 @@ import {
 }
 from "../controllers/analyticsController.js";
 
+import authMiddleware
+from "../middleware/auth.middleware.js";
+
 const router =
  express.Router();
 
 router.post(
  "/view/:id",
+ authMiddleware,
  trackView
 );
 
