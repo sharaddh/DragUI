@@ -1,5 +1,6 @@
 import express from "express";
 import authMiddleware from "../middleware/auth.middleware.js";
+import optionalAuth from "../middleware/optionalAuth.js";
 import Project from "../models/Project.js";
 import * as projectController from "../controllers/projectController.js";
 
@@ -16,7 +17,7 @@ router.get("/marketplace", async (req, res) => {
 router.post("/", authMiddleware, projectController.create);
 router.get("/list", authMiddleware, projectController.list);
 router.post("/save", authMiddleware, projectController.save);
-router.get("/:projectId", projectController.getOne);
+router.get("/:projectId", optionalAuth, projectController.getOne);
 router.put("/:projectId", authMiddleware, projectController.update);
 router.delete("/:projectId", authMiddleware, projectController.deleteProject);
 
