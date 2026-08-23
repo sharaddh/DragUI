@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { getProjects, deleteProject } from "../api/projects";
 import {
   Plus, Trash2, ExternalLink, Search, Box, Loader2,
-  ArrowUpDown, Grid3X3, List,
+  ArrowUpDown, Grid3X3, List, Terminal, Copy, Check,
 } from "lucide-react";
 import CreateProjectModal from "../components/CreateProjectModal";
 import { ProjectCardSkeleton } from "../components/LoadingSkeleton";
@@ -23,7 +23,18 @@ export default function Projects() {
   const [showModal, setShowModal] = useState(false);
   const [sort, setSort] = useState("newest");
   const [view, setView] = useState("grid");
+  const [copiedId, setCopiedId] = useState(null);
   const navigate = useNavigate();
+
+  const copyPullCommand = async (id) => {
+    try {
+      await navigator.clipboard.writeText(`dropui pull ${id}`);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 1500);
+    } catch {
+      //
+    }
+  };
 
   useEffect(() => {
     loadProjects();
@@ -200,6 +211,19 @@ export default function Projects() {
                 <p className="mt-1 text-sm text-slate-500 line-clamp-2 min-h-[2.5rem]">
                   {project.description || "No description"}
                 </p>
+                <button
+                  onClick={() => copyPullCommand(id)}
+                  className="mt-3 inline-flex max-w-full items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 font-mono text-[11px] text-slate-600 transition hover:border-cyan-300 hover:bg-cyan-50 hover:text-cyan-700"
+                  title="Copy CLI pull command"
+                >
+                  <Terminal className="h-3 w-3 shrink-0" />
+                  <span className="truncate">dropui pull {id}</span>
+                  {copiedId === id ? (
+                    <Check className="h-3 w-3 shrink-0 text-emerald-600" />
+                  ) : (
+                    <Copy className="h-3 w-3 shrink-0 opacity-60" />
+                  )}
+                </button>
                 <div className="mt-4 flex items-center justify-between text-xs text-slate-400">
                   <span className="capitalize">{project.type || "frontend"}</span>
                   <span
@@ -232,6 +256,19 @@ export default function Projects() {
                       <p className="truncate text-sm text-slate-500">
                         {project.description || "No description"} &middot; {formatDate(project.updatedAt || project.createdAt)}
                       </p>
+                      <button
+                        onClick={() => copyPullCommand(id)}
+                        className="mt-1 inline-flex max-w-full items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 font-mono text-[11px] text-slate-500 transition hover:border-cyan-300 hover:bg-cyan-50 hover:text-cyan-700"
+                        title="Copy CLI pull command"
+                      >
+                        <Terminal className="h-3 w-3 shrink-0" />
+                        <span className="truncate">dropui pull {id}</span>
+                        {copiedId === id ? (
+                          <Check className="h-3 w-3 shrink-0 text-emerald-600" />
+                        ) : (
+                          <Copy className="h-3 w-3 shrink-0 opacity-60" />
+                        )}
+                      </button>
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-3 ml-4">
