@@ -155,7 +155,14 @@ router.get(
 );
 
 // ================= GITHUB =================
-router.get("/github", passport.authenticate("github", { scope: ["user:email"] }));
+router.get(
+  "/github",
+  (req, res, next) => {
+    req.session.redirect = req.query.redirect;
+    next();
+  },
+  passport.authenticate("github", { scope: ["user:email"] })
+);
 
 router.get(
   "/github/callback",
@@ -163,7 +170,8 @@ router.get(
   (req, res) => {
     const token = signUserToken(req.user);
 
-    res.redirect(`${process.env.CLIENT_URL || "http://localhost:5173"}/auth-success?token=${token}`);
+    const redirect = safeClientRedirect(req.query.redirect || req.session?.redirect);
+    res.redirect(`${redirect}${redirect.includes("?") ? "&" : "?"}token=${token}`);
   }
 );
 
