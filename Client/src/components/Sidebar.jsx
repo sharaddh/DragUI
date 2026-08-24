@@ -227,7 +227,13 @@ export default function Sidebar() {
     : [];
 
   const handleDirectAdd = (comp) => {
-    addComponent(comp.type);
+    addComponent(comp.type, "root", undefined, {
+      props: comp.defaultProps || {},
+      code: comp.code || comp.template || "",
+      template: comp.template || "",
+      thumbnail: comp.thumbnail || "",
+      label: comp.label,
+    });
   };
 
   return (

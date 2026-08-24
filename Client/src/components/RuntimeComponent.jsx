@@ -1,5 +1,8 @@
 import { useMemo } from "react";
-import { LiveProvider, LivePreview } from "react-live";
+import * as React from "react";
+import { LiveProvider, LivePreview, LiveError } from "react-live";
+import { motion, AnimatePresence } from "framer-motion";
+import confetti from "canvas-confetti";
 
 function prepareCode(code = "") {
   let src = code
@@ -8,21 +11,23 @@ function prepareCode(code = "") {
     .replace(/import\s+React\s+from\s*['"]react['"];?/g, "")
     .replace(/^\s*import[^\n]*$/gm, "");
 
+  // Named exports become plain declarations so they stay usable in-scope
+  src = src.replace(/^\s*export\s+(const|let|var|function|class)\s+/gm, "$1 ");
+
   const ref = "__DropUiPreview__";
 
-  const fnMatch = src.match(/export\s+default\s+function\s+(\w+)/);
-  const varMatch = src.match(/export\s+default\s+(const|let|var)\s+(\w+)/);
-  const arrowMatch = src.match(/export\s+default\s+((?:\([^)]*\)|[A-Za-z_$][\w$]*)\s*=>)/);
-  const bareMatch = src.match(/export\s+default\s+([\w$]+)\s*;?/);
+  const fnMatch = src.match(/(?:^|\n)\s*export\s+default\s+function\s+(\w+)/);
+  const varMatch = src.match(/export\s+default\s+(?:const|let|var)\s+(\w+)/);
+  const arrowMatch = src.match(/export\s+default\s+(?:\([^)]*\)|[A-Za-z_$][\w$]*)\s*=>/);
+  const bareMatch = src.match(/export\s+default\s+([A-Za-z_$][\w$]*)\s*;?\s*(?:\n|$)/);
 
   if (fnMatch) {
-    src = src.replace(`export default function ${fnMatch[1]}`, `function ${ref}`);
+    src = src.replace(/export\s+default\s+function\s+(\w+)/, `function ${ref}`);
   } else if (varMatch) {
-    src = src.replace(`export default ${varMatch[1]} ${varMatch[2]}`, `${varMatch[1]} ${ref}`);
+    src = src.replace(/export\s+default\s+(const|let|var)\s+(\w+)/, `$1 ${ref}`);
   } else if (arrowMatch) {
     src = src.replace(/export\s+default\s+/, `const ${ref} = `);
   } else if (bareMatch) {
-    src = src.replace(bareMatch[0], "");
     src += `\nconst ${ref} = ${bareMatch[1]};`;
   } else {
     return { code: "", ref: "" };
@@ -30,6 +35,10 @@ function prepareCode(code = "") {
 
   return { code: src, ref };
 }
+
+// Libraries admin-created components may import - import lines are stripped,
+// so every identifier they reference must exist in the live scope.
+export const RUNTIME_SCOPE_LIBS = { motion, AnimatePresence, confetti };
 
 export default function RuntimeComponent({ code, props }) {
   const liveCode = useMemo(() => {
@@ -39,12 +48,28 @@ export default function RuntimeComponent({ code, props }) {
     return `${clean}\nrender(<${ref} {...__props__} />);`;
   }, [code]);
 
-  const scope = useMemo(() => ({ __props__: props || {} }), [props]);
+  const scope = useMemo(
+    () => ({
+      __props__: props || {},
+      React,
+      useState: React.useState,
+      useEffect: React.useEffect,
+      useRef: React.useRef,
+      useMemo: React.useMemo,
+      useCallback: React.useCallback,
+      useContext: React.useContext,
+      useReducer: React.useReducer,
+      useLayoutEffect: React.useLayoutEffect,
+      ...RUNTIME_SCOPE_LIBS,
+    }),
+    [props]
+  );
 
   if (!liveCode) return null;
 
   return (
     <LiveProvider code={liveCode} scope={scope} noInline>
+      <LiveError className="rounded-lg border border-red-200 bg-red-50 p-2 text-left text-[10px] leading-snug text-red-600" />
       <LivePreview className="h-full w-full" />
     </LiveProvider>
   );
