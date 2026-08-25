@@ -51,7 +51,11 @@ export default async function projects() {
     }
 
     console.log("");
-    console.log(chalk.gray(`Pull any project with: ${chalk.cyan("dropui pull <projectId>")}`));
+    console.log(
+      chalk.gray(
+        `${list.length} project${list.length === 1 ? "" : "s"} · pull any with: ${chalk.cyan("dropui pull <projectId>")}`
+      )
+    );
   } catch (error) {
     spinner.fail(chalk.red(error.response?.data?.message || error.message));
   }
