@@ -3,8 +3,7 @@ import chalk from "chalk";
 import ora from "ora";
 
 import { getToken, getRole } from "../utils/auth.js";
-
-const API = "http://localhost:5000/api";
+import { API_BASE as API } from "../utils/config.js";
 
 function pad(str, len) {
   str = String(str || "");

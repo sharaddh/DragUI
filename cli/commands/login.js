@@ -4,8 +4,8 @@ import { platform } from "os";
 import axios from "axios";
 
 import { saveToken } from "../utils/auth.js";
+import { API_BASE, CLIENT_URL } from "../utils/config.js";
 
-const CLIENT_URL = "http://localhost:5173";
 const LOGIN_TIMEOUT_MS = 5 * 60 * 1000;
 
 function openBrowser(url) {
@@ -45,7 +45,7 @@ export default async function login() {
 
     // Confirm the token actually authenticates before declaring success
     try {
-      const profile = await axios.get("http://localhost:5000/api/auth/profile", {
+      const profile = await axios.get(`${API_BASE}/auth/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log(`Logged in as ${profile.data.user?.email || "DropUI user"}`);

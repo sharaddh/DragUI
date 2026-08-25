@@ -12,6 +12,8 @@ import {
  getRole
 }
 from "../utils/auth.js";
+import { API_BASE }
+from "../utils/config.js";
 
 export default async function whoami(){
 
@@ -30,8 +32,8 @@ export default async function whoami(){
 
   const url =
    role === "user"
-    ? "http://localhost:5000/api/auth/profile"
-    : "http://localhost:5000/api/admin-auth/profile";
+    ? `${API_BASE}/auth/profile`
+    : `${API_BASE}/admin-auth/profile`;
 
   const res =
   await axios.get(

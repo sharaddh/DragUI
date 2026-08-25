@@ -8,6 +8,8 @@ import {
  saveToken
 }
 from "../utils/auth.js";
+import { API_BASE }
+from "../utils/config.js";
 
 export default async function adminLogin(){
 
@@ -34,7 +36,7 @@ export default async function adminLogin(){
  const res =
  await axios.post(
 
-  "http://localhost:5000/api/admin-auth/login",
+  `${API_BASE}/admin-auth/login`,
 
   {
    adminId,
@@ -53,7 +55,7 @@ export default async function adminLogin(){
  try {
   const profile =
    await axios.get(
-    "http://localhost:5000/api/admin-auth/profile",
+    `${API_BASE}/admin-auth/profile`,
     {
      headers:{
       Authorization:

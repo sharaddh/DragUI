@@ -2,8 +2,7 @@ import fs from "fs";
 import path from "path";
 import axios from "axios";
 import { getToken } from "../utils/auth.js";
-
-const API = "http://localhost:5000/api";
+import { API_BASE as API } from "../utils/config.js";
 
 function escapeHtml(str) {
   if (!str) return "";
