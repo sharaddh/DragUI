@@ -14,6 +14,7 @@ import logoutCommand from "../commands/logout.js";
 import doctorCommand from "../commands/doctor.js";
 import whoamiCommand from "../commands/whoami.js";
 import pullCommand from "../commands/pull.js";
+import projectsCommand from "../commands/projects.js";
 import publishCommand from "../commands/publish.js";
 import syncCommand from "../commands/sync.js";
 import validateCommand from "../commands/validate.js";
@@ -74,6 +75,11 @@ program
     .command("pull <projectId>")
     .description("Pull a project design")
     .action(pullCommand);
+
+program
+    .command("projects")
+    .description("List your projects with their pull ids")
+    .action(projectsCommand);
 
 program
     .command("update <component>")
