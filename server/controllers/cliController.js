@@ -109,7 +109,9 @@ async (
     }
 
     let project =
-      await Project.findOne(query);
+      await Project.findOne(query).select(
+        "-__v -backend -installs -downloads -likes -views"
+      );
 
     if (!project) {
       return res.status(404).json({
