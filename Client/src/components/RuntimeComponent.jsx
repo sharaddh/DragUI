@@ -3,6 +3,7 @@ import * as React from "react";
 import { LiveProvider, LivePreview, LiveError } from "react-live";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
+import LiveErrorBoundary from "./LiveErrorBoundary";
 
 function prepareCode(code = "") {
   let src = code
@@ -74,7 +75,9 @@ export default function RuntimeComponent({ code, props }) {
   return (
     <LiveProvider code={liveCode} scope={scope} noInline>
       <LiveError className="rounded-lg border border-red-200 bg-red-50 p-2 text-left text-[10px] leading-snug text-red-600" />
-      <LivePreview className="h-full w-full" />
+      <LiveErrorBoundary>
+        <LivePreview className="h-full w-full" />
+      </LiveErrorBoundary>
     </LiveProvider>
   );
 }
