@@ -8,6 +8,7 @@ import {
 import CreateProjectModal from "../components/CreateProjectModal";
 import { ProjectCardSkeleton } from "../components/LoadingSkeleton";
 import EmptyState from "../components/EmptyState";
+import { copyText } from "../utils/clipboard";
 
 const SORT_OPTIONS = [
   { value: "newest", label: "Newest First" },
@@ -27,12 +28,10 @@ export default function Projects() {
   const navigate = useNavigate();
 
   const copyPullCommand = async (id) => {
-    try {
-      await navigator.clipboard.writeText(`dropui pull ${id}`);
+    const ok = await copyText(`dropui pull ${id}`);
+    if (ok) {
       setCopiedId(id);
       setTimeout(() => setCopiedId(null), 1500);
-    } catch {
-      //
     }
   };
 
