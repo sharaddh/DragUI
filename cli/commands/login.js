@@ -1,6 +1,7 @@
 import http from "http";
 import { exec } from "child_process";
 import { platform } from "os";
+import axios from "axios";
 
 import { saveToken } from "../utils/auth.js";
 
@@ -18,7 +19,7 @@ function openBrowser(url) {
 }
 
 export default async function login() {
-  const server = http.createServer((req, res) => {
+  const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, "http://127.0.0.1");
 
     if (url.pathname !== "/callback") {
@@ -42,7 +43,15 @@ export default async function login() {
       "<h2>&#10003; DropUI CLI</h2><p>Logged in successfully. You can close this window and return to your terminal.</p>"
     );
 
-    console.log("Logged in");
+    // Confirm the token actually authenticates before declaring success
+    try {
+      const profile = await axios.get("http://localhost:5000/api/auth/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log(`Logged in as ${profile.data.user?.email || "DropUI user"}`);
+    } catch {
+      console.log("Logged in (could not verify profile)");
+    }
     server.close(() => process.exit(0));
   });
 

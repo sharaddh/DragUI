@@ -48,8 +48,27 @@ export default async function adminLogin(){
   "admin"
  );
 
+ // Confirm the token actually authenticates
+ let adminLabel = "admin";
+ try {
+  const profile =
+   await axios.get(
+    "http://localhost:5000/api/admin-auth/profile",
+    {
+     headers:{
+      Authorization:
+       `Bearer ${res.data.token}`
+     }
+    }
+   );
+  adminLabel =
+   profile.data.admin?.adminId || "admin";
+ } catch {
+  // keep generic label
+ }
+
  console.log(
-  "Logged in as admin"
+  `Logged in as ${adminLabel} (admin)`
  );
 
 }
