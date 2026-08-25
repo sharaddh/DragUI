@@ -226,7 +226,7 @@ ${customScript}
 </html>`;
 }
 
-export default async function pull(projectId) {
+export default async function pull(projectId, opts = {}) {
   if (!projectId) {
     console.log("Usage: dropui pull <projectId>");
     return;
@@ -247,7 +247,11 @@ export default async function pull(projectId) {
       return;
     }
 
-    const dir = project.name ? project.name.replace(/[^a-zA-Z0-9-_]/g, "-").toLowerCase() : "dropui-project";
+    const dir = opts.dir
+      ? opts.dir
+      : project.name
+        ? project.name.replace(/[^a-zA-Z0-9-_]/g, "-").toLowerCase()
+        : "dropui-project";
 
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });

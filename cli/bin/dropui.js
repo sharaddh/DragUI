@@ -74,6 +74,7 @@ program
 program
     .command("pull <projectId>")
     .description("Pull a project design")
+    .option("-d, --dir <path>", "Output directory (defaults to ./<project-name>)")
     .action(pullCommand);
 
 program
