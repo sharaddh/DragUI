@@ -159,22 +159,51 @@ function generateHtml(design, projectName) {
     const libScripts = [];
     const libAliases = [];
     if (libUsed.has("motion")) {
-      libScripts.push(`  <script crossorigin src="https://unpkg.com/framer-motion@10/dist/framer-motion.js"></script>`);
+      // v6 is the last line with a browser-ready UMD build (global: Motion)
+      libScripts.push(`  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/framer-motion@6/dist/framer-motion.js"></script>`);
       libAliases.push(`const { motion, AnimatePresence } = window.Motion || {};`);
+    } else {
+      libScripts.push(`  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>`);
     }
     if (libUsed.has("confetti")) {
       libScripts.push(`  <script crossorigin src="https://cdn.jsdelivr.net/npm/canvas-confetti@1/dist/confetti.browser.min.js"></script>`);
       libAliases.push(`const confetti = window.confetti;`);
     }
 
-    customScript = `${libScripts.join("\n")}
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    customScript = `${[...new Set(libScripts)].join("\n")}
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script type="text/babel" data-presets="react">
+  <script type="text/plain" id="__dropui-custom-src__">
 ${libAliases.join("\n")}
 ${sources.join("\n\n")}
 ${mounts.join("\n")}
+  </script>
+  <script>
+    (function () {
+      // Compile with the CLASSIC JSX runtime - Babel standalone's automatic
+      // runtime emits "import from react/jsx-runtime" which fails as a
+      // classic script without module resolution.
+      function boot() {
+        var src = document.getElementById("__dropui-custom-src__").textContent;
+        try {
+          var out = Babel.transform(src, {
+            presets: [["react", { runtime: "classic" }]],
+          }).code;
+          var s = document.createElement("script");
+          s.textContent = out;
+          document.body.appendChild(s);
+        } catch (err) {
+          console.error("DropUI custom component failed to compile:", err);
+        }
+      }
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", boot);
+      } else {
+        boot();
+      }
+    })();
   </script>`;
   }
 
@@ -247,6 +276,18 @@ export default async function pull(projectId) {
 }
 
 function generateReactComponent(design) {
+  const customNodes = collectCustomNodes(design);
+  const customMap = new Map();
+  const usedLibs = new Set();
+
+  customNodes.forEach((node, i) => {
+    const prepared = prepareCustomSource(node.code, `Custom_${i + 1}`);
+    if (prepared) {
+      customMap.set(node, { name: `Custom_${i + 1}`, src: prepared.src });
+      Object.keys(prepared.uses).forEach((k) => usedLibs.add(k));
+    }
+  });
+
   const renderJSX = (node) => {
     if (!node) return "";
     if (node.type === "root") {
@@ -257,6 +298,10 @@ function generateReactComponent(design) {
     const cls = p.className || "";
     const styleStr = Object.keys(style).length ? ` style={${JSON.stringify(style)}}` : "";
     const children = (node.children || []).map(renderJSX).join("\n");
+
+    if (node.code && customMap.has(node)) {
+      return `  <${customMap.get(node).name} {...${JSON.stringify(p)}} />`;
+    }
 
     switch (node.type) {
       case "heading": {
@@ -301,8 +346,11 @@ ${p.text ? `    ${p.text}\n` : ""}${children ? children + "\n" : ""}  </div>`;
 
   if (!content) return null;
 
-  return `import React from "react";
+  const libImports = [...usedLibs].map((k) => CUSTOM_LIB_IMPORTS[k]).join("\n");
+  const customSources = [...customMap.values()].map((c) => `// inlined admin component\n${c.src}`).join("\n\n");
 
+  return `${libImports ? libImports + "\n" : ""}import React from "react";
+${customSources ? "\n" + customSources + "\n" : ""}
 export default function Component() {
   return (
     <div className="min-h-screen bg-white">
