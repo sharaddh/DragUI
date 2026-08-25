@@ -101,8 +101,9 @@ export default function CliLogin() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           <button
             type="button"
+            disabled={loading}
             onClick={() => socialLogin("google")}
-            className="group flex h-16 items-center justify-center gap-3 rounded-2xl border border-slate-700 bg-red-600 px-5 text-base font-semibold text-white transition hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-400"
+            className="group flex h-16 items-center justify-center gap-3 rounded-2xl border border-slate-700 bg-red-600 px-5 text-base font-semibold text-white transition hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-400 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M23.64 12.2045C23.64 11.4318 23.5782 10.6814 23.4591 9.95897H12.2383V14.0427H18.6982C18.5691 15.5034 17.6846 16.7644 16.3491 17.5529V20.2701H20.6518C22.8127 18.1769 23.64 15.1121 23.64 12.2045Z" fill="#4285F4"/>
@@ -115,8 +116,9 @@ export default function CliLogin() {
 
           <button
             type="button"
+            disabled={loading}
             onClick={() => socialLogin("github")}
-            className="group flex h-16 items-center justify-center gap-3 rounded-2xl border border-slate-700 bg-slate-800 px-5 text-base font-semibold text-white transition hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500"
+            className="group flex h-16 items-center justify-center gap-3 rounded-2xl border border-slate-700 bg-slate-800 px-5 text-base font-semibold text-white transition hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M12 0.297852C5.373 0.297852 0 5.67085 0 12.2979C0 17.4839 3.438 21.8689 8.205 23.5429C8.805 23.6579 9.025 23.3219 9.025 23.0349C9.025 22.7789 9.015 22.1169 9.01 21.2049C5.672 21.9049 4.968 19.6539 4.968 19.6539C4.422 18.2889 3.633 17.9489 3.633 17.9489C2.546 17.2179 3.715 17.2329 3.715 17.2329C4.919 17.3199 5.555 18.4779 5.555 18.4779C6.64 20.2559 8.356 19.7089 9.048 19.4119C9.161 18.6439 9.477 18.1109 9.83 17.8179C7.165 17.5189 4.343 16.4549 4.343 11.7089C4.343 10.3759 4.8 9.28585 5.57 8.43485C5.445 8.13185 5.045 6.86385 5.695 5.17685C5.695 5.17685 6.695 4.85985 8.995 6.41985C9.94 6.15485 10.94 6.02385 11.94 6.01985C12.94 6.02385 13.94 6.15485 14.885 6.41985C17.185 4.85985 18.185 5.17685 18.185 5.17685C18.835 6.86385 18.435 8.13185 18.31 8.43485C19.08 9.28585 19.535 10.3759 19.535 11.7089C19.535 16.4679 16.71 17.5149 14.04 17.8129C14.49 18.2149 14.89 20.1759 14.89 21.8619C14.88 22.9999 14.88 23.0349 14.88 23.0349C14.88 23.3229 15.095 23.6629 15.705 23.5429C20.465 21.8669 24 17.4839 24 12.2979C24 5.67085 18.627 0.297852 12 0.297852Z" />
