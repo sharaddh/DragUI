@@ -5,3 +5,9 @@ dist/
 *.orig
 .env
 .env.local
+
+# DropUI CLI pull output
+smoke-test-project/
+pulled-out/
+cli-custom-pull-test/
+dropui-project/
