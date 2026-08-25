@@ -34,8 +34,31 @@ export const list = async (req, res) => {
   }
 };
 
+function isValidDesign(design) {
+  if (!design || typeof design !== "object" || Array.isArray(design)) return false;
+  if (design.type !== "root") return false;
+  if (!Array.isArray(design.children)) return false;
+  // Every child must at least carry a type and its own children bucket
+  return design.children.every(
+    (node) => node && typeof node === "object" && typeof node.type === "string"
+  );
+}
+
 export const save = async (req, res) => {
   try {
+    const { name, design } = req.body;
+
+    if (!name || !String(name).trim()) {
+      return res.status(400).json({ success: false, message: "Project name is required" });
+    }
+
+    if (!isValidDesign(design)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid design payload: expected a root node with children",
+      });
+    }
+
     const project = await projectService.saveProject(req.userId, req.body);
     res.json({ success: true, project });
   } catch (error) {
