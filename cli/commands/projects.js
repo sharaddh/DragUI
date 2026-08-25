@@ -23,7 +23,7 @@ export default async function projects() {
   const spinner = ora("Fetching your projects...").start();
 
   try {
-    const res = await axios.get(`${API}/projects`, {
+    const res = await axios.get(`${API}/projects/list`, {
       headers: { Authorization: `Bearer ${getToken()}` },
     });
 
