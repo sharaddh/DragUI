@@ -225,6 +225,8 @@ export default function Projects() {
                 </button>
                 <div className="mt-4 flex items-center justify-between text-xs text-slate-400">
                   <span className="capitalize">{project.type || "frontend"}</span>
+                  <span className="text-slate-300">|</span>
+                  <span>{formatDate(project.createdAt)}</span>
                   <span
                     className={`rounded-full px-2.5 py-1 font-medium ${
                       project.isPublished
