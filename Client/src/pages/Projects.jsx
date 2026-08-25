@@ -69,9 +69,13 @@ export default function Projects() {
     return isNaN(d.getTime()) ? "—" : d.toLocaleDateString();
   };
 
-  let filtered = projects.filter((p) =>
-    p.name?.toLowerCase().includes(search.toLowerCase())
-  );
+  let filtered = projects.filter((p) => {
+    const q = search.toLowerCase();
+    return (
+      p.name?.toLowerCase().includes(q) ||
+      (p.projectId || p._id)?.toString().toLowerCase().includes(q)
+    );
+  });
 
   filtered.sort((a, b) => {
     if (sort === "newest") return new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt);
