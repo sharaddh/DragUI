@@ -86,4 +86,15 @@ program
     .command("update <component>")
     .action(updateCommand);
 
+program.addHelpText(
+    "after",
+    `
+Examples:
+  $ dropui login                 # browser-based sign-in (email, Google, GitHub)
+  $ dropui projects              # list your projects with pull ids
+  $ dropui pull c4bdf9a0         # export a project to ./<project-name>/
+  $ dropui pull c4bdf9a0 -d out  # export into a custom folder
+`
+);
+
 program.parse();
