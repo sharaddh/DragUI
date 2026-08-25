@@ -33,3 +33,10 @@ export const authLimiter =
         "Too many login attempts.",
     },
   });
+// CLI endpoints do a DB lookup per call - keep them modest
+export const cliLimiter =
+ rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  message: { success: false, message: "Too many CLI requests, slow down" },
+ });

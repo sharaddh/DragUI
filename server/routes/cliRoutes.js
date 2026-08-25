@@ -4,6 +4,8 @@ import * as cliController from "../controllers/cliController.js";
 import adminAuth
  from "../middleware/adminAuth.js";
 
+import { cliLimiter } from "../middleware/rateLimiter.js";
+
 import User from "../models/User.js";
 import Admin from "../models/Admin.js";
 import jwt from "jsonwebtoken";
@@ -54,12 +56,14 @@ async function requireAnyAuth(req, res, next) {
 
 router.post(
  "/publish",
+ cliLimiter,
  adminAuth,
  cliController.publishPackage
 );
 
 router.get(
   "/pull/:projectId",
+  cliLimiter,
   requireAnyAuth,
   cliController.pullProject
 );
