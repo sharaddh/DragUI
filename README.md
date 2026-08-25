@@ -217,10 +217,16 @@ npm run dev
 cd DragUi-cli
 npm link
 
-dropui login
-dropui whoami
-dropui pull <projectId>
+dropui login          # opens the browser - email/password, Google, or GitHub
+dropui whoami         # shows the signed-in account
+dropui projects       # lists your projects with their pull ids
+dropui pull <id>      # exports design.json, index.html, Component.jsx
+dropui admin-login    # separate terminal login for platform admins
 ```
+
+`pull` writes a ready-to-use folder: open `index.html` directly for a static preview,
+or drop `Component.jsx` into any React + Tailwind project (custom admin components
+also need `framer-motion` and `canvas-confetti`).
 
 ---
 
