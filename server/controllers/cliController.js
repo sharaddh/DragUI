@@ -1,5 +1,7 @@
 import Project from "../models/Project.js";
 import Component from "../models/Component.js";
+import User from "../models/User.js";
+import Admin from "../models/Admin.js";
 import slugify from "slugify";
 
 export const publishPackage =
@@ -68,6 +70,25 @@ async(req,res)=>{
 
  }
 
+};
+
+// Authenticated via requireAnyAuth.
+// Returns the caller's identity so the CLI can greet/verify in one call.
+export const me = async (req, res) => {
+  try {
+    if (req.adminId) {
+      const admin = await Admin.findById(req.adminId).select("adminId isActive");
+      return res.json({ success: true, role: "admin", admin });
+    }
+
+    const user = await User.findById(req.userId).select("email username");
+    if (!user) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+    res.json({ success: true, role: "user", user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 // Authenticated via requireAnyAuth (see routes):

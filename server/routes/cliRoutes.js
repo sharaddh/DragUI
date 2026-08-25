@@ -62,6 +62,12 @@ router.post(
 );
 
 router.get(
+  "/me",
+  requireAnyAuth,
+  cliController.me
+);
+
+router.get(
   "/pull/:projectId",
   cliLimiter,
   requireAnyAuth,
