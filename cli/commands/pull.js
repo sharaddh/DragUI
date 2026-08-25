@@ -10,6 +10,56 @@ function escapeHtml(str) {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
+const CUSTOM_LIB_IMPORTS = {
+  confetti: `import confetti from "canvas-confetti";`,
+  motion: `import { motion, AnimatePresence } from "framer-motion";`,
+};
+
+// Strip import/export syntax so a stored component source can be inlined
+// under a chosen name; reports which external libs it references.
+function prepareCustomSource(code, compName) {
+  let src = String(code)
+    .replace(/import\s+React\s*,\s*\{([^}]*)\}\s+from\s*['"]react['"];?/g, "const { $1 } = React;")
+    .replace(/import\s+\{([^}]*)\}\s+from\s*['"]react['"];?/g, "const { $1 } = React;")
+    .replace(/import\s+React\s+from\s*['"]react['"];?/g, "")
+    .replace(/^\s*import[^\n]*$/gm, "");
+  src = src.replace(/^\s*export\s+(const|let|var|function|class)\s+/gm, "$1 ");
+
+  const uses = {};
+  if (/\bconfetti\b/.test(src)) uses.confetti = true;
+  if (/\bmotion\b|\bAnimatePresence\b/.test(src)) uses.motion = true;
+
+  const patterns = [
+    [/export\s+default\s+function\s+(\w+)/, (m) => [`export default function ${m[1]}`, `function ${compName}`]],
+    [/export\s+default\s+(const|let|var)\s+(\w+)/, (m) => [`export default ${m[1]} ${m[2]}`, `${m[1]} ${compName}`]],
+    [/export\s+default\s+/, () => ["export default", `const ${compName} =`]],
+  ];
+  let replaced = false;
+  for (const [re, make] of patterns) {
+    const m = src.match(re);
+    if (m) {
+      const [from, to] = make(m);
+      src = src.replace(from, to);
+      replaced = true;
+      break;
+    }
+  }
+  if (!replaced) return null;
+  return { src, uses };
+}
+
+function collectCustomNodes(design) {
+  const found = [];
+  const walk = (node) => {
+    if (!node || typeof node !== "object") return;
+    if (Array.isArray(node)) return node.forEach(walk);
+    if (node.code) found.push(node);
+    (node.children || []).forEach(walk);
+  };
+  walk(design);
+  return found;
+}
+
 function styleToInline(style) {
   if (!style || !Object.keys(style).length) return "";
   return Object.entries(style)
@@ -22,10 +72,10 @@ function styleToInline(style) {
     .join("; ");
 }
 
-function renderNode(node) {
+function renderNode(node, customMap) {
   if (!node) return "";
   if (node.type === "root") {
-    return (node.children || []).map(renderNode).join("\n");
+    return (node.children || []).map((c) => renderNode(c, customMap)).join("\n");
   }
 
   const p = node.props || {};
@@ -33,7 +83,12 @@ function renderNode(node) {
   const inline = styleToInline(style);
   const cls = p.className || "";
   const attrs = ` class="${cls}"${inline ? ` style="${inline}"` : ""}`;
-  const children = (node.children || []).map(renderNode).join("\n");
+  const children = (node.children || []).map((c) => renderNode(c, customMap)).join("\n");
+
+  if (node.code && customMap) {
+    const ref = customMap.get(node);
+    return `<div data-dropui-custom="${ref}"${attrs}></div>`;
+  }
 
   switch (node.type) {
     case "heading": {
@@ -67,14 +122,62 @@ function renderNode(node) {
 }
 
 function generateHtml(design, projectName) {
+  const customNodes = collectCustomNodes(design);
+  const customMap = new Map();
+  customNodes.forEach((node, i) => customMap.set(node, `c${i + 1}`));
+
   let body = "";
   if (Array.isArray(design)) {
-    body = design.map(renderNode).join("\n");
+    body = design.map((n) => renderNode(n, customMap)).join("\n");
   } else if (design?.children) {
-    body = (design.children || []).map(renderNode).join("\n");
+    body = (design.children || []).map((n) => renderNode(n, customMap)).join("\n");
   } else if (design?.type) {
-    body = renderNode(design);
+    body = renderNode(design, customMap);
   }
+
+  // Custom admin components need a live runtime - mount them via Babel standalone
+  let customScript = "";
+  if (customNodes.length) {
+    const sources = [];
+    const mounts = [];
+    const libUsed = new Set();
+
+    customNodes.forEach((node, i) => {
+      const ref = customMap.get(node);
+      const prepared = prepareCustomSource(node.code, `Custom_${i + 1}`);
+      if (!prepared) return;
+      Object.keys(prepared.uses).forEach((k) => libUsed.add(k));
+      sources.push(`// ${node.label || node.type}\n${prepared.src}`);
+
+      const propsJson = JSON.stringify(node.props || {}).replace(/</g, "\\u003c");
+      mounts.push(
+        `ReactDOM.createRoot(document.querySelector('[data-dropui-custom="${ref}"]'))` +
+          `.render(React.createElement(Custom_${i + 1}, ${propsJson}));`
+      );
+    });
+
+    const libScripts = [];
+    const libAliases = [];
+    if (libUsed.has("motion")) {
+      libScripts.push(`  <script crossorigin src="https://unpkg.com/framer-motion@10/dist/framer-motion.js"></script>`);
+      libAliases.push(`const { motion, AnimatePresence } = window.Motion || {};`);
+    }
+    if (libUsed.has("confetti")) {
+      libScripts.push(`  <script crossorigin src="https://cdn.jsdelivr.net/npm/canvas-confetti@1/dist/confetti.browser.min.js"></script>`);
+      libAliases.push(`const confetti = window.confetti;`);
+    }
+
+    customScript = `${libScripts.join("\n")}
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel" data-presets="react">
+${libAliases.join("\n")}
+${sources.join("\n\n")}
+${mounts.join("\n")}
+  </script>`;
+  }
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -89,6 +192,7 @@ function generateHtml(design, projectName) {
 </head>
 <body>
 ${body}
+${customScript}
 </body>
 </html>`;
 }
