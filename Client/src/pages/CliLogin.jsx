@@ -60,6 +60,8 @@ export default function CliLogin() {
               id="cli-email"
               type="email"
               required
+              autoFocus
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
@@ -72,6 +74,7 @@ export default function CliLogin() {
               id="cli-password"
               type="password"
               required
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
