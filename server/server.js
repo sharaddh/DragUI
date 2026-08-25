@@ -103,6 +103,9 @@ app.get("/", (req, res) => {
   res.json({
     success: true,
     message: "DropUI API Running",
+    version: "1.0.0",
+    uptimeSeconds: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
   });
 });
 
