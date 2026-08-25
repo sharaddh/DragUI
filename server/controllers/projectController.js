@@ -68,7 +68,10 @@ export const save = async (req, res) => {
 
 export const deleteProject = async (req, res) => {
   try {
-    await projectService.deleteProject(req.userId, req.params.projectId);
+    const deleted = await projectService.deleteProject(req.userId, req.params.projectId);
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: "Project not found" });
+    }
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -78,6 +81,9 @@ export const deleteProject = async (req, res) => {
 export const update = async (req, res) => {
   try {
     const project = await projectService.updateProject(req.userId, req.params.projectId, req.body);
+    if (!project) {
+      return res.status(404).json({ success: false, message: "Project not found" });
+    }
     res.json({ success: true, project });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
