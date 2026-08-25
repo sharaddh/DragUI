@@ -48,9 +48,13 @@ export default function RuntimeComponent({ code, props }) {
     return `${clean}\nrender(<${ref} {...__props__} />);`;
   }, [code]);
 
+  // Keyed by serialized props so a new object identity with the same
+  // values does not recompile the live sandbox on every render.
+  const propsKey = JSON.stringify(props || {});
+
   const scope = useMemo(
     () => ({
-      __props__: props || {},
+      __props__: JSON.parse(propsKey),
       React,
       useState: React.useState,
       useEffect: React.useEffect,
@@ -62,7 +66,7 @@ export default function RuntimeComponent({ code, props }) {
       useLayoutEffect: React.useLayoutEffect,
       ...RUNTIME_SCOPE_LIBS,
     }),
-    [props]
+    [propsKey]
   );
 
   if (!liveCode) return null;
