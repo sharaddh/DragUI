@@ -5,6 +5,7 @@ import { useBuilderStore } from "../store/useBuilderStore";
 import { components } from "../DropUi/index";
 import { CSS_STYLE_KEYS } from "../utils/cssProps";
 import ComponentPreview from "./ComponentPreview";
+import { buildComponentOverrides } from "../utils/componentOverrides";
 
 // 2. CORE INTERACTIVE DRAGGABLE ITEM COMPONENT
 function ToolItem({ comp, index, onDirectAdd }) {
@@ -106,13 +107,7 @@ export default function Sidebar() {
     : [];
 
   const handleDirectAdd = (comp) => {
-    addComponent(comp.type, "root", undefined, {
-      props: comp.defaultProps || {},
-      code: comp.code || comp.template || "",
-      template: comp.template || "",
-      thumbnail: comp.thumbnail || "",
-      label: comp.label,
-    });
+    addComponent(comp.type, "root", undefined, buildComponentOverrides(comp, comp.type));
   };
 
   return (

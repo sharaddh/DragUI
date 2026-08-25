@@ -15,6 +15,7 @@ import CanvasToolbar from "../components/CanvasToolbar";
 import SaveButton from "../components/SaveButton";
 import { useBuilderStore, componentLabels } from "../store/useBuilderStore";
 import { getProject } from "../api/projects";
+import { buildComponentOverrides } from "../utils/componentOverrides";
 import { generateHTML, generateReactJSX } from "../utils/codeGenerator";
 import { Loader2, ArrowLeft, Code, X, Check } from "lucide-react";
 
@@ -91,13 +92,7 @@ export default function Builder() {
     if (isTool) {
       const type = data.type || active.id.split("tool-")[1]?.split("-")[0] || "div";
       const parentId = over.id === "canvas" ? "root" : over.id?.toString() || "root";
-      addComponent(type, parentId, undefined, {
-        props: data.props || {},
-        code: data.template || "",
-        template: data.template || "",
-        thumbnail: data.thumbnail || "",
-        label: data.label || componentLabels[type] || type,
-      });
+      addComponent(type, parentId, undefined, buildComponentOverrides(data, type));
     }
   };
 
