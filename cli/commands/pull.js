@@ -276,6 +276,15 @@ export default async function pull(projectId) {
 }
 
 function generateReactComponent(design) {
+  // JSX text nodes need braces and angle brackets escaped
+  const escapeJsxText = (str) =>
+    String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\{/g, "&#123;")
+      .replace(/\}/g, "&#125;");
+
   const customNodes = collectCustomNodes(design);
   const customMap = new Map();
   const usedLibs = new Set();
@@ -306,16 +315,16 @@ function generateReactComponent(design) {
     switch (node.type) {
       case "heading": {
         const level = p.level || "h2";
-        return `  <${level}${cls ? ` className="${cls}"` : ""}${styleStr}>${p.text || ""}</${level}>`;
+        return `  <${level}${cls ? ` className="${cls}"` : ""}${styleStr}>${escapeJsxText(p.text)}</${level}>`;
       }
       case "text":
-        return `  <span${cls ? ` className="${cls}"` : ""}${styleStr}>${p.text || ""}</span>`;
+        return `  <span${cls ? ` className="${cls}"` : ""}${styleStr}>${escapeJsxText(p.text)}</span>`;
       case "paragraph":
-        return `  <p${cls ? ` className="${cls}"` : ""}${styleStr}>${p.text || ""}</p>`;
+        return `  <p${cls ? ` className="${cls}"` : ""}${styleStr}>${escapeJsxText(p.text)}</p>`;
       case "button":
-        return `  <button${cls ? ` className="${cls}"` : ""}${styleStr}>${p.text || "Button"}</button>`;
+        return `  <button${cls ? ` className="${cls}"` : ""}${styleStr}>${escapeJsxText(p.text || "Button")}</button>`;
       case "link":
-        return `  <a href="${p.href || "#"}"${cls ? ` className="${cls}"` : ""}${styleStr}>${p.text || "Link"}</a>`;
+        return `  <a href="${p.href || "#"}"${cls ? ` className="${cls}"` : ""}${styleStr}>${escapeJsxText(p.text || "Link")}</a>`;
       case "image":
         return `  <img src="${p.src || ""}" alt={${JSON.stringify(p.alt || "")}}${cls ? ` className="${cls}"` : ""}${styleStr} />`;
       case "input":
@@ -331,7 +340,7 @@ ${p.label ? `    <label>${p.label}</label>\n` : ""}    <input type="${p.type || 
       }
       default:
         return `  <div${cls ? ` className="${cls}"` : ""}${styleStr}>
-${p.text ? `    ${p.text}\n` : ""}${children ? children + "\n" : ""}  </div>`;
+${p.text ? `    ${escapeJsxText(p.text)}\n` : ""}${children ? children + "\n" : ""}  </div>`;
     }
   };
 
