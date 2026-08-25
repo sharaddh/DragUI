@@ -297,6 +297,15 @@ app.post('/api/generate', (req, res) => {
 // Error handler (must be last)
 app.use(errorHandler);
 
+// JSON 404 for any unmatched /api route - the default Express HTML
+// error page confuses API clients (curl, CLI, fetch).
+app.use("/api", (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Route not found: ${req.method} ${req.originalUrl}`,
+  });
+});
+
 connectDB();
 
 // Start
