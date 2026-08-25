@@ -80,8 +80,10 @@ function renderNode(node, customMap) {
   const p = node.props || {};
   const style = p.style || {};
   const inline = styleToInline(style);
-  const cls = p.className || "";
-  const attrs = ` class="${cls}"${inline ? ` style="${inline}"` : ""}`;
+  // Props come from user input - keep them from breaking out of the
+  // class/style attributes in the exported file.
+  const cls = escapeHtml(p.className || "");
+  const attrs = ` class="${cls}"${inline ? ` style="${escapeHtml(inline)}"` : ""}`;
   const children = (node.children || []).map((c) => renderNode(c, customMap)).join("\n");
 
   if (node.code && customMap) {
