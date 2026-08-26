@@ -9,6 +9,28 @@ function escapeHtml(str) {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
+const BUILTIN_TYPES = new Set([
+  "div", "text", "heading", "paragraph", "button", "image", "input", "link",
+  "divider", "card", "list", "icon", "video", "navbar", "hero", "container",
+  "section", "footer",
+]);
+
+// Custom components whose source never made it into the saved design
+// (added before source-storing existed, or saved by an older client).
+function findSourcelessCustomNodes(design) {
+  const missing = [];
+  const walk = (node) => {
+    if (!node || typeof node !== "object") return;
+    if (Array.isArray(node)) return node.forEach(walk);
+    if (!BUILTIN_TYPES.has(node.type) && node.type !== "root" && !node.code) {
+      missing.push(node.label || node.type);
+    }
+    (node.children || []).forEach(walk);
+  };
+  walk(design);
+  return [...new Set(missing)];
+}
+
 const CUSTOM_LIB_IMPORTS = {
   confetti: `import confetti from "canvas-confetti";`,
   motion: `import { motion, AnimatePresence } from "framer-motion";`,
@@ -307,6 +329,16 @@ Copy \`Component.jsx\` into \`src/\`, import it in \`App.jsx\`, and include Tail
       console.log(
         `Note: includes ${collectCustomNodes(design).length} custom admin component(s).` +
           ` Component.jsx requires framer-motion and canvas-confetti.`
+      );
+    }
+
+    const sourceless = findSourcelessCustomNodes(design);
+    if (sourceless.length) {
+      console.log("");
+      console.warn(
+        `WARNING: these custom components have no stored source and will NOT render:` +
+          ` ${sourceless.join(", ")}` +
+          `\nRe-open the project in the DropUI builder, re-add them (or drag once), save, then pull again.`
       );
     }
   } catch (error) {
