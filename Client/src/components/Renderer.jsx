@@ -35,7 +35,7 @@ function ResizeHandle({ position, onResize }) {
 }
 
 function renderElement(node, ctx) {
-  const { isSelected, selectComponent, updateProps, editingTextId, setEditingText, childrenNode } = ctx;
+  const { isSelected, selectComponent, updateProps, updateTextSilently, editingTextId, setEditingText, childrenNode } = ctx;
   const p = node.props || {};
   const style = p.style || {};
   const combinedStyle = { ...style, position: "relative" };
@@ -57,7 +57,8 @@ function renderElement(node, ctx) {
           onDoubleClick={() => setEditingText(node.id)}
           contentEditable={editingTextId === node.id}
           suppressContentEditableWarning
-          onBlur={(e) => { updateProps(node.id, { text: e.currentTarget.textContent }); setEditingText(null); }}
+          onInput={(e) => updateTextSilently(node.id, e.currentTarget.textContent)}
+          onBlur={(e) => { updateTextSilently(node.id, e.currentTarget?.textContent); setEditingText(null); }}
         >
           {p.text || "Heading"}
         </Tag>
@@ -72,7 +73,8 @@ function renderElement(node, ctx) {
           onDoubleClick={() => setEditingText(node.id)}
           contentEditable={editingTextId === node.id}
           suppressContentEditableWarning
-          onBlur={(e) => { updateProps(node.id, { text: e.currentTarget.textContent }); setEditingText(null); }}
+          onInput={(e) => updateTextSilently(node.id, e.currentTarget.textContent)}
+          onBlur={(e) => { updateTextSilently(node.id, e.currentTarget?.textContent); setEditingText(null); }}
         >
           {p.text || "Text"}
         </span>
@@ -86,7 +88,8 @@ function renderElement(node, ctx) {
           onDoubleClick={() => setEditingText(node.id)}
           contentEditable={editingTextId === node.id}
           suppressContentEditableWarning
-          onBlur={(e) => { updateProps(node.id, { text: e.currentTarget.textContent }); setEditingText(null); }}
+          onInput={(e) => updateTextSilently(node.id, e.currentTarget.textContent)}
+          onBlur={(e) => { updateTextSilently(node.id, e.currentTarget?.textContent); setEditingText(null); }}
         >
           {p.text || "Paragraph"}
         </p>
@@ -100,7 +103,8 @@ function renderElement(node, ctx) {
           onDoubleClick={() => setEditingText(node.id)}
           contentEditable={editingTextId === node.id}
           suppressContentEditableWarning
-          onBlur={(e) => { updateProps(node.id, { text: e.currentTarget.textContent }); setEditingText(null); }}
+          onInput={(e) => updateTextSilently(node.id, e.currentTarget.textContent)}
+          onBlur={(e) => { updateTextSilently(node.id, e.currentTarget?.textContent); setEditingText(null); }}
         >
           {p.text || "Button"}
         </button>
@@ -115,7 +119,8 @@ function renderElement(node, ctx) {
           onDoubleClick={() => setEditingText(node.id)}
           contentEditable={editingTextId === node.id}
           suppressContentEditableWarning
-          onBlur={(e) => { updateProps(node.id, { text: e.currentTarget.textContent }); setEditingText(null); }}
+          onInput={(e) => updateTextSilently(node.id, e.currentTarget.textContent)}
+          onBlur={(e) => { updateTextSilently(node.id, e.currentTarget?.textContent); setEditingText(null); }}
         >
           {p.text || "Link"}
         </a>
@@ -317,6 +322,7 @@ export default function Renderer({ node, depth = 0 }) {
   const selectedIds = useBuilderStore((s) => s.selectedIds);
   const selectComponent = useBuilderStore((s) => s.selectComponent);
   const updateProps = useBuilderStore((s) => s.updateProps);
+  const updateTextSilently = useBuilderStore((s) => s.updateTextSilently);
   const editingTextId = useBuilderStore((s) => s.editingTextId);
   const setEditingText = useBuilderStore((s) => s.setEditingText);
   const [hovered, setHovered] = useState(false);
@@ -438,6 +444,7 @@ export default function Renderer({ node, depth = 0 }) {
           isSelected,
           selectComponent,
           updateProps,
+          updateTextSilently,
           editingTextId,
           setEditingText,
           childrenNode: children.length > 0 ? (

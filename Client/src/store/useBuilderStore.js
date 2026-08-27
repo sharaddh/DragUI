@@ -206,6 +206,18 @@ export const useBuilderStore = create((set, get) => ({
 
   updateComponentProp: (id, key, value) => { get().updateProps(id, { [key]: value }); },
 
+  // Update text while inline-editing without pushing an undo snapshot on every
+  // keystroke (avoids history bloat and clobbering live contentEditable text).
+  updateTextSilently: (id, value) => {
+    const newTree = clone(get().tree);
+    function update(node) {
+      if (node.id === id) { node.props = { ...node.props, text: value }; return; }
+      (node.children || []).forEach(update);
+    }
+    update(newTree);
+    set({ tree: newTree });
+  },
+
   updateStyle: (id, styleProps) => {
     get().saveHistory();
     const newTree = clone(get().tree);
