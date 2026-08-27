@@ -22,12 +22,18 @@ export function getConfig() {
 
  }
 
- return JSON.parse(
-  fs.readFileSync(
-   CONFIG,
-   "utf8"
-  )
- );
+ try {
+  return JSON.parse(
+   fs.readFileSync(
+    CONFIG,
+    "utf8"
+   )
+  );
+ } catch {
+  throw new Error(
+   `dropui.config.json is corrupt - run 'dropui init' to regenerate it`
+  );
+ }
 
 }
 

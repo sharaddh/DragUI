@@ -34,51 +34,29 @@ export function saveToken(
 
  );
 }
+function readAuthFile() {
+  if (!fs.existsSync(AUTH_FILE)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(AUTH_FILE, "utf8"));
+  } catch {
+    // Corrupt or half-written auth file - treat as logged out and remove it
+    // so the next command starts clean instead of crashing.
+    try { fs.removeSync(AUTH_FILE); } catch { /* ignore */ }
+    return null;
+  }
+}
+
 export function getToken(){
 
- if(
-  !fs.existsSync(
-   AUTH_FILE
-  )
- ){
-
-  return null;
- }
-
- return JSON.parse(
-
-  fs.readFileSync(
-
-   AUTH_FILE,
-
-   "utf8"
-  )
-
- ).token;
+ const auth = readAuthFile();
+ return auth?.token || null;
 
 }
 
 export function getRole(){
 
- if(
-  !fs.existsSync(
-   AUTH_FILE
-  )
- ){
-
-  return null;
- }
-
- return JSON.parse(
-
-  fs.readFileSync(
-
-   AUTH_FILE,
-
-   "utf8"
-  )
-
- ).role || "admin";
+ const auth = readAuthFile();
+ return auth?.role || "admin";
 
 }
 export function clearToken(){
