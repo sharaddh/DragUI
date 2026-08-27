@@ -345,23 +345,37 @@ export const useBuilderStore = create((set, get) => ({
 
   copySelected: () => {
     const { selectedIds, tree } = get();
-    const items = selectedIds.map((id) => {
-      const node = (function search(n) { if (n.id === id) return n; for (const c of n.children || []) { const f = search(c); if (f) return f; } return null; })(tree);
-      return node ? clone(node) : null;
-    }).filter(Boolean);
-    set({ clipboard: items });
+    const nodes = selectedIds.map((id) => findById(tree, id)).filter(Boolean);
+    // Drop any node that is a descendant of another selected node so we
+    // don't duplicate its subtree on paste.
+    const topLevel = nodes.filter((n) => {
+      for (const other of nodes) {
+        if (other === n) continue;
+        if (findById(other, n.id)) return false;
+      }
+      return true;
+    });
+    set({ clipboard: topLevel.map((n) => clone(n)) });
   },
 
   pasteClipboard: () => {
-    const { clipboard } = get();
+    const { clipboard, selectedIds } = get();
     if (!clipboard?.length) return;
     get().saveHistory();
     const newTree = clone(get().tree);
+
+    // Prefer pasting into the first selected container (a node with
+    // children); fall back to the root.
+    const targetId = selectedIds[0] && selectedIds[0] !== "root" && findById(newTree, selectedIds[0])
+      ? selectedIds[0]
+      : "root";
+    const target = targetId === "root" ? newTree : findById(newTree, targetId);
+
     const newIds = [];
     clipboard.forEach((item) => {
       function assignIds(node) { node.id = genId(); newIds.push(node.id); (node.children || []).forEach(assignIds); }
       const copy = clone(item); assignIds(copy);
-      newTree.children.push(copy);
+      if (target && target.children) target.children.push(copy);
     });
     set({ tree: newTree, selectedIds: newIds });
   },
