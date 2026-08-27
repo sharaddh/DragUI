@@ -265,7 +265,21 @@ function renderElement(node, ctx) {
         </div>
       );
     }
-    default:
+    default: {
+      const isCustom = !componentLabels[node.type] && !!node.code;
+      if (isCustom) {
+        // Admin custom components render directly with no intermediate
+        // wrapper box - editor style props apply straight to the element.
+        return (
+          <div
+            style={combinedStyle}
+            onClick={(e) => { e.stopPropagation(); selectComponent(node.id); }}
+            className={p.className}
+          >
+            <RuntimeComponent code={node.code} props={p} />
+          </div>
+        );
+      }
       return (
         <div
           style={combinedStyle}
@@ -273,33 +287,25 @@ function renderElement(node, ctx) {
           onClick={(e) => { e.stopPropagation(); selectComponent(node.id); }}
         >
           {!componentLabels[node.type] ? (
-            <div className="flex min-h-[80px] w-full flex-col rounded-lg border border-dashed border-slate-300 bg-slate-50/60">
-              <div className="px-2 pt-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+            node.thumbnail ? (
+              <img
+                src={node.thumbnail}
+                alt={node.label || node.type}
+                draggable={false}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="text-center text-xs text-slate-400">
                 {node.label || node.type}
               </div>
-              <div className="p-2">
-                {node.code ? (
-                  <RuntimeComponent code={node.code} props={p} />
-                ) : node.thumbnail ? (
-                  <img
-                    src={node.thumbnail}
-                    alt={node.label || node.type}
-                    draggable={false}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="text-center text-xs text-slate-400">
-                    {node.label || node.type}
-                  </div>
-                )}
-              </div>
-            </div>
+            )
           ) : (
             p.text && <span>{p.text}</span>
           )}
           {childrenNode}
         </div>
       );
+    }
   }
 }
 
