@@ -65,9 +65,17 @@ async (
  try {
 
    const project =
-     await AIProject.findById(
-       req.params.id
-     );
+     await AIProject.findOne({
+       _id: req.params.id,
+       user: req.userId,
+     });
+
+   if (!project) {
+     return res.status(404).json({
+       success:false,
+       message:"Project not found"
+     });
+   }
 
    res.json({
      success:true,
