@@ -15,6 +15,17 @@ function cloneWithFreshIds(node) {
   return copy;
 }
 
+// Breadth-safe node lookup by id across the whole tree
+function findById(node, id) {
+  if (!node || typeof node !== "object") return null;
+  if (node.id === id) return node;
+  for (const child of node.children || []) {
+    const found = findById(child, id);
+    if (found) return found;
+  }
+  return null;
+}
+
 export const defaultComponentProps = {
   div: { className: "", style: { minHeight: "60px" }, text: "" },
   text: { className: "", style: { fontSize: "16px", color: "#0f172a" }, text: "Double-click to edit text" },
@@ -208,19 +219,60 @@ export const useBuilderStore = create((set, get) => ({
 
   deleteComponent: (id) => {
     get().saveHistory();
-    function remove(node) {
-      node.children = node.children.filter((c) => c.id !== id);
-      node.children.forEach(remove);
-    }
     const newTree = clone(get().tree);
-    remove(newTree);
-    set({ tree: newTree, selectedIds: get().selectedIds.filter((i) => i !== id) });
+
+    // Collect the id plus every descendant into a set of nodes to remove.
+    const removed = new Set([id]);
+    (function collect(node) {
+      node.children.forEach((c) => {
+        removed.add(c.id);
+        (c.children || []).forEach(collect);
+      });
+    })(findById(newTree, id) || { children: [] });
+
+    (function remove(node) {
+      node.children = node.children.filter((c) => !removed.has(c.id));
+      node.children.forEach(remove);
+    })(newTree);
+
+    const { selectedIds, editingTextId } = get();
+    set({
+      tree: newTree,
+      selectedIds: selectedIds.filter((i) => !removed.has(i)),
+      editingTextId: editingTextId && removed.has(editingTextId) ? null : editingTextId,
+    });
   },
 
   deleteSelected: () => {
     const { selectedIds } = get();
-    if (!selectedIds.length) return;
-    selectedIds.forEach((id) => { if (id !== "root") get().deleteComponent(id); });
+    const ids = selectedIds.filter((id) => id !== "root");
+    if (!ids.length) return;
+    // Single history entry for the whole multi-delete
+    get().saveHistory();
+    const newTree = clone(get().tree);
+
+    const removed = new Set();
+    ids.forEach((id) => {
+      if (removed.has(id)) return; // already covered by an ancestor delete
+      removed.add(id);
+      (function collect(node) {
+        node.children.forEach((c) => {
+          removed.add(c.id);
+          (c.children || []).forEach(collect);
+        });
+      })(findById(newTree, id) || { children: [] });
+    });
+
+    (function remove(node) {
+      node.children = node.children.filter((c) => !removed.has(c.id));
+      node.children.forEach(remove);
+    })(newTree);
+
+    set({
+      tree: newTree,
+      selectedIds: [],
+      editingTextId: null,
+    });
   },
 
   duplicateComponent: (id) => {
