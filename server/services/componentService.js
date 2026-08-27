@@ -49,7 +49,7 @@ export const createComponent = async (payload, adminId) => {
 
   // 4. Create the initial version history
   await ComponentVersion.create({
-    component: component._id,
+    componentId: component._id,
     version: "1.0.0",
     template: code,
     props,
