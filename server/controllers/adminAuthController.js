@@ -65,7 +65,13 @@ export const registerAdmin = async (req, res, next) => {
     res.status(201).json({
       success: true,
       token: generateToken(admin._id),
-      admin,
+      admin: {
+        _id: admin._id,
+        adminId: admin.adminId,
+        email: admin.email,
+        role: admin.role,
+        isActive: admin.isActive,
+      },
     });
 
   } catch (error) {
@@ -127,7 +133,13 @@ export const loginAdmin = async (req, res, next) => {
     res.json({
       success: true,
       token: generateToken(admin._id),
-      admin,
+      admin: {
+        _id: admin._id,
+        adminId: admin.adminId,
+        email: admin.email,
+        role: admin.role,
+        isActive: admin.isActive,
+      },
     });
 
   } catch (error) {
