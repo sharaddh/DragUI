@@ -1,9 +1,9 @@
 import { useContext, useState } from "react";
 import { AuthContext } from "../context/auth-context";
 import { useNavigate, Link } from "react-router-dom";
-import { LogOut, Menu, X, LayoutDashboard, Box, Palette } from "lucide-react";
+import { LogOut, Menu, X, LayoutDashboard, Box, Palette, ArrowLeft, Code } from "lucide-react";
 
-export default function Navbar() {
+export default function Navbar({ builder, projectName, onBack, onExport, rightActions }) {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -12,6 +12,37 @@ export default function Navbar() {
     logout();
     navigate("/login");
   };
+
+  if (builder) {
+    return (
+      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
+        <div className="flex items-center justify-between gap-3 px-3 py-2 sm:px-4">
+          <div className="flex min-w-0 items-center gap-2">
+            <button
+              onClick={onBack}
+              className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+              title="Back to projects"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Projects</span>
+            </button>
+            <div className="h-5 w-px bg-slate-200" />
+            <button
+              onClick={onExport}
+              className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+              title="Export code"
+            >
+              <Code className="h-4 w-4" />
+              <span className="hidden md:inline">Export</span>
+            </button>
+            <div className="h-5 w-px bg-slate-200" />
+            <p className="truncate text-sm font-semibold text-slate-800">{projectName || "Untitled Project"}</p>
+          </div>
+          {rightActions}
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
