@@ -115,13 +115,25 @@ export default function Sidebar() {
 
       {/* Search */}
       <div className="px-3 pt-2">
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search components..."
-          className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs placeholder:text-slate-400 focus:border-cyan-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-cyan-400"
-        />
+        <div className="relative">
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Escape") setQuery(""); }}
+            placeholder="Search components..."
+            className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 pr-7 text-xs placeholder:text-slate-400 focus:border-cyan-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-cyan-400"
+          />
+          {query && (
+            <button
+              onClick={() => setQuery("")}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-slate-400 hover:text-slate-600"
+              title="Clear search (Esc)"
+            >
+              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* List */}
