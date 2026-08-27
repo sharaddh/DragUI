@@ -45,10 +45,10 @@ GET ALL COMPONENTS
 export const getAll = async (req, res) => {
   try {
     const page =
-      Number(req.query.page) || 1;
+      Math.max(1, Number(req.query.page) || 1);
 
     const limit =
-      Number(req.query.limit) || 20;
+      Math.min(100, Math.max(1, Number(req.query.limit) || 20));
 
     const skip =
       (page - 1) * limit;
