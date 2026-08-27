@@ -14,7 +14,9 @@ export default function AuthSuccess() {
 
     if (token) {
       login?.(token); // 🔥 THIS SAVES TOKEN
-      navigate("/dashboard");
+      const returnTo = sessionStorage.getItem("dropui.returnTo");
+      sessionStorage.removeItem("dropui.returnTo");
+      navigate(returnTo && returnTo !== "/login" ? returnTo : "/dashboard");
     } else {
       navigate("/login");
     }

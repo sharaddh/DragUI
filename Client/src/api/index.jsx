@@ -16,15 +16,16 @@ API.interceptors.request.use((config) => {
 });
 
 // Expired/invalid tokens should never leave the app in a broken state -
-// clear the stale token and send the user back to the login screen.
+// clear the stale token and send the user back to the login screen,
+// remembering where they were so they can be returned after re-login.
 API.interceptors.response.use(
   (res) => res,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !window.location.pathname.startsWith("/login")) {
+      const current = window.location.pathname + window.location.search;
+      if (current !== "/") sessionStorage.setItem("dropui.returnTo", current);
       localStorage.removeItem("token");
-      if (!window.location.pathname.startsWith("/login")) {
-        window.location.href = "/login";
-      }
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }

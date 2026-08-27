@@ -29,7 +29,9 @@ export default function Login() {
           ? await registerAPI({ email: form.email, password: form.password, username: form.username })
           : await loginAPI({ email: form.email, password: form.password });
       login(res.data.token);
-      navigate("/dashboard");
+      const returnTo = sessionStorage.getItem("dropui.returnTo");
+      sessionStorage.removeItem("dropui.returnTo");
+      navigate(returnTo && returnTo !== "/login" ? returnTo : "/dashboard");
     } catch (err) {
       const msg =
         err.response?.data?.message ||
