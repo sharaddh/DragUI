@@ -8,7 +8,9 @@ async(req,res)=>{
   await Component.find({
 
    status:
-    "published"
+    "published",
+   visibility:
+    "public"
 
   });
 
@@ -28,9 +30,11 @@ async(req,res)=>{
    slug:
     req.params.slug,
 
-   // Public registry only exposes published components - no draft leaks
+   // Public registry only exposes published, public components - no draft/private leaks
    status:
-    "published"
+    "published",
+   visibility:
+    "public"
 
   });
 
@@ -58,10 +62,12 @@ async(req,res)=>{
   slug:
    req.params.name,
 
-  status:
-   "published"
+   status:
+    "published",
+   visibility:
+    "public"
 
- });
+  });
 
  if(!component){
 
