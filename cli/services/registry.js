@@ -32,7 +32,7 @@ export async function searchComponents(
  const res =
   await api.get(
 
-   `/registry/search/${query}`
+   `/search/search/${encodeURIComponent(query)}`
 
   );
 
@@ -45,8 +45,11 @@ export async function getLatestVersion(
 
  const res =
  await api.get(
-  `/registry/version/${component}`
+  `/registry/manifest/${component}`
  );
 
- return res.data;
+ return {
+  version: res.data?.manifest?.version ?? null,
+  manifest: res.data?.manifest ?? null,
+ };
 }
