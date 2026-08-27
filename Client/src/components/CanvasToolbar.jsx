@@ -120,17 +120,25 @@ export default function CanvasToolbar() {
           Snap
         </button>
 
-        <div className="flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1">
+        <div className="flex items-center gap-1 rounded-lg border border-slate-200 px-1 py-1">
           <button
             onClick={() => setZoom(zoom - 10)}
             className="p-0.5 text-slate-500 hover:text-slate-700"
+            title="Zoom out (Ctrl+-)"
           >
             <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
           </button>
-          <span className="min-w-[40px] text-center text-xs font-mono text-slate-600">{zoom}%</span>
+          <button
+            onClick={() => setZoom(100)}
+            className="min-w-[40px] rounded px-0.5 py-0.5 text-center text-xs font-mono text-slate-600 transition hover:bg-slate-100"
+            title="Reset zoom to 100%"
+          >
+            {zoom}%
+          </button>
           <button
             onClick={() => setZoom(zoom + 10)}
             className="p-0.5 text-slate-500 hover:text-slate-700"
+            title="Zoom in (Ctrl+=)"
           >
             <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
           </button>
