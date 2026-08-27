@@ -7,6 +7,10 @@ import { useState } from "react";
 const TEXT_TYPES = new Set(["text", "heading", "paragraph", "link", "button"]);
 const CONTAINER_TYPES = new Set(["card", "div", "container", "section", "navbar", "hero", "footer"]);
 
+// Custom components are unknown types with source code. They render via
+// RuntimeComponent and don't inject children internally.
+const isCustomComponent = (node) => !componentLabels[node.type] && !!node.code;
+
 function ResizeHandle({ position, onResize }) {
   const posClass = {
     "top": "top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-n-resize",
@@ -445,8 +449,9 @@ export default function Renderer({ node, depth = 0 }) {
           ) : null,
         })}
 
-        {/* Children of leaf elements render after the element itself */}
-        {children.length > 0 && !CONTAINER_TYPES.has(node.type) && (
+        {/* Children of custom components render after the element itself,
+            since RuntimeComponent doesn't inject childrenNode internally. */}
+        {children.length > 0 && isCustomComponent(node) && (
           <div className="space-y-1">
             {children.map((child) => (
               <Renderer key={child.id} node={child} depth={depth + 1} />
