@@ -4,7 +4,8 @@ import searchComponents from '../services/searchService.js';
 export const search =
 async (
   req,
-  res
+  res,
+  queryParam
 ) => {
 
   try {
@@ -15,15 +16,18 @@ async (
       category,
     } = req.query;
 
-    if (!q) {
+    const searchReq =
+      queryParam ?? q;
+
+    if (!searchReq) {
       return res.status(400).json({
         success: false,
         message: "q query parameter is required",
       });
     }
 
-    // Only search published components publicly; service signature is (components, query)
-    const filters = { status: "published" };
+    // Only search published public components; service signature is (components, query)
+    const filters = { status: "published", visibility: "public" };
     if (type) filters.type = type;
     if (category) filters.category = category;
 
@@ -33,7 +37,7 @@ async (
     const results =
       searchComponents(
         dataset,
-        q
+        searchReq
       );
 
     res.json({
