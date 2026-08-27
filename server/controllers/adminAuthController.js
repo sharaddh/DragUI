@@ -19,20 +19,24 @@ export const registerAdmin = async (req, res, next) => {
       setupKey,
     } = req.body;
 
-    // Registration is closed by default:
-    // - open only while no admins exist (first-run bootstrap), or
-    // - when the caller supplies ADMIN_SETUP_KEY matching the server env
-    const adminCount =
-      await Admin.countDocuments();
-
+    // Admin registration is a privileged action. It stays closed unless the
+    // operator has configured ADMIN_SETUP_KEY in the server env.
+    //
+    // Fail-closed:
+    //  - if ADMIN_SETUP_KEY is not configured, deny ALL registrations (this
+    //    stops a freshly-deployed, unsecured server from being hijacked by
+    //    anyone who hits the endpoint before the operator sets a key);
+    //  - otherwise require a matching setupKey for both first-run bootstrap
+    //    and any additional admin accounts.
     const setupKeyValid =
       process.env.ADMIN_SETUP_KEY &&
+      typeof setupKey === "string" &&
       setupKey === process.env.ADMIN_SETUP_KEY;
 
-    if (adminCount > 0 && !setupKeyValid) {
+    if (!setupKeyValid) {
       return res.status(403).json({
         success: false,
-        message: "Admin registration is disabled",
+        message: "Admin registration is disabled", 
       });
     }
 
