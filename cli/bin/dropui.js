@@ -97,4 +97,8 @@ Examples:
 `
 );
 
-program.parse();
+// parseAsync so rejected async command handlers surface cleanly instead of
+// crashing the process with an unhandled-rejection stack trace.
+program.parseAsync().catch((err) => {
+  process.exitCode = 1;
+});
