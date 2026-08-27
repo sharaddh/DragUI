@@ -20,8 +20,14 @@ export default function CanvasToolbar() {
   const selectedIds = useBuilderStore((s) => s.selectedIds);
 
   const handleKeyDown = useCallback((e) => {
-    const tag = e.target.tagName.toLowerCase();
-    if (tag === "input" || tag === "textarea" || e.target.isContentEditable) return;
+    const tag = e.target.tagName?.toLowerCase();
+    // Never hijack keys while typing or when an interactive control is focused
+    // (buttons, selects, links) - e.g. pressing Backspace on a focused button
+    // must not delete the selected component.
+    if (
+      tag === "input" || tag === "textarea" || tag === "select" || tag === "button" || tag === "a" ||
+      e.target.isContentEditable
+    ) return;
 
     const mod = e.metaKey || e.ctrlKey;
 
@@ -30,7 +36,7 @@ export default function CanvasToolbar() {
     if (mod && e.key === "c") { e.preventDefault(); copySelected(); }
     if (mod && e.key === "v") { e.preventDefault(); pasteClipboard(); }
     if (mod && e.key === "d") { e.preventDefault(); duplicateSelected(); }
-    if (e.key === "Delete" || e.key === "Backspace") { deleteSelected(); }
+    if (e.key === "Delete" || (e.key === "Backspace" && !mod)) { e.preventDefault(); deleteSelected(); }
     if (mod && e.key === "=") { e.preventDefault(); setZoom(zoom + 10); }
     if (mod && e.key === "-") { e.preventDefault(); setZoom(zoom - 10); }
     if (mod && e.key === "0") { e.preventDefault(); setZoom(100); }

@@ -111,7 +111,7 @@ export const useBuilderStore = create((set, get) => ({
     set({
       tree: prev.tree, selectedIds: prev.selectedIds,
       history: history.slice(0, -1),
-      future: [{ tree: clone(tree), selectedIds: [...selectedIds] }, ...future],
+      future: [{ tree: clone(tree), selectedIds: [...selectedIds] }, ...future].slice(0, 50),
     });
   },
 
@@ -122,7 +122,7 @@ export const useBuilderStore = create((set, get) => ({
     set({
       tree: next.tree, selectedIds: next.selectedIds,
       future: future.slice(1),
-      history: [...history, { tree: clone(tree), selectedIds: [...selectedIds] }],
+      history: [...history.slice(-49), { tree: clone(tree), selectedIds: [...selectedIds] }],
     });
   },
 
