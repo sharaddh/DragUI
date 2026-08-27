@@ -179,10 +179,19 @@ export default function PropertyEditor() {
 
   if (!selectedNode || selectedNode.id === "root") {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-4">
-        <p className="text-center text-sm text-slate-400 py-8">
-          Select an element on the canvas to edit its properties
-        </p>
+      <div className="flex h-full flex-col">
+        <div className="border-b border-slate-100 px-3 py-2.5">
+          <h2 className="text-xs font-bold tracking-wide text-slate-800 uppercase">Inspector</h2>
+        </div>
+        <div className="flex flex-1 items-center justify-center p-6">
+          <div className="text-center">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-300">
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            </div>
+            <p className="text-sm font-medium text-slate-500">No selection</p>
+            <p className="mt-1 text-xs text-slate-400">Select an element on the canvas to edit its properties</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -219,20 +228,20 @@ export default function PropertyEditor() {
   );
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div className="flex h-full flex-col overflow-hidden">
       {/* Header */}
-      <div className="border-b border-slate-100 bg-slate-50/80 px-4 py-3">
+      <div className="shrink-0 border-b border-slate-100 bg-slate-50/80 px-3 py-2.5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-100 text-xs font-bold text-cyan-700 uppercase">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-100 text-xs font-bold text-cyan-700 uppercase">
               {label[0]}
             </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-800">{label}</p>
-              <p className="text-[10px] font-mono text-slate-400">{selectedNode.id}</p>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-slate-800">{label}</p>
+              <p className="truncate text-[10px] font-mono text-slate-400">{selectedNode.id}</p>
             </div>
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-0.5 shrink-0">
             <button
               onClick={() => duplicateComponent(selectedNode.id)}
               className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
@@ -252,28 +261,31 @@ export default function PropertyEditor() {
       </div>
 
       {/* Style Tabs */}
-      <div className="flex border-b border-slate-100 bg-slate-50/50">
+      <div className="flex shrink-0 border-b border-slate-100 bg-slate-50/50" role="tablist">
         {STYLE_TABS.map((tab) => (
           <button
             key={tab.id}
+            role="tab"
+            aria-selected={activeTab === tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 py-2 text-xs font-medium transition ${
+            title={tab.label}
+            className={`flex-1 py-2 text-sm transition ${
               activeTab === tab.id
-                ? "border-b-2 border-cyan-500 text-cyan-700 bg-white"
-                : "text-slate-500 hover:text-slate-700"
+                ? "border-b-2 border-cyan-500 text-cyan-700"
+                : "text-slate-400 hover:text-slate-600"
             }`}
           >
-            {tab.label}
+            {tab.icon}
           </button>
         ))}
       </div>
 
       {/* Tab Content */}
-      <div className="max-h-[calc(100vh-320px)] overflow-y-auto p-4">
+      <div className="min-h-0 flex-1 overflow-y-auto p-3 custom-scrollbar">
         {activeTab === "content" && (
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             {hasText && (
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Text Content</label>
                 <textarea
                   value={p.text || ""}
@@ -284,7 +296,7 @@ export default function PropertyEditor() {
               </div>
             )}
             {selectedNode.type === "heading" && (
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Heading Level</label>
                 <select
                   value={p.level || "h2"}
@@ -299,7 +311,7 @@ export default function PropertyEditor() {
               </div>
             )}
             {selectedNode.type === "button" && (
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Link URL</label>
                 <input
                   type="text"
@@ -312,7 +324,7 @@ export default function PropertyEditor() {
             )}
             {selectedNode.type === "image" && (
               <>
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Image URL</label>
                   <input
                     type="text"
@@ -322,7 +334,7 @@ export default function PropertyEditor() {
                     placeholder="https://..."
                   />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Alt Text</label>
                   <input
                     type="text"
@@ -335,7 +347,7 @@ export default function PropertyEditor() {
             )}
             {selectedNode.type === "input" && (
               <>
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Label</label>
                   <input
                     type="text"
@@ -344,7 +356,7 @@ export default function PropertyEditor() {
                     className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-400"
                   />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Placeholder</label>
                   <input
                     type="text"
@@ -353,7 +365,7 @@ export default function PropertyEditor() {
                     className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-400"
                   />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Input Type</label>
                   <select
                     value={p.type || "text"}
@@ -368,7 +380,7 @@ export default function PropertyEditor() {
               </>
             )}
             {selectedNode.type === "link" && (
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">URL</label>
                 <input
                   type="text"
@@ -386,7 +398,7 @@ export default function PropertyEditor() {
                   value={(p.items || []).join("\n")}
                   onChange={(e) => handleContentChange("items", e.target.value.split("\n"))}
                   className="w-full rounded-lg border border-slate-200 p-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-400 min-h-[100px] resize-y font-mono"
-                  placeholder="Item 1&#10;Item 2&#10;Item 3"
+                  placeholder={"Item 1\nItem 2\nItem 3"}
                 />
                 <label className="flex items-center gap-2 text-xs text-slate-600">
                   <input
@@ -398,7 +410,7 @@ export default function PropertyEditor() {
                 </label>
               </div>
             )}
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Class Name</label>
               <input
                 type="text"
