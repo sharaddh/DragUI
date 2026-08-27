@@ -1,4 +1,4 @@
-﻿import React from "react";
+﻿import React, { useState } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { useRegistry } from "../hooks/useRegistry";
 import { useBuilderStore } from "../store/useBuilderStore";
@@ -7,7 +7,7 @@ import { CSS_STYLE_KEYS } from "../utils/cssProps";
 import ComponentPreview from "./ComponentPreview";
 import { buildComponentOverrides } from "../utils/componentOverrides";
 
-// 2. CORE INTERACTIVE DRAGGABLE ITEM COMPONENT
+// Compact draggable component item
 function ToolItem({ comp, index, onDirectAdd }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: `tool-${comp.type}-${index}`,
@@ -22,7 +22,6 @@ function ToolItem({ comp, index, onDirectAdd }) {
 
   const Comp = components[comp.type];
 
-  // Sanitize style fields out of the preview layer to prevent rendering crashes
   const cleanProps = {};
   Object.entries(comp.defaultProps || {}).forEach(([key, value]) => {
     if (CSS_STYLE_KEYS && !CSS_STYLE_KEYS.has(key)) {
@@ -30,7 +29,6 @@ function ToolItem({ comp, index, onDirectAdd }) {
     }
   });
 
-  // Calculate real-time transformation strings safely
   const style = {
     transform: transform
       ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
@@ -43,100 +41,106 @@ function ToolItem({ comp, index, onDirectAdd }) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`group relative rounded-3xl border bg-white p-4 transition-all duration-200 select-none ${
-        isDragging 
-          ? "border-cyan-400 shadow-lg ring-2 ring-cyan-100" 
-          : "border-slate-200 shadow-xs hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+      className={`group flex items-center gap-2.5 rounded-lg border bg-white px-2 py-1.5 transition-colors select-none ${
+        isDragging
+          ? "border-cyan-400 bg-cyan-50 ring-2 ring-cyan-100"
+          : "border-slate-200 hover:border-cyan-300 hover:bg-cyan-50/40 cursor-grab active:cursor-grabbing"
       }`}
     >
-      <div className="flex flex-col gap-3">
-        {/* Drag handles boundary wrapper */}
-        <div 
-          {...listeners} 
-          {...attributes} 
-          className="flex h-24 cursor-grab items-center justify-center overflow-hidden rounded-2xl border border-slate-100 bg-slate-50/70 p-2 active:cursor-grabbing transition-colors group-hover:bg-slate-50"
-          title="Drag onto Canvas"
-        >
-          {Comp ? (
-            <div className="pointer-events-none scale-90 origin-center max-h-full max-w-full overflow-hidden">
-              <Comp {...cleanProps} />
-            </div>
-          ) : (
-            <ComponentPreview
-              comp={{
-                label: comp.label,
-                code: comp.code,
-                template: comp.template,
-                thumbnail: comp.thumbnail,
-                defaultProps: comp.defaultProps,
-              }}
-            />
-          )}
-        </div>
-
-        <div className="flex items-start justify-between gap-2">
-          <div className="space-y-0.5">
-            <div className="text-xs font-bold text-slate-800">{comp.label}</div>
-            <p className="text-[11px] text-slate-400">Drag to target layout layer</p>
+      {/* Small preview thumb */}
+      <div
+        {...listeners}
+        {...attributes}
+        title="Drag onto canvas"
+        className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-slate-100 bg-slate-50/70"
+      >
+        {Comp ? (
+          <div className="pointer-events-none scale-[0.45] origin-center">
+            <Comp {...cleanProps} />
           </div>
-          
-          <button
-            type="button"
-            onClick={onDirectAdd}
-            className="rounded-xl border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:text-cyan-600 hover:border-cyan-200"
-          >
-            + Add
-          </button>
-        </div>
+        ) : (
+          <ComponentPreview
+            comp={{
+              label: comp.label,
+              code: comp.code,
+              template: comp.template,
+              thumbnail: comp.thumbnail,
+              defaultProps: comp.defaultProps,
+            }}
+          />
+        )}
       </div>
+
+      <span className="min-w-0 flex-1 truncate text-xs font-medium text-slate-700">{comp.label}</span>
+
+      <button
+        type="button"
+        onClick={onDirectAdd}
+        className="shrink-0 rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-500 transition hover:border-cyan-300 hover:text-cyan-600"
+        title="Add to canvas"
+      >
+        + Add
+      </button>
     </div>
   );
 }
 
-// Wrap ToolItem down here so it reference-hoists without triggering exceptions
 const MemoToolItem = React.memo(ToolItem);
 
-// 3. MAIN CONTAINER EXPORT
 export default function Sidebar() {
   const registry = useRegistry();
   const addComponent = useBuilderStore((s) => s.addComponent);
+  const [query, setQuery] = useState("");
 
-  // Fallback to empty array if the custom hook returns a non-iterable entity
-  const validRegistry = Array.isArray(registry) 
-    ? registry.filter((comp) => comp && comp.type) 
+  const validRegistry = Array.isArray(registry)
+    ? registry.filter((comp) => comp && comp.type)
     : [];
+
+  const filtered = query.trim()
+    ? validRegistry.filter((comp) =>
+        (comp.label || comp.type).toLowerCase().includes(query.trim().toLowerCase())
+      )
+    : validRegistry;
 
   const handleDirectAdd = (comp) => {
     addComponent(comp.type, "root", undefined, buildComponentOverrides(comp, comp.type));
   };
 
   return (
-    <aside className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm h-fit max-h-[calc(100vh-120px)] overflow-y-auto custom-scrollbar">
-      <div className="mb-5 space-y-1">
-        <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
-          Component Modules
-        </h2>
-        <p className="text-xs text-slate-400">
-          Drag cards to the blueprint canvas workspace or use instant append.
-        </p>
+    <div className="flex h-full flex-col">
+      {/* Header */}
+      <div className="border-b border-slate-100 px-3 pb-2 pt-3">
+        <h2 className="text-xs font-bold tracking-wide text-slate-800 uppercase">Components</h2>
       </div>
 
-      <div className="space-y-3">
-        {validRegistry.length > 0 ? (
-          validRegistry.map((comp, index) => (
-            <MemoToolItem 
-              key={`${comp.type}-${index}`} 
-              comp={comp} 
-              index={index} 
+      {/* Search */}
+      <div className="px-3 pt-2">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search components..."
+          className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs placeholder:text-slate-400 focus:border-cyan-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-cyan-400"
+        />
+      </div>
+
+      {/* List */}
+      <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-3 custom-scrollbar">
+        {filtered.length > 0 ? (
+          filtered.map((comp, index) => (
+            <MemoToolItem
+              key={`${comp.type}-${index}`}
+              comp={comp}
+              index={index}
               onDirectAdd={() => handleDirectAdd(comp)}
             />
           ))
         ) : (
-          <div className="rounded-2xl border border-dashed border-slate-200 p-6 text-center text-xs text-slate-400">
-            No registry elements loaded
+          <div className="rounded-lg border border-dashed border-slate-200 p-5 text-center text-xs text-slate-400">
+            {query ? "No matching components" : "No components loaded"}
           </div>
         )}
       </div>
-    </aside>
+    </div>
   );
 }
