@@ -42,8 +42,8 @@ export default function CanvasToolbar() {
   }, [handleKeyDown]);
 
   return (
-    <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-2 shadow-sm">
-      <div className="flex items-center gap-2">
+    <div className="flex items-center justify-between px-3 py-1.5 sm:px-4">
+      <div className="flex items-center gap-0.5 sm:gap-1">
         <button
           onClick={undo}
           disabled={!history.length}
