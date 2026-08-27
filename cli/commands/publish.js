@@ -175,6 +175,8 @@ export default async function publish(){
 
  }catch(error){
 
+  process.exitCode = 1;
+
   spinner.fail(
    chalk.red(
     error.message

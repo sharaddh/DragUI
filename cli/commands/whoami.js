@@ -14,6 +14,7 @@ export default async function whoami() {
     const token = getToken();
 
     if (!token) {
+      process.exitCode = 1;
       spinner.fail(chalk.red("Not logged in. Run 'dropui login' first."));
       return;
     }
@@ -39,6 +40,7 @@ export default async function whoami() {
       }
     }
   } catch (error) {
+    process.exitCode = 1;
     spinner.fail(
       chalk.red(error.response?.data?.message || error.message)
     );

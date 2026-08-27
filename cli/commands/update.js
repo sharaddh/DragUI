@@ -103,6 +103,8 @@ export default async function update(
 
  }catch(error){
 
+  process.exitCode = 1;
+
   spinner.fail(
    error.message
   );

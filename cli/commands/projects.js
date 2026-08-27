@@ -57,6 +57,7 @@ export default async function projects() {
       )
     );
   } catch (error) {
+    process.exitCode = 1;
     spinner.fail(chalk.red(error.response?.data?.message || error.message));
   }
 }

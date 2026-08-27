@@ -51,6 +51,8 @@ export default async function generate(){
 
  }catch(error){
 
+  process.exitCode = 1;
+
   spinner.fail(
    chalk.red(
     error.message

@@ -342,6 +342,7 @@ Copy \`Component.jsx\` into \`src/\`, import it in \`App.jsx\`, and include Tail
       );
     }
   } catch (error) {
+    process.exitCode = 1;
     console.error("Pull failed:", error.response?.data?.message || error.message);
   }
 }

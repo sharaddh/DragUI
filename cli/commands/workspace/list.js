@@ -46,6 +46,8 @@ export default async function list(){
 
  }catch(error){
 
+  process.exitCode = 1;
+
   spinner.fail(
    chalk.red(
     error.message

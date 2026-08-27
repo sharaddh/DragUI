@@ -43,6 +43,8 @@ export default async function search(
 
  }catch(error){
 
+  process.exitCode = 1;
+
   spinner.fail(
    chalk.red(
     error.message

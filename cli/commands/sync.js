@@ -26,6 +26,8 @@ export default async function sync(){
 
  }catch(error){
 
+  process.exitCode = 1;
+
   spinner.fail(
    chalk.red(
     error.message
