@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   DndContext,
   DragOverlay,
@@ -17,7 +17,7 @@ import { useBuilderStore, componentLabels } from "../store/useBuilderStore";
 import { getProject } from "../api/projects";
 import { buildComponentOverrides } from "../utils/componentOverrides";
 import { generateHTML, generateReactJSX } from "../utils/codeGenerator";
-import { Loader2, ArrowLeft, Code, X, Check } from "lucide-react";
+import { Loader2, Code, X, Check } from "lucide-react";
 
 export default function Builder() {
   const addComponent = useBuilderStore((s) => s.addComponent);
@@ -35,6 +35,11 @@ export default function Builder() {
   const [codeTab, setCodeTab] = useState("html");
   const [copied, setCopied] = useState(false);
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  const handleBack = useCallback(() => {
+    navigate("/projects");
+  }, [navigate]);
 
   const loadProject = useCallback(async (id) => {
     setLoading(true);
@@ -119,61 +124,64 @@ export default function Builder() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <Navbar />
-      <main className="mx-auto max-w-[1600px] px-4 py-4 sm:px-6">
-        <div className="mb-3 flex items-center justify-between">
-          <Link to="/dashboard" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700">
-            <ArrowLeft className="h-4 w-4" />
-            Dashboard
-          </Link>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowCode(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
-            >
-              <Code className="h-3.5 w-3.5" />
-              Export Code
-            </button>
-            <SaveButton projectName={projectName} />
+    <div className="flex h-screen flex-col overflow-hidden bg-slate-100">
+      <Navbar
+        builder
+        projectName={projectName}
+        onBack={handleBack}
+        onExport={() => setShowCode(true)}
+        rightActions={
+          <SaveButton projectName={projectName} />
+        }
+      />
+
+      <DndContext
+        sensors={sensors}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+      >
+        <div className="flex flex-1 min-h-0">
+          {/* Left: components */}
+          <div className="w-[264px] shrink-0 border-r border-slate-200 bg-white">
+            <Sidebar />
+          </div>
+
+          {/* Center: canvas with toolbar */}
+          <div className="flex min-w-0 flex-1 flex-col">
+            <div className="border-b border-slate-200 bg-white">
+              <CanvasToolbar />
+            </div>
+            <div className="flex-1 min-h-0 overflow-auto p-4 sm:p-6" onClick={handleCanvasClick}>
+              <Canvas tree={tree} />
+            </div>
+          </div>
+
+          {/* Right: properties */}
+          <div className="w-[312px] shrink-0 border-l border-slate-200 bg-white overflow-y-auto custom-scrollbar">
+            <PropertyEditor />
           </div>
         </div>
 
-        <CanvasToolbar />
-
-        <DndContext
-          sensors={sensors}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-          onDragCancel={handleDragCancel}
-        >
-          <div className="mt-4 grid gap-4 xl:grid-cols-[260px_1fr_300px]">
-            <Sidebar />
-            <div onClick={handleCanvasClick}>
-              <Canvas tree={tree} />
-            </div>
-            <PropertyEditor />
-          </div>
-          <DragOverlay>
-            {activeDrag ? (
-              activeDrag.type === "move" ? (
-                <div className="rounded-xl border-2 border-cyan-400 bg-white/90 px-4 py-2 text-xs font-semibold text-cyan-700 shadow-xl backdrop-blur-sm">
-                  Move
-                </div>
-              ) : (
-                <div className="rounded-xl border border-cyan-400 bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-2.5 text-sm font-semibold text-white shadow-xl shadow-cyan-500/30">
-                  + {activeDrag.label || activeDrag.type}
-                </div>
-              )
-            ) : null}
-          </DragOverlay>
-        </DndContext>
-      </main>
+        <DragOverlay>
+          {activeDrag ? (
+            activeDrag.type === "move" ? (
+              <div className="rounded-lg border-2 border-cyan-400 bg-white/90 px-3 py-1.5 text-xs font-semibold text-cyan-700 shadow-xl backdrop-blur-sm">
+                Move
+              </div>
+            ) : (
+              <div className="rounded-lg border border-cyan-400 bg-gradient-to-r from-cyan-500 to-blue-500 px-3 py-1.5 text-sm font-semibold text-white shadow-xl shadow-cyan-500/30">
+                + {activeDrag.label || activeDrag.type}
+              </div>
+            )
+          ) : null}
+        </DragOverlay>
+      </DndContext>
 
       {showCode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowCode(false)}>
-          <div className="relative w-full max-w-3xl rounded-2xl border border-slate-200 bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="relative w-full max-w-5xl rounded-2xl border border-slate-200 bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
               <div className="flex items-center gap-3">
                 <h3 className="text-sm font-bold text-slate-800">Export Code</h3>
@@ -199,7 +207,7 @@ export default function Builder() {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="max-h-[60vh] overflow-auto p-5">
+            <div className="max-h-[65vh] overflow-auto p-5">
               <pre className="rounded-xl bg-[#0f172a] p-4 text-xs leading-relaxed text-slate-200 overflow-x-auto font-mono">{code}</pre>
             </div>
             <div className="flex items-center justify-end gap-2 border-t border-slate-100 px-5 py-3">
@@ -209,7 +217,7 @@ export default function Builder() {
                   setCopied(true);
                   setTimeout(() => setCopied(false), 2000);
                 }}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-slate-800 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700 transition"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700 transition"
               >
                 {copied ? <Check className="h-3.5 w-3.5" /> : null}
                 {copied ? "Copied!" : `Copy ${codeTitle}`}
