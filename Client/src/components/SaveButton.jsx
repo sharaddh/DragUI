@@ -1,44 +1,66 @@
 import { saveProject } from "../api/projects";
 import { useBuilderStore } from "../store/useBuilderStore";
 import { useState } from "react";
+import { Save, Check } from "lucide-react";
 
 export default function SaveButton({ projectName }) {
   const tree = useBuilderStore((s) => s.tree);
   const [isPublic, setIsPublic] = useState(false);
+  const [state, setState] = useState("idle");
 
   const save = async () => {
     if (!projectName) {
-      alert("Please enter a project name before saving.");
+      setState("error");
+      setTimeout(() => setState("idle"), 2500);
       return;
     }
 
     try {
+      setState("saving");
       await saveProject({
         name: projectName,
         design: tree,
         isPublic,
         isPublished: isPublic,
       });
-      alert("Saved successfully");
+      setState("saved");
+      setTimeout(() => setState("idle"), 2500);
     } catch (error) {
       console.error(error);
-      alert("Save failed. Check the server and try again.");
+      setState("error");
+      setTimeout(() => setState("idle"), 2500);
     }
   };
 
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex items-center gap-2">
-        <input id="isPublic" type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />
-        <label htmlFor="isPublic" className="text-sm text-slate-700">Public</label>
-      </div>
+    <div className="flex items-center gap-2.5">
+      <label className="flex cursor-pointer items-center gap-1.5 text-xs text-slate-600 select-none" title="Make this project public">
+        <input
+          type="checkbox"
+          checked={isPublic}
+          onChange={(e) => setIsPublic(e.target.checked)}
+          className="h-3.5 w-3.5 accent-emerald-500"
+        />
+        Public
+      </label>
       <button
         type="button"
         onClick={save}
-        className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
+        disabled={state === "saving"}
+        className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-emerald-500/20 transition hover:bg-emerald-600 disabled:opacity-60"
       >
-        Save project
+        {state === "saving" ? (
+          <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+        ) : state === "saved" ? (
+          <Check className="h-3.5 w-3.5" />
+        ) : (
+          <Save className="h-3.5 w-3.5" />
+        )}
+        {state === "saved" ? "Saved" : state === "saving" ? "Saving..." : "Save"}
       </button>
+      {state === "error" && (
+        <span className="text-xs font-medium text-red-500">Failed to save</span>
+      )}
     </div>
   );
 }
