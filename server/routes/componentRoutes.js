@@ -7,12 +7,14 @@ import {
 from "../controllers/componentLockController.js";
 import * as componentController from "../controllers/componentController.js";
 import Component from "../models/component.js";
+import ComponentManifest from "../models/ComponentManifest.js";
 
 const router = express.Router();
 
 router.get("/public", async (req, res) => {
   try {
-    const components = await Component.find({ status: "published" }).sort({ createdAt: -1 });
+    const components = await Component.find({ status: "published", visibility: "public" })
+      .sort({ createdAt: -1 });
     res.json(components);
   } catch {
     res.status(500).json([]);
