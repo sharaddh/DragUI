@@ -295,26 +295,41 @@ export const useBuilderStore = create((set, get) => ({
 
   moveComponent: (id, newParentId, insertIndex) => {
     get().saveHistory();
-    const node = get().findNode(id);
-    if (!node) return;
-    const copy = clone(node); copy.id = genId();
+    if (!get().findNode(id)) return;
     const newTree = clone(get().tree);
-    function remove(n) { n.children = n.children.filter((c) => c.id !== id); n.children.forEach(remove); }
-    remove(newTree);
+    const node = findById(newTree, id);
+    if (!node || node.id === newParentId) return;
+    // Remove first, then insert the SAME node object (id preserved) so
+    // selection/clipboard references keep working.
+    let removed = null;
+    function remove(n) {
+      const idx = n.children.findIndex((c) => c.id === id);
+      if (idx !== -1) { removed = n.children.splice(idx, 1)[0]; return true; }
+      for (const child of n.children || []) if (remove(child)) return true;
+      return false;
+    }
+    if (!remove(newTree)) return;
     function add(n) {
       if (n.id === newParentId) {
-        if (typeof insertIndex === "number") { n.children.splice(insertIndex, 0, copy); }
-        else { n.children.push(copy); }
+        if (typeof insertIndex === "number" && insertIndex >= 0 && insertIndex <= n.children.length) {
+          n.children.splice(insertIndex, 0, removed);
+        } else {
+          n.children.push(removed);
+        }
         return true;
       }
       for (const child of n.children || []) { if (add(child)) return true; }
       return false;
     }
-    add(newTree);
-    set({ tree: newTree, selectedIds: [copy.id] });
+    if (!add(newTree)) { newTree.children.push(removed); }
+    set({ tree: newTree, selectedIds: [id] });
   },
 
   reorderChildren: (parentId, fromIndex, toIndex) => {
+    const parent = findById(get().tree, parentId);
+    if (!parent || !Array.isArray(parent.children)) return;
+    if (fromIndex < 0 || fromIndex >= parent.children.length) return;
+    if (toIndex < 0 || toIndex > parent.children.length) return;
     get().saveHistory();
     const newTree = clone(get().tree);
     function reorder(node) {
