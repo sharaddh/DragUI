@@ -200,7 +200,7 @@ function generateHtml(design, projectName) {
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script type="text/plain" id="__dropui-custom-src__">
 ${libAliases.join("\n")}
-${sources.join("\n\n")}
+${sources.map((s) => s.replace(/<\/script/gi, "<\\/script")).join("\n\n")}
 ${mounts.join("\n")}
   </script>
   <script>
@@ -357,6 +357,16 @@ function generateReactComponent(design) {
       .replace(/\{/g, "&#123;")
       .replace(/\}/g, "&#125;");
 
+  // Attribute values live inside double quotes in the generated JSX, so any
+  // quote or interpolation must be escaped to avoid breaking/splitting the tag
+  const escapeJsxAttr = (str) =>
+    String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;")
+      .replace(/\{/g, "&#123;")
+      .replace(/\}/g, "&#125;");
+
   const customNodes = collectCustomNodes(design);
   const customMap = new Map();
   const usedLibs = new Set();
@@ -387,31 +397,31 @@ function generateReactComponent(design) {
     switch (node.type) {
       case "heading": {
         const level = p.level || "h2";
-        return `  <${level}${cls ? ` className="${cls}"` : ""}${styleStr}>${escapeJsxText(p.text)}</${level}>`;
+        return `  <${level}${cls ? ` className="${escapeJsxAttr(cls)}"` : ""}${styleStr}>${escapeJsxText(p.text)}</${level}>`;
       }
       case "text":
-        return `  <span${cls ? ` className="${cls}"` : ""}${styleStr}>${escapeJsxText(p.text)}</span>`;
+        return `  <span${cls ? ` className="${escapeJsxAttr(cls)}"` : ""}${styleStr}>${escapeJsxText(p.text)}</span>`;
       case "paragraph":
-        return `  <p${cls ? ` className="${cls}"` : ""}${styleStr}>${escapeJsxText(p.text)}</p>`;
+        return `  <p${cls ? ` className="${escapeJsxAttr(cls)}"` : ""}${styleStr}>${escapeJsxText(p.text)}</p>`;
       case "button":
-        return `  <button${cls ? ` className="${cls}"` : ""}${styleStr}>${escapeJsxText(p.text || "Button")}</button>`;
+        return `  <button${cls ? ` className="${escapeJsxAttr(cls)}"` : ""}${styleStr}>${escapeJsxText(p.text || "Button")}</button>`;
       case "link":
-        return `  <a href="${p.href || "#"}"${cls ? ` className="${cls}"` : ""}${styleStr}>${escapeJsxText(p.text || "Link")}</a>`;
+        return `  <a href="${escapeJsxAttr(p.href || "#")}"${cls ? ` className="${escapeJsxAttr(cls)}"` : ""}${styleStr}>${escapeJsxText(p.text || "Link")}</a>`;
       case "image":
-        return `  <img src="${p.src || ""}" alt={${JSON.stringify(p.alt || "")}}${cls ? ` className="${cls}"` : ""}${styleStr} />`;
+        return `  <img src="${escapeJsxAttr(p.src || "")}" alt={${JSON.stringify(p.alt || "")}}${cls ? ` className="${escapeJsxAttr(cls)}"` : ""}${styleStr} />`;
       case "input":
         return `  <div${styleStr}>
-${p.label ? `    <label>${p.label}</label>\n` : ""}    <input type="${p.type || "text"}" placeholder="${p.placeholder || ""}" />
+${p.label ? `    <label>${escapeJsxText(p.label)}</label>\n` : ""}    <input type="${escapeJsxAttr(p.type || "text")}" placeholder="${escapeJsxAttr(p.placeholder || "")}" />
   </div>`;
       case "divider":
         return `  <hr${styleStr} />`;
       case "list": {
         const tag = p.ordered ? "ol" : "ul";
-        const items = (p.items || []).map((item) => `    <li>${item}</li>`).join("\n");
+        const items = (p.items || []).map((item) => `    <li>${escapeJsxText(item)}</li>`).join("\n");
         return `  <${tag}>\n${items}\n  </${tag}>`;
       }
       default:
-        return `  <div${cls ? ` className="${cls}"` : ""}${styleStr}>
+        return `  <div${cls ? ` className="${escapeJsxAttr(cls)}"` : ""}${styleStr}>
 ${p.text ? `    ${escapeJsxText(p.text)}\n` : ""}${children ? children + "\n" : ""}  </div>`;
     }
   };
