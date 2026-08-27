@@ -26,11 +26,13 @@ export default function Builder() {
   const tree = useBuilderStore((s) => s.tree);
   const setTree = useBuilderStore((s) => s.setTree);
   const setProjectName = useBuilderStore((s) => s.setProjectName);
+  const setProjectId = useBuilderStore((s) => s.setProjectId);
+  const resetProject = useBuilderStore((s) => s.resetProject);
   const projectName = useBuilderStore((s) => s.projectName);
   const clearSelection = useBuilderStore((s) => s.clearSelection);
-  const [, setProjectIdState] = useState(null);
   const [activeDrag, setActiveDrag] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState(null);
   const [showCode, setShowCode] = useState(false);
   const [codeTab, setCodeTab] = useState("html");
   const [copied, setCopied] = useState(false);
@@ -43,20 +45,23 @@ export default function Builder() {
 
   const loadProject = useCallback(async (id) => {
     setLoading(true);
+    setLoadError(null);
     try {
       const res = await getProject(id);
       const p = res.data.project;
       if (p) {
         setProjectName(p.name);
-        setProjectIdState(p._id || id);
+        setProjectId(p.projectId || p._id || id);
         if (p.design) setTree(p.design);
+      } else {
+        setLoadError("Project not found.");
       }
     } catch {
-      //
+      setLoadError("Failed to load project. Check the server and try again.");
     } finally {
       setLoading(false);
     }
-  }, [setProjectName, setProjectIdState, setTree]);
+  }, [setProjectName, setProjectId, setTree]);
 
   useEffect(() => {
     const id = searchParams.get("project");
@@ -119,6 +124,23 @@ export default function Builder() {
           <Loader2 className="h-8 w-8 animate-spin text-cyan-500" />
           <p className="text-sm text-slate-500">Loading project...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-500">
+          <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+        </div>
+        <p className="text-sm font-medium text-slate-700">{loadError}</p>
+        <button
+          onClick={handleBack}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700"
+        >
+          Back to projects
+        </button>
       </div>
     );
   }

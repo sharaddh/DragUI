@@ -5,6 +5,7 @@ import { Save, Check } from "lucide-react";
 
 export default function SaveButton({ projectName }) {
   const tree = useBuilderStore((s) => s.tree);
+  const projectId = useBuilderStore((s) => s.projectId);
   const [isPublic, setIsPublic] = useState(false);
   const [state, setState] = useState("idle");
 
@@ -18,6 +19,7 @@ export default function SaveButton({ projectName }) {
     try {
       setState("saving");
       await saveProject({
+        projectId,
         name: projectName,
         design: tree,
         isPublic,

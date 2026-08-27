@@ -44,8 +44,22 @@ export const listProjects = async (userId) => {
   return Project.find({ owner: userId }).sort({ updatedAt: -1 });
 };
 
-export const saveProject = async (userId, { name, design, isPublic, isPublished, description, type, tags, visibility }) => {
-  let project = await Project.findOne({ owner: userId, name });
+export const saveProject = async (userId, { name, design, isPublic, isPublished, description, type, tags, visibility, projectId }) => {
+  // Prefer an explicit id so we update the exact project the user opened
+  // rather than whichever first project shares the same name.
+  let project = projectId
+    ? await (async () => {
+        let p = await Project.findOne({ owner: userId, projectId });
+        if (!p && mongoose.isValidObjectId(projectId)) {
+          p = await Project.findOne({ _id: projectId, owner: userId });
+        }
+        return p;
+      })()
+    : null;
+
+  if (!project) {
+    project = await Project.findOne({ owner: userId, name });
+  }
 
   if (!project) {
     project = await Project.create({
