@@ -20,6 +20,9 @@ export const getRecommendations = async (
         $ne: component._id,
       },
 
+      status: "published",
+      visibility: "public",
+
       $or: [
         {
           category:
@@ -50,6 +53,7 @@ async (
 
   return Component.find({
     status: "published",
+    visibility: "public",
   })
     .sort({
       downloads: -1,
