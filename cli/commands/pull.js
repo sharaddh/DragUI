@@ -270,11 +270,17 @@ export default async function pull(projectId, opts = {}) {
       return;
     }
 
-    const dir = opts.dir
-      ? opts.dir
-      : project.name
+    const dir = (() => {
+      const raw = project.name && project.name.trim()
         ? project.name.replace(/[^a-zA-Z0-9-_]/g, "-").toLowerCase()
         : "dropui-project";
+      // Windows reserved device names (and trailing dot/space) are illegal as
+      // directory names - prefix them so the pull can't fail to create the dir.
+      const reserved = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i;
+      return reserved.test(raw.replace(/\..+$/, ""))
+        ? `dropui-${raw}`
+        : raw;
+    })();
 
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
