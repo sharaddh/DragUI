@@ -1,15 +1,16 @@
 import { saveProject } from "../api/projects";
 import { useBuilderStore } from "../store/useBuilderStore";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Save, Check } from "lucide-react";
 
 export default function SaveButton({ projectName }) {
   const tree = useBuilderStore((s) => s.tree);
   const projectId = useBuilderStore((s) => s.projectId);
+  const setTriggerSave = useBuilderStore((s) => s.setTriggerSave);
   const [isPublic, setIsPublic] = useState(false);
   const [state, setState] = useState("idle");
 
-  const save = async () => {
+  const save = useCallback(async () => {
     if (!projectName) {
       setState("error");
       setTimeout(() => setState("idle"), 2500);
@@ -32,7 +33,13 @@ export default function SaveButton({ projectName }) {
       setState("error");
       setTimeout(() => setState("idle"), 2500);
     }
-  };
+  }, [projectName, projectId, tree, isPublic]);
+
+  // Register save for keyboard shortcut (Ctrl+S)
+  useEffect(() => {
+    setTriggerSave(() => save);
+    return () => setTriggerSave(null);
+  }, [save, setTriggerSave]);
 
   return (
     <div className="flex items-center gap-2.5">

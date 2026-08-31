@@ -36,7 +36,9 @@ export default function CanvasToolbar() {
     if (mod && e.key === "c") { e.preventDefault(); copySelected(); }
     if (mod && e.key === "v") { e.preventDefault(); pasteClipboard(); }
     if (mod && e.key === "d") { e.preventDefault(); duplicateSelected(); }
-    if (e.key === "Delete" || (e.key === "Backspace" && !mod)) { e.preventDefault(); deleteSelected(); }
+    if (e.key === "Delete") { e.preventDefault(); deleteSelected(); }
+    if (e.key === "Backspace" && !mod) { e.preventDefault(); deleteSelected(); }
+    if (mod && e.key === "s") { e.preventDefault(); useBuilderStore.getState().triggerSave?.(); }
     if (mod && e.key === "=") { e.preventDefault(); setZoom(zoom + 10); }
     if (mod && e.key === "-") { e.preventDefault(); setZoom(zoom - 10); }
     if (mod && e.key === "0") { e.preventDefault(); setZoom(100); }

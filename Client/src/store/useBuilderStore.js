@@ -403,5 +403,10 @@ export const useBuilderStore = create((set, get) => ({
     selectedIds: [], history: [], future: [], clipboard: null,
     projectId: null, projectName: 'Untitled Project',
   }),
+
+  // Allow external components (e.g. keyboard shortcuts) to trigger a save
+  // without tight coupling. SaveButton registers itself here on mount.
+  triggerSave: null,
+  setTriggerSave: (fn) => set({ triggerSave: fn }),
 }));
 
