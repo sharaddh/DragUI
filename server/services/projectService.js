@@ -3,10 +3,11 @@ import crypto from "crypto";
 import mongoose from "mongoose";
 
 export const createProject = async (payload, userId) => {
-  // Whitelist fields - never create straight from req.body
   const { name, description, type, tags, isPublic, visibility } = payload;
+  const trimmed = typeof name === "string" ? name.trim() : "";
+  if (!trimmed) throw new Error("Project name is required");
   const project = await Project.create({
-    name,
+    name: trimmed,
     description,
     type,
     tags: tags || [],
