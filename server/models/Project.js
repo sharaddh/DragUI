@@ -100,6 +100,10 @@ const projectSchema =
     }
   );
 
+// Speed up the two most common query patterns:
+projectSchema.index({ owner: 1, updatedAt: -1 });
+projectSchema.index({ visibility: 1, isPublished: 1 });
+
 export default mongoose.model(
   "Project",
   projectSchema
