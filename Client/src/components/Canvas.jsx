@@ -9,11 +9,19 @@ import { useBuilderStore } from "../store/useBuilderStore";
 export default function Canvas({ tree }) {
   const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
   const selectedIds = useBuilderStore((s) => s.selectedIds);
+  const clearSelection = useBuilderStore((s) => s.clearSelection);
   const children = tree?.children || [];
+
+  const handleCanvasClick = (e) => {
+    // Only deselect when clicking the canvas background itself, not any child
+    if (e.target.closest("[data-element-id]")) return;
+    clearSelection();
+  };
 
   return (
     <div
       ref={setNodeRef}
+      onClick={handleCanvasClick}
       data-canvas-area="true"
       className={`relative min-h-full rounded-xl border-2 transition-all duration-150 ${
         isOver
