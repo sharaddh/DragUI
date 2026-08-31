@@ -19,9 +19,9 @@ export const createProject = async (payload, userId) => {
 
 const canRead = (project, userId) => {
   if (!project) return false;
-  const ownerId = project.owner?._id ? String(project.owner._id) : String(project.owner);
+  if (!project.owner) return project.visibility === "public";
+  const ownerId = project.owner._id ? String(project.owner._id) : String(project.owner);
   if (userId && ownerId === String(userId)) return true;
-  // Public projects are readable by anyone
   return project.visibility === "public";
 };
 
