@@ -47,12 +47,13 @@ function UnitInput({ value, onChange }) {
 }
 
 function ColorInput({ value, onChange }) {
+  const swatch = /^#[0-9a-f]{6}$/i.test(value || "") ? value : "#000000";
   return (
     <div className="flex gap-1.5 items-center">
       <div className="relative w-8 h-8 rounded-lg border border-slate-200 overflow-hidden shrink-0">
         <input
           type="color"
-          value={value || "#000000"}
+          value={swatch}
           onChange={(e) => onChange(e.target.value)}
           className="absolute inset-0 w-12 h-12 -top-2 -left-2 cursor-pointer"
         />
