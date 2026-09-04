@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { saveProject } from "../api/projects";
 import { X, Loader2, Box, Globe, Lock } from "lucide-react";
@@ -17,6 +17,16 @@ export default function CreateProjectModal({ open, onClose }) {
   const [isPublic, setIsPublic] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!open) return;
+    setName("");
+    setDescription("");
+    setType("frontend");
+    setIsPublic(false);
+    setSaving(false);
+    setError("");
+  }, [open]);
 
   if (!open) return null;
 
