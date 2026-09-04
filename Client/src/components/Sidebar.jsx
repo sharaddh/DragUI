@@ -5,6 +5,7 @@ import { useBuilderStore } from "../store/useBuilderStore";
 import { components } from "../DropUi/index";
 import { CSS_STYLE_KEYS } from "../utils/cssProps";
 import ComponentPreview from "./ComponentPreview";
+import TreeView from "./TreeView";
 import { buildComponentOverrides } from "../utils/componentOverrides";
 
 // Compact draggable component item
@@ -92,6 +93,8 @@ const CONTAINER_TYPES = new Set(["div", "container", "section", "card", "navbar"
 export default function Sidebar() {
   const registry = useRegistry();
   const addComponent = useBuilderStore((s) => s.addComponent);
+  const tree = useBuilderStore((s) => s.tree);
+  const [tab, setTab] = useState("components");
   const [query, setQuery] = useState("");
 
   const validRegistry = Array.isArray(registry)
@@ -116,49 +119,74 @@ export default function Sidebar() {
     <div className="flex h-full flex-col">
       {/* Header */}
       <div className="border-b border-slate-100 px-3 pb-2 pt-3">
-        <h2 className="text-xs font-bold tracking-wide text-slate-800 uppercase">Components</h2>
-      </div>
-
-      {/* Search */}
-      <div className="px-3 pt-2">
-        <div className="relative">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Escape") setQuery(""); }}
-            placeholder="Search components..."
-            className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 pr-7 text-xs placeholder:text-slate-400 focus:border-cyan-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-cyan-400"
-          />
-          {query && (
-            <button
-              onClick={() => setQuery("")}
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-slate-400 hover:text-slate-600"
-              title="Clear search (Esc)"
-            >
-              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-          )}
+        <div className="flex rounded-lg bg-slate-100 p-0.5">
+          <button
+            onClick={() => setTab("components")}
+            className={`flex-1 rounded-md py-1 text-xs font-semibold transition ${
+              tab === "components" ? "bg-white text-cyan-700 shadow-sm" : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            Components
+          </button>
+          <button
+            onClick={() => setTab("layers")}
+            className={`flex-1 rounded-md py-1 text-xs font-semibold transition ${
+              tab === "layers" ? "bg-white text-cyan-700 shadow-sm" : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            Layers
+          </button>
         </div>
       </div>
 
-      {/* List */}
-      <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-3 custom-scrollbar">
-        {filtered.length > 0 ? (
-          filtered.map((comp, index) => (
-            <MemoToolItem
-              key={`${comp.type}-${index}`}
-              comp={comp}
-              index={index}
-              onDirectAdd={() => handleDirectAdd(comp)}
-            />
-          ))
-        ) : (
-          <div className="rounded-lg border border-dashed border-slate-200 p-5 text-center text-xs text-slate-400">
-            {query ? "No matching components" : "No components loaded"}
+      {tab === "layers" ? (
+        <div className="min-h-0 flex-1 overflow-y-auto p-2 custom-scrollbar">
+          <TreeView tree={tree} />
+        </div>
+      ) : (
+        <>
+          {/* Search */}
+          <div className="px-3 pt-2">
+            <div className="relative">
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Escape") setQuery(""); }}
+                placeholder="Search components..."
+                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 pr-7 text-xs placeholder:text-slate-400 focus:border-cyan-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-cyan-400"
+              />
+              {query && (
+                <button
+                  onClick={() => setQuery("")}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-slate-400 hover:text-slate-600"
+                  title="Clear search (Esc)"
+                >
+                  <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              )}
+            </div>
           </div>
-        )}
-      </div>
+
+          {/* List */}
+          <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-3 custom-scrollbar">
+            {filtered.length > 0 ? (
+              filtered.map((comp, index) => (
+                <MemoToolItem
+                  key={`${comp.type}-${index}`}
+                  comp={comp}
+                  index={index}
+                  onDirectAdd={() => handleDirectAdd(comp)}
+                />
+              ))
+            ) : (
+              <div className="rounded-lg border border-dashed border-slate-200 p-5 text-center text-xs text-slate-400">
+                {query ? "No matching components" : "No components loaded"}
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
