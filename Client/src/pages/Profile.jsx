@@ -99,9 +99,9 @@ export default function Profile() {
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 text-2xl font-bold text-white shadow-lg">
               {user?.email?.[0]?.toUpperCase() || "U"}
             </div>
-            <button className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-not-allowed" title="Avatar upload is not available yet">
               <Camera className="h-6 w-6 text-white" />
-            </button>
+            </div>
           </div>
           <div>
             <h2 className="text-xl font-semibold text-slate-900">{user?.email || "User"}</h2>
