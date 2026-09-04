@@ -19,6 +19,7 @@ const SORT_OPTIONS = [
 export default function Projects() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [search, setSearch] = useState("");
   const [deleting, setDeleting] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -40,11 +41,14 @@ export default function Projects() {
   }, []);
 
   const loadProjects = async () => {
+    setLoading(true);
+    setLoadError("");
     try {
       const res = await getProjects();
       setProjects(res.data.projects || []);
     } catch {
       setProjects([]);
+      setLoadError("Could not load your projects. Check the server and try again.");
     } finally {
       setLoading(false);
     }
@@ -101,6 +105,18 @@ export default function Projects() {
       </div>
 
       {/* Search & Filters */}
+      {loadError && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-5 py-4 animate-fadeIn">
+          <p className="text-sm font-medium text-slate-700">{loadError}</p>
+          <button
+            onClick={loadProjects}
+            className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-red-600 shadow-sm transition hover:bg-red-100"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
