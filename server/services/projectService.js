@@ -42,7 +42,7 @@ export const getProject = async (projectId, userId = null) => {
 };
 
 export const listProjects = async (userId) => {
-  return Project.find({ owner: userId }).sort({ updatedAt: -1 });
+  return Project.find({ owner: userId }).sort({ updatedAt: -1, createdAt: -1 });
 };
 
 export const saveProject = async (userId, { name, design, isPublic, isPublished, description, type, tags, visibility, projectId }) => {
