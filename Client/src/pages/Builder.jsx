@@ -261,7 +261,14 @@ export default function Builder() {
               </button>
             </div>
             <div className="max-h-[65vh] overflow-auto p-5">
-              <pre className="rounded-xl bg-[#0f172a] p-4 text-xs leading-relaxed text-slate-200 overflow-x-auto font-mono">{code}</pre>
+              {!tree.children?.length ? (
+                <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+                  <p className="text-sm font-medium text-slate-600">Nothing to export yet</p>
+                  <p className="mt-1 text-xs text-slate-400">Add components to the canvas first, then export your code.</p>
+                </div>
+              ) : (
+                <pre className="rounded-xl bg-[#0f172a] p-4 text-xs leading-relaxed text-slate-200 overflow-x-auto font-mono">{code}</pre>
+              )}
             </div>
             <div className="flex items-center justify-end gap-2 border-t border-slate-100 px-5 py-3">
               <button
