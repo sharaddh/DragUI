@@ -127,7 +127,11 @@ function StyleField({ field, value, onChange }) {
         <input
           type="number"
           value={value || ""}
-          onChange={(e) => onChange(e.target.value ? parseInt(e.target.value) : "")}
+          onChange={(e) => {
+            const raw = e.target.value;
+            const parsed = Number(raw);
+            onChange(raw === "" || !Number.isFinite(parsed) ? "" : parsed);
+          }}
           className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-cyan-400"
         />
       </div>
