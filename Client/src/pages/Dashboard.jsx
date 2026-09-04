@@ -4,7 +4,7 @@ import { AuthContext } from "../context/auth-context";
 import { getProjects } from "../api/projects";
 import {
   Box, Puzzle, Palette, ArrowRight, Plus,
-  TrendingUp, FileText, Sparkles, Clock, User,
+  TrendingUp, FileText, Sparkles, Clock, User, AlertTriangle,
 } from "lucide-react";
 import { CardSkeleton, TableRowSkeleton } from "../components/LoadingSkeleton";
 import EmptyState from "../components/EmptyState";
@@ -13,6 +13,7 @@ export default function Dashboard() {
   const { user } = useContext(AuthContext);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [stats, setStats] = useState({ total: 0, published: 0, drafts: 0 });
 
   useEffect(() => {
@@ -20,6 +21,8 @@ export default function Dashboard() {
   }, []);
 
   const loadProjects = async () => {
+    setLoading(true);
+    setError("");
     try {
       const res = await getProjects();
       const list = res.data?.projects || [];
@@ -31,6 +34,7 @@ export default function Dashboard() {
       });
     } catch {
       setProjects([]);
+      setError("Could not load your projects. Check the server and try again.");
     } finally {
       setLoading(false);
     }
@@ -42,7 +46,7 @@ export default function Dashboard() {
     return isNaN(d.getTime()) ? "—" : d.toLocaleDateString();
   };
 
-  const isNewUser = !loading && stats.total === 0;
+  const isNewUser = !loading && !error && stats.total === 0;
   const statCards = [
     { label: "Total Projects", value: stats.total, icon: Box, color: "text-cyan-500", bg: "bg-cyan-50" },
     { label: "Published", value: stats.published, icon: TrendingUp, color: "text-emerald-500", bg: "bg-emerald-50" },
@@ -81,6 +85,23 @@ export default function Dashboard() {
       </div>
 
       {/* New user welcome banner */}
+      {error && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 p-5 animate-fadeIn">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-100 text-red-500">
+              <AlertTriangle className="h-5 w-5" />
+            </div>
+            <p className="text-sm font-medium text-slate-700">{error}</p>
+          </div>
+          <button
+            onClick={loadProjects}
+            className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-red-600 shadow-sm transition hover:bg-red-100"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
       {isNewUser && (
         <div className="rounded-2xl border border-cyan-200 bg-gradient-to-r from-cyan-50 to-blue-50 p-6 shadow-sm">
           <div className="flex items-start gap-4">
