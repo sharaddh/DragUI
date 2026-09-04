@@ -10,6 +10,7 @@ export default function Canvas({ tree }) {
   const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
   const selectedIds = useBuilderStore((s) => s.selectedIds);
   const clearSelection = useBuilderStore((s) => s.clearSelection);
+  const showGrid = useBuilderStore((s) => s.showGrid);
   const children = tree?.children || [];
 
   const handleCanvasClick = (e) => {
@@ -29,7 +30,17 @@ export default function Canvas({ tree }) {
           : "border-slate-200 bg-white shadow-sm"
       }`}
     >
-      <div className="min-h-[calc(100vh-160px)] p-1 sm:p-2">
+      <div
+        className="min-h-[calc(100vh-160px)] p-1 sm:p-2"
+        style={
+          showGrid
+            ? {
+                backgroundImage: "radial-gradient(circle, #e2e8f0 1px, transparent 1.5px)",
+                backgroundSize: "22px 22px",
+              }
+            : undefined
+        }
+      >
         {children.length === 0 ? (
           <div className="flex h-full min-h-[50vh] flex-col items-center justify-center gap-5">
             <button
