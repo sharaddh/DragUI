@@ -17,7 +17,7 @@ import { useBuilderStore, componentLabels } from "../store/useBuilderStore";
 import { getProject } from "../api/projects";
 import { buildComponentOverrides } from "../utils/componentOverrides";
 import { generateHTML, generateReactJSX } from "../utils/codeGenerator";
-import { Loader2, Code, X, Check } from "lucide-react";
+import { Loader2, Code, X, Check, Download } from "lucide-react";
 
 export default function Builder() {
   const addComponent = useBuilderStore((s) => s.addComponent);
@@ -139,6 +139,19 @@ export default function Builder() {
 
   const code = codeTab === "html" ? generateHTML(tree, projectName) : generateReactJSX(tree);
   const codeTitle = codeTab === "html" ? "HTML" : "React JSX";
+
+  const downloadCode = () => {
+    const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const base = (projectName || "project").replace(/[^a-z0-9-_ ]/gi, "").trim().replace(/\s+/g, "-") || "project";
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${base}.${codeTab === "html" ? "html" : "jsx"}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
 
   if (loading) {
     return (
@@ -271,6 +284,14 @@ export default function Builder() {
               )}
             </div>
             <div className="flex items-center justify-end gap-2 border-t border-slate-100 px-5 py-3">
+              <button
+                onClick={downloadCode}
+                disabled={!tree.children?.length}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+              >
+                <Download className="h-3.5 w-3.5" />
+                Download .{codeTab === "html" ? "html" : "jsx"}
+              </button>
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(code);
