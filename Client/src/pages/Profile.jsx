@@ -20,12 +20,28 @@ export default function Profile() {
     if (user?.username) setUsername(user.username);
   }, [user]);
 
+  const trimmedUsername = username.trim();
+  const profileTooLong = trimmedUsername.length > 50;
+  const profileDirty = trimmedUsername !== (user?.username || "");
+  const canSaveProfile = profileDirty && !profileTooLong && !saving;
+  const passwordComplete =
+    passwordForm.currentPassword && passwordForm.newPassword && passwordForm.confirmPassword;
+
   const handleSaveProfile = async () => {
     setError("");
     setSaved(false);
+    if (profileTooLong) {
+      setError("Display name must be 50 characters or fewer");
+      return;
+    }
+    if (!profileDirty) {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+      return;
+    }
     setSaving(true);
     try {
-      const res = await updateProfile({ username });
+      const res = await updateProfile({ username: trimmedUsername });
       if (res.data.success) {
         updateUser(res.data.user);
         setSaved(true);
@@ -41,6 +57,10 @@ export default function Profile() {
   const handleChangePassword = async () => {
     setPasswordError("");
     setPasswordSaved(false);
+    if (!passwordForm.currentPassword) {
+      setPasswordError("Enter your current password");
+      return;
+    }
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       setPasswordError("Passwords do not match");
       return;
@@ -103,8 +123,12 @@ export default function Profile() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Set a display name"
+              maxLength={50}
               className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm transition focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200"
             />
+            {profileTooLong && (
+              <p className="mt-1 text-xs font-medium text-red-500">Display name must be 50 characters or fewer</p>
+            )}
           </div>
 
           <div>
@@ -125,10 +149,10 @@ export default function Profile() {
 
           <button
             onClick={handleSaveProfile}
-            disabled={saving}
+            disabled={!canSaveProfile}
             className={`inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition ${
               saved ? "bg-emerald-500" : "bg-cyan-500 hover:bg-cyan-600"
-            } disabled:opacity-60`}
+            } disabled:opacity-60 disabled:cursor-not-allowed`}
           >
             {saving ? (
               <><Loader2 className="h-4 w-4 animate-spin" /> Saving...</>
@@ -196,10 +220,10 @@ export default function Profile() {
 
           <button
             onClick={handleChangePassword}
-            disabled={passwordSaving}
+            disabled={passwordSaving || !passwordComplete}
             className={`inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition ${
               passwordSaved ? "bg-emerald-500" : "bg-slate-800 hover:bg-slate-700"
-            } disabled:opacity-60`}
+            } disabled:opacity-60 disabled:cursor-not-allowed`}
           >
             {passwordSaving ? (
               <><Loader2 className="h-4 w-4 animate-spin" /> Updating...</>
