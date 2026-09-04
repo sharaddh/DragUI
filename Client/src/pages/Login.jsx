@@ -1,10 +1,10 @@
-import { useState, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { loginAPI, registerAPI, googleLogin, githubLogin } from "../api/auth";
 import { AuthContext } from "../context/auth-context";
 import { useNavigate } from "react-router-dom";
 import { FaGithub } from "react-icons/fa";
 import {
-  Mail, Lock, LogIn, Loader2, AlertCircle, Eye, EyeOff, User
+  Mail, Lock, LogIn, Loader2, AlertCircle, Eye, EyeOff, User, X
 } from "lucide-react";
 
 export default function Login() {
@@ -15,6 +15,12 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(() => !!localStorage.getItem("dropui.rememberedEmail"));
+
+  useEffect(() => {
+    const stored = localStorage.getItem("dropui.rememberedEmail");
+    if (stored) setForm((f) => ({ ...f, email: stored }));
+  }, []);
 
   const handleSubmit = async () => {
     setError("");
@@ -29,6 +35,8 @@ export default function Login() {
           ? await registerAPI({ email: form.email, password: form.password, username: form.username })
           : await loginAPI({ email: form.email, password: form.password });
       login(res.data.token);
+      if (remember) localStorage.setItem("dropui.rememberedEmail", form.email);
+      else localStorage.removeItem("dropui.rememberedEmail");
       const returnTo = sessionStorage.getItem("dropui.returnTo");
       sessionStorage.removeItem("dropui.returnTo");
       navigate(returnTo && returnTo !== "/login" ? returnTo : "/dashboard");
@@ -137,10 +145,18 @@ export default function Login() {
 
             <div className="flex items-center justify-between text-sm">
               <label className="flex cursor-pointer items-center gap-2">
-                <input type="checkbox" className="rounded border-slate-300 text-cyan-600 focus:ring-cyan-500" />
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  className="rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
+                />
                 <span className="text-slate-600">Remember me</span>
               </label>
-              <button className="font-medium text-cyan-600 transition hover:text-cyan-700">
+              <button
+                onClick={() => setShowForgot(true)}
+                className="font-medium text-cyan-600 transition hover:text-cyan-700"
+              >
                 Forgot password?
               </button>
             </div>
