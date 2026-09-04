@@ -33,6 +33,7 @@ export default function Builder() {
   const [activeDrag, setActiveDrag] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState(null);
+  const [failedId, setFailedId] = useState(null);
   const [showCode, setShowCode] = useState(false);
   const [codeTab, setCodeTab] = useState("html");
   const [copied, setCopied] = useState(false);
@@ -46,6 +47,7 @@ export default function Builder() {
   const loadProject = useCallback(async (id) => {
     setLoading(true);
     setLoadError(null);
+    setFailedId(null);
     try {
       const res = await getProject(id);
       const p = res.data.project;
@@ -55,9 +57,11 @@ export default function Builder() {
         if (p.design) setTree(p.design);
       } else {
         setLoadError("Project not found.");
+        setFailedId(id);
       }
     } catch {
       setLoadError("Failed to load project. Check the server and try again.");
+      setFailedId(id);
     } finally {
       setLoading(false);
     }
@@ -139,12 +143,20 @@ export default function Builder() {
           <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
         </div>
         <p className="text-sm font-medium text-slate-700">{loadError}</p>
-        <button
-          onClick={handleBack}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700"
-        >
-          Back to projects
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => failedId && loadProject(failedId)}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-600"
+          >
+            Retry
+          </button>
+          <button
+            onClick={handleBack}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700"
+          >
+            Back to projects
+          </button>
+        </div>
       </div>
     );
   }
