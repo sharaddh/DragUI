@@ -30,6 +30,8 @@ export default function Builder() {
   const resetProject = useBuilderStore((s) => s.resetProject);
   const projectName = useBuilderStore((s) => s.projectName);
   const clearSelection = useBuilderStore((s) => s.clearSelection);
+  const history = useBuilderStore((s) => s.history);
+  const isDirty = history.length > 0;
   const [activeDrag, setActiveDrag] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState(null);
@@ -43,6 +45,21 @@ export default function Builder() {
   const handleBack = useCallback(() => {
     navigate("/projects");
   }, [navigate]);
+
+  const handleBackGuarded = useCallback(() => {
+    if (isDirty && !window.confirm("Your project has unsaved changes. Leave anyway?")) return;
+    handleBack();
+  }, [isDirty, handleBack]);
+
+  useEffect(() => {
+    if (!isDirty) return;
+    const onBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [isDirty]);
 
   const openExport = useCallback(() => {
     setCodeTab("html");
@@ -194,7 +211,7 @@ export default function Builder() {
       <Navbar
         builder
         projectName={projectName}
-        onBack={handleBack}
+        onBack={handleBackGuarded}
         onExport={openExport}
         rightActions={
           <SaveButton projectName={projectName} />
