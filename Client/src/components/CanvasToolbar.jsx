@@ -1,5 +1,5 @@
 import { useBuilderStore } from "../store/useBuilderStore";
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useMemo } from "react";
 
 export default function CanvasToolbar() {
   const zoom = useBuilderStore((s) => s.zoom);
@@ -18,6 +18,18 @@ export default function CanvasToolbar() {
   const clipboard = useBuilderStore((s) => s.clipboard);
   const duplicateSelected = useBuilderStore((s) => s.duplicateSelected);
   const selectedIds = useBuilderStore((s) => s.selectedIds);
+  const tree = useBuilderStore((s) => s.tree);
+
+  const elementCount = useMemo(() => {
+    let count = 0;
+    (function walk(node) {
+      (node.children || []).forEach((child) => {
+        count += 1;
+        walk(child);
+      });
+    })(tree || {});
+    return count;
+  }, [tree]);
 
   const handleKeyDown = useCallback((e) => {
     const tag = e.target.tagName?.toLowerCase();
@@ -109,6 +121,12 @@ export default function CanvasToolbar() {
       </div>
 
       <div className="flex items-center gap-2">
+        <span className="hidden rounded-lg bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-500 sm:inline" title="Elements on canvas">
+          {elementCount} {elementCount === 1 ? "element" : "elements"}
+          {selectedIds.length > 0 && (
+            <span className="ml-1 text-cyan-600">· {selectedIds.length} selected</span>
+          )}
+        </span>
         <button
           onClick={toggleGrid}
           className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition ${
