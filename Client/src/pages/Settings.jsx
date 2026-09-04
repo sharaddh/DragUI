@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bell, Globe, Shield, Palette, ChevronRight, Moon, Sun } from "lucide-react";
+import { loadPersistedTheme, applyDuTheme } from "../utils/theme";
 
 const SETTINGS_SECTIONS = [
   { id: "notifications", label: "Notifications", icon: Bell, desc: "Manage email and in-app notifications" },
@@ -8,20 +9,48 @@ const SETTINGS_SECTIONS = [
   { id: "language", label: "Language & Region", icon: Globe, desc: "Set your preferred language and timezone" },
 ];
 
+const DARK_SURFACE = {
+  background: "#0f172a",
+  surface: "#1e293b",
+  text: "#e2e8f0",
+  textMuted: "#94a3b8",
+  border: "#334155",
+};
+
 export default function Settings() {
   const [activeSection, setActiveSection] = useState("notifications");
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("dropui-dark") === "true");
-  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [emailNotifications, setEmailNotifications] = useState(
+    () => localStorage.getItem("dropui-email-notifications") !== "false"
+  );
+  const [language, setLanguage] = useState(() => localStorage.getItem("dropui-language") || "en");
+  const [timezone, setTimezone] = useState(() => localStorage.getItem("dropui-timezone") || "UTC");
   const [saved, setSaved] = useState(false);
+  const [projectUpdates, setProjectUpdates] = useState(
+    () => localStorage.getItem("dropui-project-updates") !== "false"
+  );
 
-  const toggleDarkMode = () => {
-    const next = !darkMode;
+  useEffect(() => {
+    if (darkMode) applyDuTheme({ ...loadPersistedTheme(), ...DARK_SURFACE });
+  }, []);
+
+  const applyDarkMode = (next) => {
     setDarkMode(next);
-    localStorage.setItem("dropui-dark", next);
-    document.documentElement.classList.toggle("dark", next);
+    localStorage.setItem("dropui-dark", String(next));
+    if (next) {
+      applyDuTheme({ ...loadPersistedTheme(), ...DARK_SURFACE });
+    } else {
+      applyDuTheme(loadPersistedTheme());
+    }
   };
 
+  const toggleDarkMode = () => applyDarkMode(!darkMode);
+
   const saveSetting = () => {
+    localStorage.setItem("dropui-email-notifications", String(emailNotifications));
+    localStorage.setItem("dropui-project-updates", String(projectUpdates));
+    localStorage.setItem("dropui-language", language);
+    localStorage.setItem("dropui-timezone", timezone);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -79,7 +108,7 @@ export default function Settings() {
                     <p className="text-sm font-medium text-slate-900">Project Updates</p>
                     <p className="text-xs text-slate-500">When team members make changes</p>
                   </div>
-                  <input type="checkbox" defaultChecked className="h-5 w-5 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500" />
+                  <input type="checkbox" checked={projectUpdates} onChange={(e) => setProjectUpdates(e.target.checked)} className="h-5 w-5 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500" />
                 </label>
               </div>
               <button onClick={saveSetting} className="rounded-xl bg-cyan-500 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-cyan-600">
@@ -137,13 +166,13 @@ export default function Settings() {
               <div className="space-y-4">
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-slate-700">Language</label>
-                  <select className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200">
+                  <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200">
                     <option value="en">English</option>
                   </select>
                 </div>
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-slate-700">Timezone</label>
-                  <select className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200">
+                  <select value={timezone} onChange={(e) => setTimezone(e.target.value)} className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200">
                     <option value="UTC">UTC (Coordinated Universal Time)</option>
                     <option value="America/New_York">Eastern Time (US & Canada)</option>
                     <option value="America/Chicago">Central Time (US & Canada)</option>
