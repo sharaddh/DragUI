@@ -7,6 +7,8 @@ export default function SaveButton({ projectName }) {
   const tree = useBuilderStore((s) => s.tree);
   const projectId = useBuilderStore((s) => s.projectId);
   const setTriggerSave = useBuilderStore((s) => s.setTriggerSave);
+  const setProjectId = useBuilderStore((s) => s.setProjectId);
+  const setProjectName = useBuilderStore((s) => s.setProjectName);
   const [isPublic, setIsPublic] = useState(false);
   const [state, setState] = useState("idle");
 
@@ -19,13 +21,16 @@ export default function SaveButton({ projectName }) {
 
     try {
       setState("saving");
-      await saveProject({
+      const res = await saveProject({
         projectId,
         name: projectName,
         design: tree,
         isPublic,
         isPublished: isPublic,
       });
+      const saved = res.data?.project;
+      if (saved?.projectId) setProjectId(saved.projectId);
+      if (saved?.name) setProjectName(saved.name);
       setState("saved");
       setTimeout(() => setState("idle"), 2500);
     } catch (error) {
@@ -33,7 +38,7 @@ export default function SaveButton({ projectName }) {
       setState("error");
       setTimeout(() => setState("idle"), 2500);
     }
-  }, [projectName, projectId, tree, isPublic]);
+  }, [projectName, projectId, tree, isPublic, setProjectId, setProjectName]);
 
   // Register save for keyboard shortcut (Ctrl+S)
   useEffect(() => {
