@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { getProjects, deleteProject } from "../api/projects";
 import {
   Plus, Trash2, ExternalLink, Search, Box, Loader2,
-  ArrowUpDown, Grid3X3, List, Terminal, Copy, Check,
+  ArrowUpDown, Grid3X3, List, Terminal, Copy, Check, X,
 } from "lucide-react";
 import CreateProjectModal from "../components/CreateProjectModal";
 import { ProjectCardSkeleton } from "../components/LoadingSkeleton";
@@ -139,8 +139,18 @@ export default function Projects() {
             placeholder="Search projects..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-12 pr-4 text-sm shadow-sm transition focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+            onKeyDown={(e) => { if (e.key === "Escape") setSearch(""); }}
+            className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-12 pr-10 text-sm shadow-sm transition focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200"
           />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="absolute right-4 top-1/2 -translate-y-1/2 rounded p-0.5 text-slate-400 hover:text-slate-600"
+              title="Clear search (Esc)"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1.5">
