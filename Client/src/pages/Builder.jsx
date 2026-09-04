@@ -44,6 +44,21 @@ export default function Builder() {
     navigate("/projects");
   }, [navigate]);
 
+  const openExport = useCallback(() => {
+    setCodeTab("html");
+    setCopied(false);
+    setShowCode(true);
+  }, []);
+
+  useEffect(() => {
+    if (!showCode) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") setShowCode(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showCode]);
+
   const loadProject = useCallback(async (id) => {
     setLoading(true);
     setLoadError(null);
@@ -167,7 +182,7 @@ export default function Builder() {
         builder
         projectName={projectName}
         onBack={handleBack}
-        onExport={() => setShowCode(true)}
+        onExport={openExport}
         rightActions={
           <SaveButton projectName={projectName} />
         }
