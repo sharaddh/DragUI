@@ -68,6 +68,10 @@ export default function Builder() {
     if (id) loadProject(id);
   }, [searchParams, loadProject]);
 
+  useEffect(() => {
+    if (!searchParams.get("project")) resetProject();
+  }, [searchParams, resetProject]);
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
   );
