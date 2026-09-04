@@ -3,19 +3,43 @@ import crypto from "crypto";
 import mongoose from "mongoose";
 
 export const createProject = async (payload, userId) => {
-  const { name, description, type, tags, isPublic, visibility } = payload;
-  const trimmed = typeof name === "string" ? name.trim() : "";
-  if (!trimmed) throw new Error("Project name is required");
+  const cleaned = sanitizeProjectInput(payload);
   const project = await Project.create({
-    name: trimmed,
-    description,
-    type,
-    tags: tags || [],
-    visibility: visibility || (isPublic ? "public" : "private"),
+    name: cleaned.name,
+    description: cleaned.description,
+    type: cleaned.type,
+    tags: cleaned.tags,
+    visibility: cleaned.visibility || (cleaned.isPublic ? "public" : "private"),
     owner: userId,
     projectId: crypto.randomBytes(4).toString("hex"),
   });
   return project;
+};
+
+const MAX_NAME_LENGTH = 100;
+const MAX_DESCRIPTION_LENGTH = 2000;
+const MAX_TAGS = 50;
+
+const sanitizeProjectInput = (payload) => {
+  const name = typeof payload.name === "string" ? payload.name.trim() : "";
+  if (!name) throw new Error("Project name is required");
+  if (name.length > MAX_NAME_LENGTH) {
+    throw new Error(`Project name must be at most ${MAX_NAME_LENGTH} characters`);
+  }
+
+  let description = payload.description;
+  if (typeof description === "string") {
+    description = description.trim();
+    if (description.length > MAX_DESCRIPTION_LENGTH) {
+      throw new Error(`Project description must be at most ${MAX_DESCRIPTION_LENGTH} characters`);
+    }
+  }
+
+  const tags = Array.isArray(payload.tags)
+    ? payload.tags.slice(0, MAX_TAGS).map((t) => String(t).slice(0, 50))
+    : (payload.tags || []);
+
+  return { ...payload, name, description, tags };
 };
 
 const canRead = (project, userId) => {
@@ -46,6 +70,10 @@ export const listProjects = async (userId) => {
 };
 
 export const saveProject = async (userId, { name, design, isPublic, isPublished, description, type, tags, visibility, projectId }) => {
+  const cleaned = sanitizeProjectInput({ name, design, isPublic, isPublished, description, type, tags, visibility });
+  name = cleaned.name;
+  description = cleaned.description;
+  tags = cleaned.tags;
   // Prefer an explicit id so we update the exact project the user opened
   // rather than whichever first project shares the same name.
   let project = projectId
