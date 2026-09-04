@@ -87,6 +87,8 @@ function ToolItem({ comp, index, onDirectAdd }) {
 
 const MemoToolItem = React.memo(ToolItem);
 
+const CONTAINER_TYPES = new Set(["div", "container", "section", "card", "navbar", "hero", "footer"]);
+
 export default function Sidebar() {
   const registry = useRegistry();
   const addComponent = useBuilderStore((s) => s.addComponent);
@@ -103,7 +105,11 @@ export default function Sidebar() {
     : validRegistry;
 
   const handleDirectAdd = (comp) => {
-    addComponent(comp.type, "root", undefined, buildComponentOverrides(comp, comp.type));
+    const { selectedIds, findNode } = useBuilderStore.getState();
+    const selectedId = selectedIds[0];
+    const target = selectedId && selectedId !== "root" ? findNode(selectedId) : null;
+    const parentId = target && CONTAINER_TYPES.has(target.type) ? target.id : "root";
+    addComponent(comp.type, parentId, undefined, buildComponentOverrides(comp, comp.type));
   };
 
   return (
