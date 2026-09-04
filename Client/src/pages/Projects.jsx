@@ -26,6 +26,7 @@ export default function Projects() {
   const [sort, setSort] = useState("newest");
   const [view, setView] = useState("grid");
   const [copiedId, setCopiedId] = useState(null);
+  const [notice, setNotice] = useState("");
   const navigate = useNavigate();
 
   const copyPullCommand = async (id) => {
@@ -60,8 +61,11 @@ export default function Projects() {
     try {
       await deleteProject(projectId);
       setProjects((prev) => prev.filter((p) => (p.projectId || p._id) !== projectId));
+      setNotice("Project deleted.");
+      setTimeout(() => setNotice(""), 2500);
     } catch {
-      //
+      setNotice("Could not delete the project. Try again.");
+      setTimeout(() => setNotice(""), 2500);
     } finally {
       setDeleting(null);
     }
@@ -105,6 +109,16 @@ export default function Projects() {
       </div>
 
       {/* Search & Filters */}
+      {notice && (
+        <div className={`flex items-center gap-2 rounded-xl border px-5 py-3 text-sm font-medium animate-fadeIn ${
+          notice.startsWith("Could")
+            ? "border-red-200 bg-red-50 text-red-700"
+            : "border-emerald-200 bg-emerald-50 text-emerald-700"
+        }`}>
+          {notice}
+        </div>
+      )}
+
       {loadError && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-5 py-4 animate-fadeIn">
           <p className="text-sm font-medium text-slate-700">{loadError}</p>
