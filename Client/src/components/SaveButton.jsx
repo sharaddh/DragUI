@@ -12,8 +12,13 @@ export default function SaveButton({ projectName }) {
   const [isPublic, setIsPublic] = useState(false);
   const [state, setState] = useState("idle");
 
+  const trimmedName = (projectName || "").trim();
+  const nameTooLong = trimmedName.length > 100;
+  const nameInvalid = trimmedName.length === 0 || nameTooLong;
+  const canSave = !nameInvalid && state !== "saving";
+
   const save = useCallback(async () => {
-    if (!projectName) {
+    if (!trimmedName || nameTooLong) {
       setState("error");
       setTimeout(() => setState("idle"), 2500);
       return;
@@ -23,7 +28,7 @@ export default function SaveButton({ projectName }) {
       setState("saving");
       const res = await saveProject({
         projectId,
-        name: projectName,
+        name: trimmedName,
         design: tree,
         isPublic,
         isPublished: isPublic,
@@ -60,7 +65,7 @@ export default function SaveButton({ projectName }) {
       <button
         type="button"
         onClick={save}
-        disabled={state === "saving"}
+        disabled={!canSave}
         className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-emerald-500/20 transition hover:bg-emerald-600 disabled:opacity-60"
       >
         {state === "saving" ? (
@@ -72,9 +77,11 @@ export default function SaveButton({ projectName }) {
         )}
         {state === "saved" ? "Saved" : state === "saving" ? "Saving..." : "Save"}
       </button>
-      {state === "error" && (
+      {nameTooLong ? (
+        <span className="text-xs font-medium text-red-500">Name must be ≤ 100 chars</span>
+      ) : state === "error" ? (
         <span className="text-xs font-medium text-red-500">Failed to save</span>
-      )}
+      ) : null}
     </div>
   );
 }
