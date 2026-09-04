@@ -4,6 +4,9 @@ import App from "./App";
 import "./index.css";
 
 import { AuthProvider } from "./context/authContext.jsx";
+import { loadPersistedTheme, applyDuTheme } from "./utils/theme";
+
+applyDuTheme(loadPersistedTheme());
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <AuthProvider>

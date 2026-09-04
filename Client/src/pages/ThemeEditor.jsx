@@ -1,43 +1,14 @@
 import { useState, useEffect } from "react";
 import { Palette, RotateCcw, Check, Copy } from "lucide-react";
-
-const DEFAULT_THEME = {
-  primary: "#06b6d4",
-  secondary: "#8b5cf6",
-  accent: "#f59e0b",
-  background: "#ffffff",
-  surface: "#f8fafc",
-  text: "#0f172a",
-  textMuted: "#64748b",
-  border: "#e2e8f0",
-  borderRadius: "12px",
-  fontFamily: "Inter, system-ui, sans-serif",
-};
+import { DEFAULT_THEME, loadPersistedTheme, applyDuTheme } from "../utils/theme";
 
 export default function ThemeEditor() {
-  const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem("dropui-theme");
-    return saved ? { ...DEFAULT_THEME, ...JSON.parse(saved) } : DEFAULT_THEME;
-  });
+  const [theme, setTheme] = useState(loadPersistedTheme);
   const [saved, setSaved] = useState(false);
   const [activeTab, setActiveTab] = useState("colors");
 
-  const applyTheme = (t) => {
-    const root = document.documentElement;
-    root.style.setProperty("--du-primary", t.primary);
-    root.style.setProperty("--du-secondary", t.secondary);
-    root.style.setProperty("--du-accent", t.accent);
-    root.style.setProperty("--du-background", t.background);
-    root.style.setProperty("--du-surface", t.surface);
-    root.style.setProperty("--du-text", t.text);
-    root.style.setProperty("--du-text-muted", t.textMuted);
-    root.style.setProperty("--du-border", t.border);
-    root.style.setProperty("--du-radius", t.borderRadius);
-    root.style.setProperty("--du-font", t.fontFamily);
-  };
-
   useEffect(() => {
-    applyTheme(theme);
+    applyDuTheme(theme);
   }, [theme]);
 
   const saveTheme = () => {
