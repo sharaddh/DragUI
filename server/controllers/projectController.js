@@ -44,6 +44,20 @@ function isValidDesign(design) {
   );
 }
 
+const MAX_TREE_NODES = 500;
+const MAX_TREE_DEPTH = 8;
+
+function designSize(design) {
+  let nodes = 0;
+  let maxDepth = 0;
+  (function walk(node, depth) {
+    nodes += 1;
+    maxDepth = Math.max(maxDepth, depth);
+    (node.children || []).forEach((child) => walk(child, depth + 1));
+  })(design, 1);
+  return { nodes, maxDepth };
+}
+
 export const save = async (req, res) => {
   try {
     const { name, design } = req.body;
@@ -56,6 +70,14 @@ export const save = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Invalid design payload: expected a root node with children",
+      });
+    }
+
+    const { nodes, maxDepth } = designSize(design);
+    if (nodes > MAX_TREE_NODES || maxDepth > MAX_TREE_DEPTH) {
+      return res.status(400).json({
+        success: false,
+        message: `Design too large: ${nodes} nodes at depth ${maxDepth} (max ${MAX_TREE_NODES} nodes, depth ${MAX_TREE_DEPTH})`,
       });
     }
 
