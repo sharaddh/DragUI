@@ -126,6 +126,12 @@ export const useBuilderStore = create((set, get) => ({
     });
   },
 
+  // After a successful save the canvas matches the server again, so there is
+  // nothing left to warn about - drop both the undo trail and the redo trail.
+  markSaved: () => {
+    set({ history: [], future: [] });
+  },
+
   findNode: (id) => {
     function search(node) {
       if (node.id === id) return node;
