@@ -31,14 +31,23 @@ export default function CreateProjectModal({ open, onClose }) {
   if (!open) return null;
 
   const handleCreate = async () => {
-    if (!name.trim()) {
+    const trimmedName = name.trim();
+    if (!trimmedName) {
       setError("Please enter a project name");
+      return;
+    }
+    if (trimmedName.length > 100) {
+      setError("Project name must be at most 100 characters");
+      return;
+    }
+    if (description.trim().length > 2000) {
+      setError("Description must be at most 2000 characters");
       return;
     }
     setError("");
     setSaving(true);
     try {
-      const res = await saveProject({ name: name.trim(), description, type, isPublic });
+      const res = await saveProject({ name: trimmedName, description: description.trim(), type, isPublic });
       const projectId = res.data.project?.projectId || res.data.project?._id;
       onClose();
       if (projectId) navigate(`/builder?project=${projectId}`);
@@ -68,10 +77,14 @@ export default function CreateProjectModal({ open, onClose }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="My Awesome Project"
+              maxLength={100}
               className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm transition focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200"
               autoFocus
               onKeyDown={(e) => e.key === "Enter" && handleCreate()}
             />
+            {name.trim().length > 100 && (
+              <p className="mt-1 text-xs font-medium text-red-500">Project name must be at most 100 characters</p>
+            )}
           </div>
 
           <div>
@@ -81,8 +94,10 @@ export default function CreateProjectModal({ open, onClose }) {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Brief description of your project"
               rows={2}
+              maxLength={2000}
               className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm transition focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200 resize-none"
             />
+            <p className="mt-1 text-right text-[10px] text-slate-400">{description.length}/2000</p>
           </div>
 
           <div>
