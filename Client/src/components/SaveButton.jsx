@@ -11,6 +11,7 @@ export default function SaveButton({ projectName }) {
   const setProjectName = useBuilderStore((s) => s.setProjectName);
   const [isPublic, setIsPublic] = useState(false);
   const [state, setState] = useState("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const trimmedName = (projectName || "").trim();
   const nameTooLong = trimmedName.length > 100;
@@ -19,8 +20,9 @@ export default function SaveButton({ projectName }) {
 
   const save = useCallback(async () => {
     if (!trimmedName || nameTooLong) {
+      setErrorMessage("Enter a project name up to 100 characters");
       setState("error");
-      setTimeout(() => setState("idle"), 2500);
+      setTimeout(() => setState("idle"), 3000);
       return;
     }
 
@@ -36,12 +38,13 @@ export default function SaveButton({ projectName }) {
       const saved = res.data?.project;
       if (saved?.projectId) setProjectId(saved.projectId);
       if (saved?.name) setProjectName(saved.name);
+      setErrorMessage("");
       setState("saved");
       setTimeout(() => setState("idle"), 2500);
     } catch (error) {
-      console.error(error);
+      setErrorMessage(error.response?.data?.message || "Failed to save the project");
       setState("error");
-      setTimeout(() => setState("idle"), 2500);
+      setTimeout(() => setState("idle"), 4000);
     }
   }, [projectName, projectId, tree, isPublic, setProjectId, setProjectName]);
 
@@ -77,10 +80,14 @@ export default function SaveButton({ projectName }) {
         )}
         {state === "saved" ? "Saved" : state === "saving" ? "Saving..." : "Save"}
       </button>
-      {nameTooLong ? (
-        <span className="text-xs font-medium text-red-500">Name must be ≤ 100 chars</span>
+      {nameTooLong || !trimmedName ? (
+        <span className="max-w-[220px] truncate text-xs font-medium text-red-500" title={errorMessage}>
+          Name must be ≤ 100 chars
+        </span>
       ) : state === "error" ? (
-        <span className="text-xs font-medium text-red-500">Failed to save</span>
+        <span className="max-w-[220px] truncate text-xs font-medium text-red-500" title={errorMessage}>
+          {errorMessage}
+        </span>
       ) : null}
     </div>
   );
