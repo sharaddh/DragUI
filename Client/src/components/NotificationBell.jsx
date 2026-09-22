@@ -7,6 +7,7 @@ export default function NotificationBell() {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const ref = useRef(null);
 
   useEffect(() => {
@@ -18,12 +19,17 @@ export default function NotificationBell() {
   }, []);
 
   const loadNotifications = () => {
+    setLoading(true);
+    setLoadFailed(false);
     import("../api/notifications").then(({ getNotifications }) => {
       getNotifications().then((res) => {
         setNotifications(res.data.notifications || []);
       }).catch(() => {
-        setNotifications([]);
+        setLoadFailed(true);
       }).finally(() => setLoading(false));
+    }).catch(() => {
+      setLoadFailed(true);
+      setLoading(false);
     });
   };
 
@@ -77,6 +83,17 @@ export default function NotificationBell() {
             {loading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-200 border-t-cyan-500" />
+              </div>
+            ) : loadFailed ? (
+              <div className="py-8 text-center text-sm">
+                <AlertTriangle className="mx-auto h-8 w-8 text-amber-400 mb-2" />
+                <p className="text-slate-500">Could not load notifications</p>
+                <button
+                  onClick={loadNotifications}
+                  className="mt-3 rounded-lg border border-slate-200 bg-white px-4 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+                >
+                  Retry
+                </button>
               </div>
             ) : notifications.length === 0 ? (
               <div className="py-8 text-center text-sm text-slate-400">
