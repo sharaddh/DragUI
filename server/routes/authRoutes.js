@@ -87,35 +87,50 @@ router.post("/register", authLimiter, async (req, res) => {
   try {
     const { email, password, username } = req.body;
 
-    if (!email || !password) {
+    const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
+    if (!normalizedEmail || !password) {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(normalizedEmail)) {
       return res.status(400).json({ message: "Please enter a valid email address" });
     }
 
-    if (password.length < 6) {
+    if (typeof password !== "string" || password.length < 6) {
       return res.status(400).json({ message: "Password must be at least 6 characters" });
     }
 
-    const existing = await User.findOne({ email });
+    const trimmedUsername = typeof username === "string" ? username.trim() : "";
+    if (trimmedUsername && (trimmedUsername.length < 2 || trimmedUsername.length > 50)) {
+      return res.status(400).json({ message: "Username must be between 2 and 50 characters" });
+    }
+
+    const existing = await User.findOne({ email: normalizedEmail });
     if (existing) {
       return res.status(400).json({ message: "An account with this email already exists. Please sign in." });
     }
 
-    const data = { email, password, provider: "local" };
-    if (username && username.trim()) data.username = username.trim();
+    const data = { email: normalizedEmail, password, provider: "local" };
+    if (trimmedUsername) data.username = trimmedUsername;
 
-    const user = await User.create(data);
+    try {
+      const user = await User.create(data);
 
-    const token = signUserToken(user);
+      const token = signUserToken(user);
 
-    res.status(201).json({
-      token,
-      user: { _id: user._id, email: user.email, username: user.username },
-    });
+      res.status(201).json({
+        token,
+        user: { _id: user._id, email: user.email, username: user.username },
+      });
+    } catch (err) {
+      if (err.code === 11000) {
+        return res.status(400).json({
+          message: "An account with this email already exists. Please sign in.",
+        });
+      }
+      throw err;
+    }
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
