@@ -48,7 +48,9 @@ function signUserToken(user) {
 // ================= EMAIL LOGIN =================
 router.post("/login", authLimiter, async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const email =
+      typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
+    const { password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required" });
