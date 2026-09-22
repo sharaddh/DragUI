@@ -26,6 +26,14 @@ export default function Profile() {
   const canSaveProfile = profileDirty && !profileTooLong && !saving;
   const passwordComplete =
     passwordForm.currentPassword && passwordForm.newPassword && passwordForm.confirmPassword;
+  const passwordsMismatch =
+    passwordForm.confirmPassword.length > 0 &&
+    passwordForm.newPassword !== passwordForm.confirmPassword;
+
+  const setPasswordField = (key, value) => {
+    setPasswordSaved(false);
+    setPasswordForm((prev) => ({ ...prev, [key]: value }));
+  };
 
   const handleSaveProfile = async () => {
     setError("");
@@ -184,13 +192,13 @@ export default function Profile() {
         <div className="mt-5 space-y-4">
           <div>
             <label className="mb-1.5 block text-sm font-medium text-slate-700">Current Password</label>
-            <input
-              type="password"
-              value={passwordForm.currentPassword}
-              onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-              placeholder="Enter current password"
-              className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm transition focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200"
-            />
+<input
+                type="password"
+                value={passwordForm.currentPassword}
+                onChange={(e) => setPasswordField("currentPassword", e.target.value)}
+                placeholder="Enter current password"
+                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm transition focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+              />
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
@@ -198,7 +206,7 @@ export default function Profile() {
               <input
                 type="password"
                 value={passwordForm.newPassword}
-                onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                onChange={(e) => setPasswordField("newPassword", e.target.value)}
                 placeholder="Min. 6 characters"
                 className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm transition focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200"
               />
@@ -208,10 +216,17 @@ export default function Profile() {
               <input
                 type="password"
                 value={passwordForm.confirmPassword}
-                onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                onChange={(e) => setPasswordField("confirmPassword", e.target.value)}
                 placeholder="Repeat new password"
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm transition focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                className={`w-full rounded-xl border px-4 py-2.5 text-sm transition focus:outline-none focus:ring-2 ${
+                  passwordsMismatch
+                    ? "border-red-300 focus:border-red-500 focus:ring-red-200"
+                    : "border-slate-200 focus:border-cyan-500 focus:ring-cyan-200"
+                }`}
               />
+              {passwordsMismatch && (
+                <p className="mt-1 text-xs font-medium text-red-500">Passwords do not match</p>
+              )}
             </div>
           </div>
 
