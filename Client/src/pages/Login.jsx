@@ -25,18 +25,35 @@ export default function Login() {
 
   const handleSubmit = async () => {
     setError("");
-    if (!form.email || !form.password || (mode === "register" && !form.username)) {
+    const trimmedEmail = form.email.trim();
+    const trimmedUsername = form.username.trim();
+
+    if (!trimmedEmail || !form.password || (mode === "register" && !trimmedUsername)) {
       setError(mode === "register" ? "Please fill in all fields" : "Please enter both email and password");
       return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+    if (mode === "register") {
+      if (form.password.length < 6) {
+        setError("Password must be at least 6 characters");
+        return;
+      }
+      if (trimmedUsername.length < 2 || trimmedUsername.length > 50) {
+        setError("Name must be between 2 and 50 characters");
+        return;
+      }
     }
     setIsLoading(true);
     try {
       const res =
         mode === "register"
-          ? await registerAPI({ email: form.email, password: form.password, username: form.username })
-          : await loginAPI({ email: form.email, password: form.password });
+          ? await registerAPI({ email: trimmedEmail, password: form.password, username: trimmedUsername })
+          : await loginAPI({ email: trimmedEmail, password: form.password });
       login(res.data.token);
-      if (remember) localStorage.setItem("dropui.rememberedEmail", form.email);
+      if (remember) localStorage.setItem("dropui.rememberedEmail", trimmedEmail);
       else localStorage.removeItem("dropui.rememberedEmail");
       const returnTo = sessionStorage.getItem("dropui.returnTo");
       sessionStorage.removeItem("dropui.returnTo");
