@@ -26,6 +26,11 @@ export default function ThemeEditor() {
     setTheme((prev) => ({ ...prev, [key]: value }));
   };
 
+  // The native color picker rejects anything that is not a full 6-digit hex,
+  // so never hand it a half-typed value - fall back to the default instead.
+  const safeHex = (value, fallback) =>
+    /^#[0-9a-fA-F]{6}$/.test(value) ? value : fallback;
+
   const colorGroups = [
     {
       label: "Brand Colors",
@@ -132,7 +137,7 @@ export default function ThemeEditor() {
                         <div className="flex gap-2">
                           <input
                             type="color"
-                            value={theme[key]}
+                            value={safeHex(theme[key], DEFAULT_THEME[key])}
                             onChange={(e) => updateColor(key, e.target.value)}
                             className="h-10 w-12 cursor-pointer rounded-lg border border-slate-200 bg-transparent"
                           />
