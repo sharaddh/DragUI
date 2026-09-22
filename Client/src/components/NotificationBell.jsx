@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Bell, X, Check, Info, AlertTriangle, ExternalLink } from "lucide-react";
+import { Bell, X, Check, Info, AlertTriangle } from "lucide-react";
 
 const ICONS = { info: Info, success: Check, warning: AlertTriangle };
 
@@ -42,6 +42,12 @@ export default function NotificationBell() {
   };
 
   const unread = notifications.filter((n) => !n.read).length;
+
+  const formatTimestamp = (dateStr) => {
+    if (!dateStr) return "Just now";
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? "Just now" : d.toLocaleDateString();
+  };
 
   return (
     <div ref={ref} className="relative">
@@ -89,7 +95,7 @@ export default function NotificationBell() {
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-slate-900">{n.title || "Notification"}</p>
                         <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{n.message || n.body || ""}</p>
-                        <p className="text-[10px] text-slate-400 mt-1">{n.createdAt ? new Date(n.createdAt).toLocaleDateString() : "Just now"}</p>
+                        <p className="text-[10px] text-slate-400 mt-1">{formatTimestamp(n.createdAt)}</p>
                       </div>
                     </div>
                   );
@@ -98,12 +104,7 @@ export default function NotificationBell() {
             )}
           </div>
 
-          <div className="border-t border-slate-100 px-4 py-2.5 text-center">
-            <button onClick={() => setOpen(false)} className="text-xs font-medium text-slate-500 hover:text-slate-700">
-              View all notifications
-            </button>
           </div>
-        </div>
       )}
     </div>
   );
