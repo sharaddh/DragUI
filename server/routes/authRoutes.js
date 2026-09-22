@@ -205,10 +205,26 @@ router.put("/profile", authMiddleware, async (req, res) => {
   try {
     const { username, avatar } = req.body;
     const update = {};
-    if (username !== undefined) update.username = username;
+    if (username !== undefined) {
+      const trimmedUsername = typeof username === "string" ? username.trim() : "";
+      if (!trimmedUsername) {
+        return res.status(400).json({ success: false, message: "Display name cannot be empty" });
+      }
+      if (trimmedUsername.length > 50) {
+        return res.status(400).json({ success: false, message: "Display name must be 50 characters or fewer" });
+      }
+      update.username = trimmedUsername;
+    }
     if (avatar !== undefined) update.avatar = avatar;
-    const user = await User.findByIdAndUpdate(req.userId, update, { new: true }).select("-password");
-    res.json({ success: true, user });
+    try {
+      const user = await User.findByIdAndUpdate(req.userId, update, { new: true }).select("-password");
+      res.json({ success: true, user });
+    } catch (err) {
+      if (err.code === 11000) {
+        return res.status(400).json({ success: false, message: "That display name is already in use" });
+      }
+      throw err;
+    }
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }
