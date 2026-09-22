@@ -136,7 +136,11 @@ export default function Profile() {
             <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-600">
               <Mail className="h-4 w-4 text-slate-400" />
               {user?.email || "No email"}
-              <span className="ml-auto rounded bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">Verified</span>
+              {user?.isVerified ? (
+                <span className="ml-auto rounded bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">Verified</span>
+              ) : (
+                <span className="ml-auto rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">Unverified</span>
+              )}
             </div>
           </div>
 
