@@ -271,10 +271,7 @@ export default function Login() {
           </div>
 
           <p className="mt-6 text-center text-xs text-slate-400">
-            By continuing, you agree to our{" "}
-            <button className="font-medium text-cyan-600 transition hover:text-cyan-700">
-              Privacy Policy
-            </button>
+            Your email and name are used only to keep track of your account and projects.
           </p>
         </div>
       </div>
