@@ -1,6 +1,7 @@
 import axios from "axios";
 import chalk from "chalk";
 import ora from "ora";
+import { API_BASE } from "../utils/config.js";
 
 export default async function sync(){
 
@@ -14,7 +15,7 @@ export default async function sync(){
   const res =
    await axios.get(
 
-    "http://localhost:5000/api/registry"
+    `${API_BASE}/registry`
 
    );
 

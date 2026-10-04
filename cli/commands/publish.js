@@ -7,7 +7,8 @@ import ora from "ora";
 import chalk from "chalk";
 
 import {
- getConfig
+ getConfig,
+ API_BASE
 }
 from "../utils/config.js";
 
@@ -17,10 +18,6 @@ import {
 from "../utils/auth.js";
 
 import axios from "axios";
-
-const API_BASE =
- process.env.DROPUI_API ||
- "http://localhost:5000/api";
 
 function collectJsxFiles(
  dir,

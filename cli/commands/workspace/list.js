@@ -11,6 +11,8 @@ import {
  getToken
 }
 from "../../utils/auth.js";
+import { API_BASE }
+from "../../utils/config.js";
 
 export default async function list(){
 
@@ -25,18 +27,18 @@ export default async function list(){
    getToken();
 
   const res =
-  await axios.get(
+await axios.get(
 
-   "http://localhost:5000/api/workspaces",
+    `${API_BASE}/workspaces`,
 
-   {
-    headers:{
-     Authorization:
-      `Bearer ${token}`
+    {
+     headers:{
+      Authorization:
+       `Bearer ${token}`
+     }
     }
-   }
 
-  );
+   );
 
   spinner.succeed();
 

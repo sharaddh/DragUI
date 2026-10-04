@@ -1,12 +1,13 @@
 import axios from "axios";
 
+import { API_BASE }
+from "../utils/config.js";
+
 const api =
  axios.create({
 
   baseURL:
-   process.env.DROPUI_API ||
-
-   "http://localhost:5000/api"
+   API_BASE
 
  });
 
