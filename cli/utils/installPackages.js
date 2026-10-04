@@ -1,5 +1,5 @@
 import {
- execSync
+ execFileSync
 }
 from "child_process";
 
@@ -9,7 +9,13 @@ import {
 from "./packageManager.js";
 
 const PACKAGE_NAME_PATTERN =
- /^[A-Za-z0-9@\/._-]+$/;
+ /^[A-Za-z0-9@\/._^~*-]+$/;
+
+const MANAGER_ARGS = {
+ npm: ["install"],
+ pnpm: ["add"],
+ yarn: ["add"]
+};
 
 export default function installPackages(
  packages=[]
@@ -42,40 +48,30 @@ export default function installPackages(
  const manager =
   detectPackageManager();
 
- let command =
-  "";
+ const args =
+  MANAGER_ARGS[manager];
 
  if(
-  manager === "npm"
+  !args
  ){
 
-  command =
-   `npm install ${packages.join(" ")}`;
+  throw new Error(
+   `Unsupported package manager: ${manager}`
+  );
 
  }
 
- if(
-  manager === "pnpm"
- ){
-
-  command =
-   `pnpm add ${packages.join(" ")}`;
-
- }
-
- if(
-  manager === "yarn"
- ){
-
-  command =
-   `yarn add ${packages.join(" ")}`;
-
- }
-
- execSync(
-  command,
+ // execFileSync with an argument array avoids interpolating registry-supplied
+ // package names into a shell string.
+ execFileSync(
+  manager,
+  [
+   ...args,
+   ...packages
+  ],
   {
-   stdio:"inherit"
+   stdio:"inherit",
+   shell:false
   }
  );
 
