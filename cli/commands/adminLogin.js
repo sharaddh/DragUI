@@ -4,6 +4,9 @@ from "inquirer";
 import axios
 from "axios";
 
+import chalk
+from "chalk";
+
 import {
  saveToken
 }
@@ -33,44 +36,57 @@ export default async function adminLogin(){
 
  ]);
 
- const res =
- await axios.post(
+ try {
 
-  `${API_BASE}/admin-auth/login`,
+  const res =
+  await axios.post(
 
-  {
-   adminId,
-   password
+   `${API_BASE}/admin-auth/login`,
+
+   {
+    adminId,
+    password
+   }
+
+  );
+
+  saveToken(
+   res.data.token,
+   "admin"
+  );
+
+  // Confirm the token actually authenticates
+  let adminLabel = "admin";
+  try {
+   const profile =
+    await axios.get(
+     `${API_BASE}/admin-auth/profile`,
+     {
+      headers:{
+       Authorization:
+        `Bearer ${res.data.token}`
+      }
+     }
+    );
+   adminLabel =
+    profile.data.admin?.adminId || "admin";
+  } catch {
+   // keep generic label
   }
 
- );
+  console.log(
+   `Logged in as ${adminLabel} (admin)`
+  );
 
- saveToken(
-  res.data.token,
-  "admin"
- );
+ } catch (error) {
 
- // Confirm the token actually authenticates
- let adminLabel = "admin";
- try {
-  const profile =
-   await axios.get(
-    `${API_BASE}/admin-auth/profile`,
-    {
-     headers:{
-      Authorization:
-       `Bearer ${res.data.token}`
-     }
-    }
-   );
-  adminLabel =
-   profile.data.admin?.adminId || "admin";
- } catch {
-  // keep generic label
+  process.exitCode = 1;
+  console.error(
+   chalk.red(
+    error.response?.data?.message || error.message
+   )
+  );
+
  }
-
- console.log(
-  `Logged in as ${adminLabel} (admin)`
- );
 
 }
