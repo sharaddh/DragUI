@@ -378,6 +378,9 @@ export const useBuilderStore = create((set, get) => ({
     const newTree = clone(get().tree);
     const node = findById(newTree, id);
     if (!node || node.id === newParentId) return;
+    // Reject moves that would create a parent/child cycle: the new parent
+    // cannot be the node itself or one of its descendants.
+    if (findById(node, newParentId)) return;
     // Remove first, then insert the SAME node object (id preserved) so
     // selection/clipboard references keep working.
     let removed = null;
@@ -445,16 +448,21 @@ export const useBuilderStore = create((set, get) => ({
 
     // Prefer pasting into the first selected container (a node with
     // children); fall back to the root.
-    const targetId = selectedIds[0] && selectedIds[0] !== "root" && findById(newTree, selectedIds[0])
-      ? selectedIds[0]
-      : "root";
+    const targetId = (() => {
+      const candidate = selectedIds[0];
+      if (candidate && candidate !== "root") {
+        const node = findById(newTree, candidate);
+        if (node && Array.isArray(node.children)) return candidate;
+      }
+      return "root";
+    })();
     const target = targetId === "root" ? newTree : findById(newTree, targetId);
 
     const newIds = [];
     clipboard.forEach((item) => {
       function assignIds(node) { node.id = genId(); newIds.push(node.id); (node.children || []).forEach(assignIds); }
       const copy = clone(item); assignIds(copy);
-      if (target && target.children) target.children.push(copy);
+      if (target && Array.isArray(target.children)) target.children.push(copy);
     });
     set({ tree: newTree, selectedIds: newIds });
   },
