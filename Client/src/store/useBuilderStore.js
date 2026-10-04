@@ -26,6 +26,22 @@ function findById(node, id) {
   return null;
 }
 
+// Find the container that holds both ids as direct children (works at any
+// nesting depth, not just the root level).
+function findSiblingParent(node, idA, idB) {
+  if (!node || typeof node !== "object") return null;
+  if (Array.isArray(node.children)) {
+    const hasA = node.children.some((c) => c.id === idA);
+    const hasB = node.children.some((c) => c.id === idB);
+    if (hasA && hasB) return node;
+  }
+  for (const child of node.children || []) {
+    const found = findSiblingParent(child, idA, idB);
+    if (found) return found;
+  }
+  return null;
+}
+
 export const defaultComponentProps = {
   div: { className: "", style: { minHeight: "60px" }, text: "" },
   text: { className: "", style: { fontSize: "16px", color: "#0f172a" }, text: "Double-click to edit text" },
@@ -189,14 +205,22 @@ export const useBuilderStore = create((set, get) => ({
 
   liveReorder: (activeId, overId) => {
     const { tree } = get();
-    const children = tree.children || [];
-    const from = children.findIndex((c) => c.id === activeId);
-    const to = children.findIndex((c) => c.id === overId);
+    if (activeId === overId) return;
+    // Resolve the container that actually holds both siblings so
+    // drag-reordering works inside nested containers, not just the root.
+    const parent = findSiblingParent(tree, activeId, overId);
+    if (!parent || !Array.isArray(parent.children)) return;
+    const from = parent.children.findIndex((c) => c.id === activeId);
+    const to = parent.children.findIndex((c) => c.id === overId);
     if (from < 0 || to < 0 || from === to) return;
-    const newChildren = [...children];
+    const newTree = clone(tree);
+    const targetParent = findById(newTree, parent.id);
+    if (!targetParent) return;
+    const newChildren = [...targetParent.children];
     const [moved] = newChildren.splice(from, 1);
     newChildren.splice(to, 0, moved);
-    set({ tree: { ...tree, children: newChildren } });
+    targetParent.children = newChildren;
+    set({ tree: newTree });
   },
 
   updateProps: (id, newProps) => {
