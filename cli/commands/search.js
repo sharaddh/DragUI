@@ -25,17 +25,39 @@ export default async function search(
 
   spinner.succeed();
 
+  const results =
+   result?.results ?? [];
+
+  if (
+   !results.length
+  ) {
+   console.log(
+    chalk.gray(
+     `No components match "${query}"`
+    )
+   );
+   return;
+  }
+
   console.log(
    chalk.cyan(
     "\nComponents\n"
    )
   );
 
-  result.results.forEach(
+  results.forEach(
    component => {
 
+    const version =
+     component.version ? `@${component.version}` : "";
+
+    const description =
+     component.description
+      ? ` - ${component.description}`
+      : "";
+
     console.log(
-     `• ${component.name}`
+     `• ${component.name}${version}${description}`
     );
 
    }

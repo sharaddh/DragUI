@@ -42,8 +42,22 @@ await axios.get(
 
   spinner.succeed();
 
+  const rows =
+   res.data?.workspaces ?? [];
+
+  if (
+   !rows.length
+  ) {
+   console.log(
+    chalk.gray(
+     "No workspaces yet."
+    )
+   );
+   return;
+  }
+
   console.table(
-   res.data.workspaces
+   rows
   );
 
  }catch(error){

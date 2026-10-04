@@ -21,8 +21,20 @@ export default async function sync(){
 
   spinner.succeed();
 
+  const count =
+   res.data?.components?.length ?? 0;
+
+  if (
+   !count
+  ) {
+   console.log(
+    chalk.yellow("Registry is empty")
+   );
+   return;
+  }
+
   console.log(
-   `${res.data.components.length} components synced`
+   `${count} component${count === 1 ? "" : "s"} available in the registry`
   );
 
  }catch(error){
