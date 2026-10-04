@@ -1,5 +1,7 @@
 import fs from "fs";
 
+import chalk from "chalk";
+
 const LOCKFILE =
  "dropui.lock";
 
@@ -17,14 +19,32 @@ export function readLockfile(){
 
  }
 
- return JSON.parse(
+ try {
 
-  fs.readFileSync(
-   LOCKFILE,
-   "utf8"
-  )
+  const data = JSON.parse(
 
- );
+   fs.readFileSync(
+    LOCKFILE,
+    "utf8"
+   )
+
+  );
+
+  return {
+   ...data,
+   components: data?.components ?? {}
+  };
+
+ } catch {
+
+  // Corrupt or half-written lockfile - fall back to an empty one instead of
+  // crashing on a raw SyntaxError.
+  console.error(chalk.yellow("dropui.lock is corrupt - starting a new one"));
+  return {
+   components:{}
+  };
+
+ }
 
 }
 
