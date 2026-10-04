@@ -8,7 +8,6 @@ import { useBuilderStore } from "../store/useBuilderStore";
 
 export default function Canvas({ tree }) {
   const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
-  const selectedIds = useBuilderStore((s) => s.selectedIds);
   const clearSelection = useBuilderStore((s) => s.clearSelection);
   const showGrid = useBuilderStore((s) => s.showGrid);
   const addComponent = useBuilderStore((s) => s.addComponent);
