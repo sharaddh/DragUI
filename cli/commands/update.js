@@ -20,8 +20,7 @@ import writeFiles
 from "../utils/fileWriter.js";
 
 import {
- getManifest,
- getLatestVersion
+ getManifest
 }
 from "../services/registry.js";
 
@@ -36,6 +35,11 @@ export default async function update(
 
  try{
 
+  const manifest =
+   await getManifest(
+    component
+   );
+
   const lock =
    readLockfile();
 
@@ -44,14 +48,10 @@ export default async function update(
     component
    ];
 
-  const latest =
-   await getLatestVersion(
-    component
-   );
-
   if(
+   manifest.version &&
    installed ===
-   latest.version
+   manifest.version
   ){
 
    spinner.succeed(
@@ -76,14 +76,9 @@ export default async function update(
 
   );
 
-  const manifest =
-   await getManifest(
-    component
-   );
-
   await writeFiles(
 
-   manifest.manifest.files,
+   manifest.files,
 
    config.componentsDir
 
@@ -91,14 +86,14 @@ export default async function update(
 
   addComponent(
 
-   component,
+   manifest.name || component,
 
-   latest.version
+   manifest.version
 
   );
 
   spinner.succeed(
-   `${component} updated`
+   `${manifest.name || component} updated`
   );
 
  }catch(error){
@@ -106,7 +101,7 @@ export default async function update(
   process.exitCode = 1;
 
   spinner.fail(
-   error.message
+   error.response?.data?.message || error.message
   );
 
  }

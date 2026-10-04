@@ -22,7 +22,15 @@ export async function getManifest(
 
   );
 
- return res.data;
+ if (
+  !res.data?.manifest
+ ) {
+  throw new Error(
+   `${component} not found in registry`
+  );
+ }
+
+ return res.data.manifest;
 
 }
 
@@ -39,18 +47,4 @@ export async function searchComponents(
 
  return res.data;
 
-}
-export async function getLatestVersion(
- component
-){
-
- const res =
- await api.get(
-  `/registry/manifest/${component}`
- );
-
- return {
-  version: res.data?.manifest?.version ?? null,
-  manifest: res.data?.manifest ?? null,
- };
 }

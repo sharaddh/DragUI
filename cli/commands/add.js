@@ -35,13 +35,10 @@ export default async function add(
   const config =
    getConfig();
 
-  const data =
+  const manifest =
    await getManifest(
     component
    );
-
-  const manifest =
-   data.manifest;
 
   installPackages(
 
