@@ -55,7 +55,7 @@ export default function CanvasToolbar() {
     if (mod && e.key === "=") { e.preventDefault(); setZoom(zoom + 10); }
     if (mod && e.key === "-") { e.preventDefault(); setZoom(zoom - 10); }
     if (mod && e.key === "0") { e.preventDefault(); setZoom(100); }
-  }, [undo, redo, copySelected, pasteClipboard, duplicateSelected, deleteSelected, zoom, setZoom]);
+  }, [undo, redo, copySelected, pasteClipboard, duplicateSelected, deleteSelected, zoom, setZoom, triggerSave]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
