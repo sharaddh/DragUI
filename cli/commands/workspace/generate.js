@@ -10,6 +10,14 @@ from "chalk";
 import ora
 from "ora";
 
+import {
+ getToken
+}
+from "../../utils/auth.js";
+import { API_BASE }
+
+from "../../utils/config.js";
+
 export default async function generate(){
 
  const spinner =
@@ -18,6 +26,23 @@ export default async function generate(){
   ).start();
 
  try{
+
+  const token =
+   getToken();
+
+  if(
+   !token
+  ){
+
+   process.exitCode = 1;
+   spinner.fail(
+    chalk.red(
+     "Not logged in. Run 'dropui login' first."
+    )
+   );
+   return;
+
+  }
 
   const {
    prompt
@@ -35,10 +60,17 @@ export default async function generate(){
   const res =
    await axios.post(
 
-    "http://localhost:5000/api/ai/generate",
+    `${API_BASE}/ai/generate`,
 
     {
      prompt
+    },
+
+    {
+     headers:{
+      Authorization:
+       `Bearer ${token}`
+     }
     }
 
    );
@@ -46,7 +78,7 @@ export default async function generate(){
   spinner.succeed();
 
   console.log(
-   res.data
+   res.data?.component?.code ?? res.data?.code ?? "(empty response)"
   );
 
  }catch(error){
@@ -55,7 +87,7 @@ export default async function generate(){
 
   spinner.fail(
    chalk.red(
-    error.message
+    error.response?.data?.message || error.message
    )
   );
 

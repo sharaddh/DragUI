@@ -20,6 +20,7 @@ import publishCommand from "../commands/publish.js";
 import syncCommand from "../commands/sync.js";
 import validateCommand from "../commands/validate.js";
 import workspaceListCommand from "../commands/workspace/list.js";
+import workspaceGenerateCommand from "../commands/workspace/generate.js";
 
 const program = new Command();
 
@@ -33,6 +34,10 @@ workspace
     .command("list")
     .description("List workspaces")
     .action(workspaceListCommand);
+workspace
+    .command("generate")
+    .description("Generate a component from a prompt (admin)")
+    .action(workspaceGenerateCommand);
 
 program.command("login").description("Log in as a DropUI user (email + password)").action(loginCommand);
 program.command("admin-login").description("Log in as a platform admin (admin ID + password)").action(adminLoginCommand);
