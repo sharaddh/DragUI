@@ -6,7 +6,7 @@ import {
 }
 from "../utils/auth.js";
 
-export default async function logout(){
+export default function logout(){
 
  const token =
   getToken();
