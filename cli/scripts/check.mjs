@@ -6,14 +6,26 @@ import fs from "fs";
 import url from "url";
 
 const root = path.dirname(path.dirname(url.fileURLToPath(import.meta.url)));
-const targets = ["bin", "commands", "utils"].flatMap((dir) =>
-  fs
-    .readdirSync(path.join(root, dir))
-    .filter((f) => f.endsWith(".js"))
-    .map((f) => path.join(root, dir, f))
+
+function walk(dir) {
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) return walk(full);
+    return entry.name.endsWith(".js") ? [full] : [];
+  });
+}
+
+const targets = ["bin", "commands", "services", "utils", "scripts"].flatMap((dir) =>
+  walk(path.join(root, dir))
 );
 
 let failed = false;
+if (!targets.length) {
+  console.error("No CLI source files found to check");
+  process.exit(1);
+}
+
 for (const file of targets) {
   try {
     execFileSync(process.execPath, ["--check", file], { stdio: "pipe" });
