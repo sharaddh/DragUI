@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
-import { AuthContext } from "../context/auth-context";
+import { AuthContext } from "../context/authContext";
 import {
   LayoutDashboard, Puzzle, Palette, LogOut, Box, Menu, X, ChevronRight,
   Settings, User,

@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { loginAPI, registerAPI, googleLogin, githubLogin } from "../api/auth";
-import { AuthContext } from "../context/auth-context";
+import { AuthContext } from "../context/authContext";
 import { useNavigate } from "react-router-dom";
 import { FaGithub } from "react-icons/fa";
 import {

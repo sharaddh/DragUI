@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext } from "react";
 import { Link } from "react-router-dom";
-import { AuthContext } from "../context/auth-context";
+import { AuthContext } from "../context/authContext";
 import { getProjects } from "../api/projects";
 import {
   Box, Puzzle, Palette, ArrowRight, Plus,

@@ -1,6 +1,6 @@
 import { useEffect, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/auth-context";
+import { AuthContext } from "../context/authContext";
 
 export default function AuthSuccess() {
   const auth = useContext(AuthContext) || {};
