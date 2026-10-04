@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import http from "http";
 import { exec } from "child_process";
 import { platform } from "os";
@@ -19,12 +20,21 @@ function openBrowser(url) {
 }
 
 export default async function login() {
+  const state = crypto.randomBytes(16).toString("hex");
+  let loginTimer;
+
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, "http://127.0.0.1");
 
     if (url.pathname !== "/callback") {
       res.writeHead(404);
       res.end();
+      return;
+    }
+
+    if (url.searchParams.get("state") !== state) {
+      res.writeHead(400, { "Content-Type": "text/html" });
+      res.end("<h2>DropUI CLI</h2><p>Invalid login state. Please try again.</p>");
       return;
     }
 
@@ -43,6 +53,8 @@ export default async function login() {
       "<h2>&#10003; DropUI CLI</h2><p>Logged in successfully. You can close this window and return to your terminal.</p>"
     );
 
+    let verified = true;
+
     // Confirm the token actually authenticates before declaring success
     try {
       const profile = await axios.get(`${API_BASE}/auth/profile`, {
@@ -50,14 +62,17 @@ export default async function login() {
       });
       console.log(`Logged in as ${profile.data.user?.email || "DropUI user"}`);
     } catch {
-      console.log("Logged in (could not verify profile)");
+      verified = false;
+      console.log("Logged in (could not verify profile) - the token may not be valid");
     }
-    server.close(() => process.exit(0));
+
+    clearTimeout(loginTimer);
+    server.close(() => process.exit(verified ? 0 : 1));
   });
 
   server.listen(0, "127.0.0.1", () => {
     const port = server.address().port;
-    const redirect = `http://127.0.0.1:${port}/callback`;
+    const redirect = `http://127.0.0.1:${port}/callback?state=${state}`;
     const url = `${CLIENT_URL}/cli-login?redirect=${encodeURIComponent(redirect)}`;
 
     console.log("Opening browser to complete login...");
@@ -68,7 +83,7 @@ export default async function login() {
     openBrowser(url);
   });
 
-  setTimeout(() => {
+  loginTimer = setTimeout(() => {
     console.log("Login timed out. Run 'dropui login' again to retry.");
     server.close();
     process.exit(1);
