@@ -333,7 +333,44 @@ export const useBuilderStore = create((set, get) => ({
     set({ tree: newTree, selectedIds: newId ? [newId] : get().selectedIds });
   },
 
-  duplicateSelected: () => { get().selectedIds.forEach((id) => { if (id !== "root") get().duplicateComponent(id); }); },
+  duplicateSelected: () => {
+    const ids = get().selectedIds.filter((id) => id !== "root");
+    if (!ids.length) return;
+
+    // Drop ids that are descendants of another selected node so we never
+    // duplicate a subtree twice.
+    const topLevel = ids.filter((id) => {
+      const node = get().findNode(id);
+      if (!node) return false;
+      for (const other of ids) {
+        if (other === id) continue;
+        const otherNode = get().findNode(other);
+        if (otherNode && findById(otherNode, id)) return false;
+      }
+      return true;
+    });
+
+    if (!topLevel.length) return;
+
+    // Single history entry for the whole multi-duplicate, and every new node
+    // stays selected afterwards.
+    get().saveHistory();
+    const newTree = clone(get().tree);
+    const newIds = [];
+    function duplicateAll(node) {
+      [...node.children].forEach((child) => {
+        if (topLevel.includes(child.id)) {
+          const copy = cloneWithFreshIds(child);
+          node.children.splice(node.children.indexOf(child) + 1, 0, copy);
+          newIds.push(copy.id);
+        } else if (child.children?.length) {
+          duplicateAll(child);
+        }
+      });
+    }
+    duplicateAll(newTree);
+    set({ tree: newTree, selectedIds: newIds.length ? newIds : get().selectedIds });
+  },
 
   moveComponent: (id, newParentId, insertIndex) => {
     get().saveHistory();
