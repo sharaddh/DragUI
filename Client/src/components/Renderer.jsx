@@ -321,6 +321,9 @@ function renderElement(node, ctx) {
 export default function Renderer({ node, depth = 0 }) {
   const selectedIds = useBuilderStore((s) => s.selectedIds);
   const selectComponent = useBuilderStore((s) => s.selectComponent);
+  const duplicateComponent = useBuilderStore((s) => s.duplicateComponent);
+  const deleteComponent = useBuilderStore((s) => s.deleteComponent);
+  const updateStyle = useBuilderStore((s) => s.updateStyle);
   const updateTextSilently = useBuilderStore((s) => s.updateTextSilently);
   const editingTextId = useBuilderStore((s) => s.editingTextId);
   const setEditingText = useBuilderStore((s) => s.setEditingText);
@@ -377,14 +380,14 @@ export default function Renderer({ node, depth = 0 }) {
           <span className="text-[10px] font-medium text-white mr-1">{label}</span>
           <button
             className="rounded p-0.5 text-white/80 hover:bg-white/20 hover:text-white"
-            onClick={(e) => { e.stopPropagation(); useBuilderStore.getState().duplicateComponent(node.id); }}
+            onClick={(e) => { e.stopPropagation(); duplicateComponent(node.id); }}
             title="Duplicate"
           >
             <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
           </button>
           <button
             className="rounded p-0.5 text-white/80 hover:bg-white/20 hover:text-white"
-            onClick={(e) => { e.stopPropagation(); useBuilderStore.getState().deleteComponent(node.id); }}
+            onClick={(e) => { e.stopPropagation(); deleteComponent(node.id); }}
             title="Delete"
           >
             <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -421,7 +424,7 @@ export default function Renderer({ node, depth = 0 }) {
                     newStyle.height = `${Math.max(30, startHeight - dy)}px`;
                     newStyle.marginTop = `${dy}px`;
                   }
-                  useBuilderStore.getState().updateStyle(node.id, newStyle);
+                  updateStyle(node.id, newStyle);
                 };
 
                 const handleMouseUp = () => {

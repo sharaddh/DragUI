@@ -19,6 +19,7 @@ export default function CanvasToolbar() {
   const duplicateSelected = useBuilderStore((s) => s.duplicateSelected);
   const selectedIds = useBuilderStore((s) => s.selectedIds);
   const tree = useBuilderStore((s) => s.tree);
+  const triggerSave = useBuilderStore((s) => s.triggerSave);
 
   const elementCount = useMemo(() => {
     let count = 0;
@@ -50,7 +51,7 @@ export default function CanvasToolbar() {
     if (mod && e.key === "d") { e.preventDefault(); duplicateSelected(); }
     if (e.key === "Delete") { e.preventDefault(); deleteSelected(); }
     if (e.key === "Backspace" && !mod) { e.preventDefault(); deleteSelected(); }
-    if (mod && e.key === "s") { e.preventDefault(); useBuilderStore.getState().triggerSave?.(); }
+    if (mod && e.key === "s") { e.preventDefault(); triggerSave?.(); }
     if (mod && e.key === "=") { e.preventDefault(); setZoom(zoom + 10); }
     if (mod && e.key === "-") { e.preventDefault(); setZoom(zoom - 10); }
     if (mod && e.key === "0") { e.preventDefault(); setZoom(100); }
