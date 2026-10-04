@@ -194,6 +194,7 @@ export default function Profile() {
             <label className="mb-1.5 block text-sm font-medium text-slate-700">Current Password</label>
 <input
                 type="password"
+                autoComplete="current-password"
                 value={passwordForm.currentPassword}
                 onChange={(e) => setPasswordField("currentPassword", e.target.value)}
                 placeholder="Enter current password"
@@ -205,6 +206,7 @@ export default function Profile() {
               <label className="mb-1.5 block text-sm font-medium text-slate-700">New Password</label>
               <input
                 type="password"
+                autoComplete="new-password"
                 value={passwordForm.newPassword}
                 onChange={(e) => setPasswordField("newPassword", e.target.value)}
                 placeholder="Min. 6 characters"
@@ -215,6 +217,7 @@ export default function Profile() {
               <label className="mb-1.5 block text-sm font-medium text-slate-700">Confirm New Password</label>
               <input
                 type="password"
+                autoComplete="new-password"
                 value={passwordForm.confirmPassword}
                 onChange={(e) => setPasswordField("confirmPassword", e.target.value)}
                 placeholder="Repeat new password"

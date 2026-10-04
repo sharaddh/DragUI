@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Palette, RotateCcw, Check, Copy } from "lucide-react";
 import { DEFAULT_THEME, loadPersistedTheme, applyDuTheme } from "../utils/theme";
 
@@ -6,6 +6,8 @@ export default function ThemeEditor() {
   const [theme, setTheme] = useState(loadPersistedTheme);
   const [saved, setSaved] = useState(false);
   const [activeTab, setActiveTab] = useState("colors");
+  const [copied, setCopied] = useState(false);
+  const copyTimer = useRef(null);
 
   useEffect(() => {
     applyDuTheme(theme);
@@ -24,6 +26,25 @@ export default function ThemeEditor() {
 
   const updateColor = (key, value) => {
     setTheme((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const buildCss = () =>
+    `:root {\n${Object.entries(theme)
+      .map(([key, value]) => {
+        const cssKey = key.replace(/([A-Z])/g, "-$1").toLowerCase();
+        return `  --du-${cssKey}: ${value};`;
+      })
+      .join("\n")}\n}`;
+
+  const copyCss = async () => {
+    try {
+      await navigator.clipboard.writeText(buildCss());
+      setCopied(true);
+      clearTimeout(copyTimer.current);
+      copyTimer.current = setTimeout(() => setCopied(false), 1500);
+    } catch {
+      setCopied(false);
+    }
   };
 
   // The native color picker rejects anything that is not a full 6-digit hex,
@@ -200,31 +221,14 @@ export default function ThemeEditor() {
               </p>
               <div className="relative">
                 <pre className="overflow-x-auto rounded-xl bg-slate-900 p-4 text-sm text-slate-200">
-                  <code>{`:root {
-${Object.entries(theme)
-  .map(([key, value]) => {
-    const cssKey = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-    return `  --du-${cssKey}: ${value};`;
-  })
-  .join("\n")}
-}`}</code>
+                  <code>{buildCss()}</code>
                 </pre>
                 <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(
-                      `:root {\n${Object.entries(theme)
-                        .map(([key, value]) => {
-                          const cssKey = key
-                            .replace(/([A-Z])/g, "-$1")
-                            .toLowerCase();
-                          return `  --du-${cssKey}: ${value};`;
-                        })
-                        .join("\n")}\n}`
-                    );
-                  }}
+                  onClick={copyCss}
+                  aria-label={copied ? "Copied CSS variables" : "Copy CSS variables"}
                   className="absolute right-3 top-3 rounded-lg bg-white/10 p-2 text-white/60 transition hover:bg-white/20 hover:text-white"
                 >
-                  <Copy className="h-4 w-4" />
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 </button>
               </div>
             </div>

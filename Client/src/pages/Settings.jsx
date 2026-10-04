@@ -134,6 +134,8 @@ export default function Settings() {
                   </div>
                   <button
                     onClick={toggleDarkMode}
+                    aria-label={darkMode ? "Turn off dark mode" : "Turn on dark mode"}
+                    aria-pressed={darkMode}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${darkMode ? "bg-cyan-600" : "bg-slate-300"}`}
                   >
                     <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition ${darkMode ? "translate-x-6" : "translate-x-0.5"}`} />
