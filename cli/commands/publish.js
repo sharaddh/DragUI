@@ -13,7 +13,8 @@ import {
 from "../utils/config.js";
 
 import {
- getToken
+ getToken,
+ getRole
 }
 from "../utils/auth.js";
 
@@ -89,13 +90,32 @@ export default async function publish(){
 
  try{
 
-  const token =
-   getToken();
+const token =
+  getToken();
 
-  const config =
-   getConfig();
+ const config =
+  getConfig();
 
-  const pkg =
+ if (
+  !token
+ ) {
+  throw new Error(
+   "Not logged in. Run 'dropui login' first."
+  );
+ }
+
+ if (
+  getRole() !== "admin"
+ ) {
+  throw new Error(
+   "Publishing requires an admin account. Run 'dropui admin-login' first."
+  );
+ }
+
+ let pkg;
+ try {
+
+  pkg =
    JSON.parse(
     fs.readFileSync(
      "package.json",
@@ -103,7 +123,25 @@ export default async function publish(){
     )
    );
 
-  const jsxFiles =
+ } catch {
+
+  throw new Error(
+   "Could not read package.json - run 'dropui init' in your project root"
+  );
+
+ }
+
+ if (
+  !fs.existsSync(
+   config.componentsDir
+  )
+ ) {
+  throw new Error(
+   `${config.componentsDir} does not exist - run 'dropui init' first`
+  );
+ }
+
+ const jsxFiles =
    collectJsxFiles(
     config.componentsDir,
     path.resolve(
@@ -145,7 +183,7 @@ export default async function publish(){
    category:
     "UI",
    description:
-    "",
+    pkg.description || "",
    code:
     files[0].content,
    files
