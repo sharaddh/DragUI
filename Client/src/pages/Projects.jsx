@@ -27,6 +27,7 @@ export default function Projects() {
   const [view, setView] = useState("grid");
   const [copiedId, setCopiedId] = useState(null);
   const [notice, setNotice] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const navigate = useNavigate();
 
   const copyPullCommand = async (id) => {
@@ -55,18 +56,19 @@ export default function Projects() {
     }
   };
 
-  const handleDelete = async (projectId) => {
-    if (!window.confirm("Delete this project? This cannot be undone.")) return;
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    const projectId = deleteTarget.projectId || deleteTarget._id;
     setDeleting(projectId);
+    setDeleteTarget(null);
     try {
       await deleteProject(projectId);
       setProjects((prev) => prev.filter((p) => (p.projectId || p._id) !== projectId));
       setNotice("Project deleted.");
-      setTimeout(() => setNotice(""), 2500);
     } catch {
       setNotice("Could not delete the project. Try again.");
-      setTimeout(() => setNotice(""), 2500);
     } finally {
+      setTimeout(() => setNotice(""), 2500);
       setDeleting(null);
     }
   };
@@ -110,7 +112,7 @@ export default function Projects() {
 
       {/* Search & Filters */}
       {notice && (
-        <div className={`flex items-center gap-2 rounded-xl border px-5 py-3 text-sm font-medium animate-fadeIn ${
+        <div role="status" aria-live="polite" className={`flex items-center gap-2 rounded-xl border px-5 py-3 text-sm font-medium animate-fadeIn ${
           notice.startsWith("Could")
             ? "border-red-200 bg-red-50 text-red-700"
             : "border-emerald-200 bg-emerald-50 text-emerald-700"
@@ -145,6 +147,7 @@ export default function Projects() {
           {search && (
             <button
               onClick={() => setSearch("")}
+              aria-label="Clear search"
               className="absolute right-4 top-1/2 -translate-y-1/2 rounded p-0.5 text-slate-400 hover:text-slate-600"
               title="Clear search (Esc)"
             >
@@ -156,6 +159,8 @@ export default function Projects() {
           <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1.5">
             <button
               onClick={() => setView("grid")}
+              aria-label="Grid view"
+              aria-pressed={view === "grid"}
               className={`rounded-lg p-1.5 transition ${view === "grid" ? "bg-cyan-50 text-cyan-600" : "text-slate-400 hover:text-slate-600"}`}
               title="Grid view"
             >
@@ -163,6 +168,8 @@ export default function Projects() {
             </button>
             <button
               onClick={() => setView("list")}
+              aria-label="List view"
+              aria-pressed={view === "list"}
               className={`rounded-lg p-1.5 transition ${view === "list" ? "bg-cyan-50 text-cyan-600" : "text-slate-400 hover:text-slate-600"}`}
               title="List view"
             >
@@ -198,7 +205,7 @@ export default function Projects() {
         ) : (
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
+              {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div key={i} className="flex items-center gap-4 animate-pulse">
                   <div className="h-10 w-10 rounded-xl bg-slate-200" />
                   <div className="flex-1">
@@ -235,14 +242,16 @@ export default function Projects() {
                   <div className="flex gap-1">
                     <button
                       onClick={() => navigate(`/builder?project=${id}`)}
+                      aria-label={`Open project ${project.name}`}
                       className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-cyan-600"
                       title="Open project"
                     >
                       <ExternalLink className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => handleDelete(id)}
+                      onClick={() => setDeleteTarget(project)}
                       disabled={deleting === id}
+                      aria-label={`Delete project ${project.name}`}
                       className="rounded-lg p-2 text-slate-400 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
                       title="Delete project"
                     >
@@ -323,11 +332,13 @@ export default function Projects() {
                       {project.isPublished ? "Published" : "Draft"}
                     </span>
                     <button onClick={() => navigate(`/builder?project=${id}`)}
+                      aria-label={`Open project ${project.name}`}
                       className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-cyan-600" title="Open">
                       <ExternalLink className="h-4 w-4" />
                     </button>
-                    <button onClick={() => handleDelete(id)}
+                    <button onClick={() => setDeleteTarget(project)}
                       disabled={deleting === id}
+                      aria-label={`Delete project ${project.name}`}
                       className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50" title="Delete">
                       <Trash2 className={`h-4 w-4 ${deleting === id ? "animate-pulse" : ""}`} />
                     </button>
@@ -340,6 +351,39 @@ export default function Projects() {
       )}
 
       <CreateProjectModal open={showModal} onClose={() => { setShowModal(false); loadProjects(); }} />
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setDeleteTarget(null)}>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-dialog-title"
+            className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl animate-fadeIn"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="delete-dialog-title" className="text-base font-semibold text-slate-900">Delete project?</h2>
+            <p className="mt-2 text-sm text-slate-500">
+              <span className="font-medium text-slate-700">{deleteTarget.name}</span> will be permanently
+              removed. This cannot be undone.
+            </p>
+            <div className="mt-5 flex justify-end gap-3">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                autoFocus
+                className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
