@@ -11,3 +11,8 @@ smoke-test-project/
 pulled-out/
 cli-custom-pull-test/
 dropui-project/
+
+# DropUI CLI generated artifacts
+dropui.lock
+dropui.config.json
+.dropui/
