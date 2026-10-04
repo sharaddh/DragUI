@@ -70,7 +70,13 @@ export default function RuntimeComponent({ code, props }) {
     [propsKey]
   );
 
-  if (!liveCode) return null;
+  if (!liveCode) {
+    return (
+      <div className="flex h-full min-h-[60px] w-full items-center justify-center rounded-lg border border-amber-200 bg-amber-50 p-2 text-left text-[10px] leading-snug text-amber-700">
+        Custom component is missing a default export
+      </div>
+    );
+  }
 
   return (
     <LiveProvider code={liveCode} scope={scope} noInline>
