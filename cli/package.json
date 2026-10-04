@@ -1,8 +1,8 @@
 {
   "name": "Dropui-cli",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "DropUI developer CLI - login, pull, and component registry workflows",
+  "main": "bin/dropui.js",
   "type": "module",
   "bin": {
     "dropui": "./bin/dropui.js"
@@ -11,8 +11,14 @@
     "check": "node scripts/check.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "dropui",
+    "cli",
+    "low-code",
+    "no-code",
+    "builder"
+  ],
+  "author": "DropUI",
   "license": "ISC",
   "dependencies": {
     "axios": "^1.17.0",
