@@ -32,7 +32,7 @@ export default function Settings() {
 
   useEffect(() => {
     if (darkMode) applyDuTheme({ ...loadPersistedTheme(), ...DARK_SURFACE });
-  }, []);
+  }, [darkMode]);
 
   const applyDarkMode = (next) => {
     setDarkMode(next);

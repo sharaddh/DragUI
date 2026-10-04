@@ -35,7 +35,7 @@ function ResizeHandle({ position, onResize }) {
 }
 
 function renderElement(node, ctx) {
-  const { isSelected, selectComponent, updateProps, updateTextSilently, editingTextId, setEditingText, childrenNode } = ctx;
+  const { isSelected, selectComponent, updateTextSilently, editingTextId, setEditingText, childrenNode } = ctx;
   const p = node.props || {};
   const style = p.style || {};
   const combinedStyle = { ...style, position: "relative" };
@@ -321,7 +321,6 @@ function renderElement(node, ctx) {
 export default function Renderer({ node, depth = 0 }) {
   const selectedIds = useBuilderStore((s) => s.selectedIds);
   const selectComponent = useBuilderStore((s) => s.selectComponent);
-  const updateProps = useBuilderStore((s) => s.updateProps);
   const updateTextSilently = useBuilderStore((s) => s.updateTextSilently);
   const editingTextId = useBuilderStore((s) => s.editingTextId);
   const setEditingText = useBuilderStore((s) => s.setEditingText);
@@ -443,7 +442,6 @@ export default function Renderer({ node, depth = 0 }) {
         {renderElement(node, {
           isSelected,
           selectComponent,
-          updateProps,
           updateTextSilently,
           editingTextId,
           setEditingText,

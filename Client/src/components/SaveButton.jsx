@@ -48,7 +48,7 @@ export default function SaveButton({ projectName }) {
       setState("error");
       setTimeout(() => setState("idle"), 4000);
     }
-  }, [projectName, projectId, tree, isPublic, setProjectId, setProjectName, markSaved]);
+  }, [projectId, tree, isPublic, setProjectId, setProjectName, markSaved, trimmedName, nameTooLong]);
 
   // Register save for keyboard shortcut (Ctrl+S)
   useEffect(() => {

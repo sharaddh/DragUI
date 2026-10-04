@@ -1,6 +1,5 @@
 ﻿import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import axios from "axios";
 import API from "../api/index";
 
 export default function CliLogin() {

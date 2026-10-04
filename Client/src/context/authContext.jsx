@@ -1,3 +1,6 @@
+/* eslint-disable react-refresh/only-export-components */
+// This module intentionally co-locates the AuthContext object with AuthProvider:
+// splitting them would fragment the single auth surface consumers import from.
 import { useState, useEffect, useCallback, createContext } from "react";
 import API from "../api/index";
 
