@@ -1,13 +1,15 @@
 import { useContext } from "react";
 import { AuthContext } from "../context/authContext";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 
 export default function ProtectedRoute({ children }) {
   const auth = useContext(AuthContext) || {};
   const { token } = auth;
+  const location = useLocation();
 
   if (!token) {
-    return <Navigate to="/login" />;
+    sessionStorage.setItem("dropui.returnTo", location.pathname + location.search);
+    return <Navigate to="/login" replace />;
   }
 
   return children;
