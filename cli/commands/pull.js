@@ -270,7 +270,8 @@ export default async function pull(projectId, opts = {}) {
       return;
     }
 
-    const dir = (() => {
+    const resolvedDir = (() => {
+      if (opts.dir) return path.resolve(opts.dir);
       const raw = project.name && project.name.trim()
         ? project.name.replace(/[^a-zA-Z0-9-_]/g, "-").toLowerCase()
         : "dropui-project";
@@ -281,6 +282,7 @@ export default async function pull(projectId, opts = {}) {
         ? `dropui-${raw}`
         : raw;
     })();
+    const dir = resolvedDir;
 
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
@@ -328,7 +330,7 @@ Copy \`Component.jsx\` into \`src/\`, import it in \`App.jsx\`, and include Tail
 `
     );
 
-    console.log(`Project "${project.name}" pulled to ./${dir}/`);
+    console.log(`Project "${project.name}" pulled to ${path.resolve(dir)}/`);
     console.log("Files: design.json, index.html, Component.jsx, README.md");
 
     if (hasCustom) {
