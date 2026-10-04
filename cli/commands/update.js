@@ -53,7 +53,7 @@ export default async function update(
 
   if(
    manifest.version &&
-   installed ===
+   installed?.version ===
    manifest.version
   ){
 
@@ -98,7 +98,10 @@ export default async function update(
 
    manifest.name || component,
 
-   manifest.version
+   {
+    version: manifest.version,
+    files: (manifest.files || []).map(f => f.path)
+   }
 
   );
 

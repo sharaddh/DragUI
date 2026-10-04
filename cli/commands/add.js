@@ -59,7 +59,10 @@ export default async function add(
 
    manifest.name,
 
-   manifest.version
+   {
+    version: manifest.version,
+    files: (manifest.files || []).map(f => f.path)
+   }
 
   );
 

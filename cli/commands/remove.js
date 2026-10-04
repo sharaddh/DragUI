@@ -31,8 +31,13 @@ export default function remove(
  const lock =
   readLockfile();
 
+ const entry =
+  lock.components[
+   component
+  ];
+
  if (
-  !(component in lock.components)
+  !entry
  ) {
   console.error(chalk.red(`${component} is not installed`));
   process.exitCode = 1;
@@ -42,20 +47,39 @@ export default function remove(
  const config =
   getConfig();
 
- const file =
-  path.join(
-
-   config.componentsDir,
-
-   `${component}.jsx`
-
+ const root =
+  path.resolve(
+   config.componentsDir
   );
 
- if(
-  fs.existsSync(file)
- ){
+ const files =
+  entry.files || [
+   `${component}.jsx`
+  ];
 
-  fs.unlinkSync(file);
+ for (
+  const file
+  of files
+ ) {
+
+  const target =
+   path.resolve(
+    config.componentsDir,
+    file
+   );
+
+  if (
+   target === root ||
+   target.startsWith(
+    root + path.sep
+   )
+  ) {
+   if (
+    fs.existsSync(target)
+   ) {
+    fs.unlinkSync(target);
+   }
+  }
 
  }
 

@@ -1,3 +1,5 @@
+import chalk from "chalk";
+
 import {
  readLockfile
 }
@@ -12,14 +14,28 @@ export default function list(){
   "\nInstalled Components\n"
  );
 
- Object.entries(
-  lock.components
- ).forEach(
+ const entries =
+  Object.entries(
+   lock.components
+  );
 
- ([name,version])=>{
+ if (
+  !entries.length
+ ) {
+  console.log(
+   chalk.gray(
+    "No components installed yet. Try 'dropui add <component>'."
+   )
+  );
+  return;
+ }
+
+ entries.forEach(
+
+ ([name,entry])=>{
 
   console.log(
-   `${name} (${version})`
+   `${name} (${entry.version ?? "unknown"})`
   );
 
  }
