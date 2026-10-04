@@ -56,7 +56,7 @@ export function getToken(){
 export function getRole(){
 
  const auth = readAuthFile();
- return auth?.role || "admin";
+ return auth?.role ?? null;
 
 }
 export function clearToken(){

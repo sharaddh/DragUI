@@ -11,7 +11,13 @@ function pad(str, len) {
 }
 
 export default async function projects() {
-  const role = getRole() || "user";
+  if (!getToken()) {
+    console.log(chalk.red("Not logged in. Run 'dropui login' first."));
+    process.exitCode = 1;
+    return;
+  }
+
+  const role = getRole();
 
   if (role !== "user") {
     console.log(chalk.yellow("You are logged in as an admin."));
