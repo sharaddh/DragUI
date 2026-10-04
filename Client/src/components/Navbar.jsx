@@ -20,6 +20,7 @@ export default function Navbar({ builder, projectName, onBack, onExport, rightAc
           <div className="flex min-w-0 items-center gap-2">
             <button
               onClick={onBack}
+              aria-label="Back to projects"
               className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
               title="Back to projects"
             >
@@ -29,6 +30,7 @@ export default function Navbar({ builder, projectName, onBack, onExport, rightAc
             <div className="h-5 w-px bg-slate-200" />
             <button
               onClick={onExport}
+              aria-label="Export code"
               className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
               title="Export code"
             >
@@ -92,6 +94,9 @@ export default function Navbar({ builder, projectName, onBack, onExport, rightAc
           </button>
           <button
             onClick={() => setMenuOpen(!menuOpen)}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            aria-controls="nav-menu"
             className="sm:hidden rounded-lg p-1.5 text-slate-500 hover:bg-slate-100"
           >
             {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -100,7 +105,7 @@ export default function Navbar({ builder, projectName, onBack, onExport, rightAc
       </div>
 
       {menuOpen && (
-        <div className="border-t border-slate-100 bg-white px-4 py-3 sm:hidden animate-fadeIn">
+        <div id="nav-menu" className="border-t border-slate-100 bg-white px-4 py-3 sm:hidden animate-fadeIn">
           <div className="flex flex-col gap-1">
             <Link to="/dashboard" onClick={() => setMenuOpen(false)} className="rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100">
               Dashboard
