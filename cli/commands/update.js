@@ -19,6 +19,9 @@ from "../utils/backup.js";
 import writeFiles
 from "../utils/fileWriter.js";
 
+import installPackages
+from "../utils/installPackages.js";
+
 import {
  getManifest
 }
@@ -81,6 +84,13 @@ export default async function update(
    manifest.files,
 
    config.componentsDir
+
+  );
+
+  installPackages(
+
+   manifest.dependencies
+   || []
 
   );
 
