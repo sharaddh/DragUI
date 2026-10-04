@@ -26,7 +26,7 @@ DragUI/
 ├── Client/           # Builder frontend for end users
 ├── admin/            # Admin dashboard for registry and component management
 ├── server/           # Backend API, auth, storage, and generation services
-├── DragUi-cli/       # CLI tool for authentication and project pull operations
+├── cli/             # Developer CLI (login, pull, registry workflows)
 ├── templates/        # Frontend/backend scaffolding templates
 ├── ADMIN_SETUP.md    # Admin onboarding and setup notes
 ├── PROJECT_BLUEPRINT.md # Architecture and design documentation
@@ -170,7 +170,7 @@ npm install
 cd ../admin
 npm install
 
-cd ../DragUi-cli
+cd ../cli
 npm install
 ```
 
@@ -214,7 +214,7 @@ npm run dev
 ### Use the CLI
 
 ```bash
-cd DragUi-cli
+cd cli
 npm link
 
 dropui login          # opens the browser - email/password, Google, or GitHub
@@ -295,7 +295,7 @@ The CLI is designed to be installed globally or linked locally using `npm link`.
 - `services/` – business logic and generation utilities
 - `middleware/` – auth, upload, and error handling
 
-### `DragUi-cli/`
+### `cli/`
 
 - `bin/index.js` – CLI bootstrap
 - `commands/` – command implementations
