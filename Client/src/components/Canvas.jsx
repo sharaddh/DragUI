@@ -11,6 +11,7 @@ export default function Canvas({ tree }) {
   const selectedIds = useBuilderStore((s) => s.selectedIds);
   const clearSelection = useBuilderStore((s) => s.clearSelection);
   const showGrid = useBuilderStore((s) => s.showGrid);
+  const addComponent = useBuilderStore((s) => s.addComponent);
   const children = tree?.children || [];
 
   const handleCanvasClick = (e) => {
@@ -45,7 +46,7 @@ export default function Canvas({ tree }) {
           <div className="flex h-full min-h-[50vh] flex-col items-center justify-center gap-5">
             <button
               type="button"
-              onClick={() => useBuilderStore.getState().addComponent("div", "root")}
+              onClick={() => addComponent("div", "root")}
               className="group flex flex-col items-center text-center"
             >
               <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 text-slate-400 transition group-hover:border-cyan-400 group-hover:text-cyan-500">
@@ -61,7 +62,7 @@ export default function Canvas({ tree }) {
                 <button
                   key={type}
                   type="button"
-                  onClick={() => useBuilderStore.getState().addComponent(type, "root")}
+                  onClick={() => addComponent(type, "root")}
                   className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-cyan-300 hover:bg-cyan-50 hover:text-cyan-700"
                 >
                   + {label}

@@ -93,6 +93,8 @@ const CONTAINER_TYPES = new Set(["div", "container", "section", "card", "navbar"
 export default function Sidebar() {
   const registry = useRegistry();
   const addComponent = useBuilderStore((s) => s.addComponent);
+  const findNode = useBuilderStore((s) => s.findNode);
+  const selectedIds = useBuilderStore((s) => s.selectedIds);
   const tree = useBuilderStore((s) => s.tree);
   const [tab, setTab] = useState("components");
   const [query, setQuery] = useState("");
@@ -108,7 +110,6 @@ export default function Sidebar() {
     : validRegistry;
 
   const handleDirectAdd = (comp) => {
-    const { selectedIds, findNode } = useBuilderStore.getState();
     const selectedId = selectedIds[0];
     const target = selectedId && selectedId !== "root" ? findNode(selectedId) : null;
     const parentId = target && CONTAINER_TYPES.has(target.type) ? target.id : "root";
