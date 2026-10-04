@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
+import chalk from "chalk";
 
 import initCommand from "../commands/init.js";
 import addCommand from "../commands/add.js";
@@ -101,4 +102,5 @@ Examples:
 // crashing the process with an unhandled-rejection stack trace.
 program.parseAsync().catch((err) => {
   process.exitCode = 1;
+  console.error(chalk.red(`\ndropui: ${err?.response?.data?.message || err?.message || err}`));
 });
