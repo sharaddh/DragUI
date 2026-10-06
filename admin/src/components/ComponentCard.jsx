@@ -1,5 +1,6 @@
 import { Pencil, Trash2, Rocket, Archive, Image as ImageIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import PropTypes from "prop-types";
 
 export default function ComponentCard({
   component,
@@ -94,3 +95,10 @@ export default function ComponentCard({
     </div>
   );
 }
+
+ComponentCard.propTypes = {
+  component: PropTypes.object.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  onPublish: PropTypes.func.isRequired,
+  onArchive: PropTypes.func.isRequired,
+};

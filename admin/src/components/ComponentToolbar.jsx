@@ -1,4 +1,5 @@
 import { Save, Upload, Rocket, Lock, Unlock, Edit2 } from "lucide-react";
+import PropTypes from "prop-types";
 
 export default function ComponentToolbar({ onSave, onVersion, onLock, isLocked, onPublish, componentName, onNameChange }) {
   return (
@@ -43,3 +44,13 @@ export default function ComponentToolbar({ onSave, onVersion, onLock, isLocked, 
     </div>
   );
 }
+
+ComponentToolbar.propTypes = {
+  onSave: PropTypes.func.isRequired,
+  onVersion: PropTypes.func.isRequired,
+  onLock: PropTypes.func.isRequired,
+  isLocked: PropTypes.bool,
+  onPublish: PropTypes.func.isRequired,
+  componentName: PropTypes.string,
+  onNameChange: PropTypes.func.isRequired,
+};
