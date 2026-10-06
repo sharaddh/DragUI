@@ -13,6 +13,10 @@ import connectDB from "./config/db.js";
 
 const app = express();
 
+// Behind a reverse proxy, honor the X-Forwarded-For hop so req.ip reflects
+// the real client IP (express-rate-limit rejects forwarded traffic otherwise).
+app.set("trust proxy", 1);
+
 // Security
 app.use(helmet());
 
