@@ -1,5 +1,6 @@
 import { FileCode2, Image as ImageIcon, Copy } from "lucide-react";
 import toast from "react-hot-toast";
+import PropTypes from "prop-types";
 
 export default function FileExplorer({ files, assets = [], selected, setSelected }) {
   
@@ -59,3 +60,10 @@ export default function FileExplorer({ files, assets = [], selected, setSelected
     </div>
   );
 }
+
+FileExplorer.propTypes = {
+  files: PropTypes.array.isRequired,
+  assets: PropTypes.array,
+  selected: PropTypes.string,
+  setSelected: PropTypes.func.isRequired,
+};

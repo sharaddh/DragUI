@@ -1,4 +1,5 @@
 import { Store } from "lucide-react";
+import PropTypes from "prop-types";
 
 export default function MarketplaceSettings({ marketplace, setMarketplace }) {
   return (
@@ -27,3 +28,11 @@ export default function MarketplaceSettings({ marketplace, setMarketplace }) {
     </div>
   );
 }
+
+MarketplaceSettings.propTypes = {
+  marketplace: PropTypes.shape({
+    title: PropTypes.string,
+    description: PropTypes.string,
+  }).isRequired,
+  setMarketplace: PropTypes.func.isRequired,
+};

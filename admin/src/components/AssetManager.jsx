@@ -1,6 +1,7 @@
 import { ImagePlus, Images, Copy } from "lucide-react";
 import { uploadFile } from "../api/uploadApi";
 import toast from "react-hot-toast";
+import PropTypes from "prop-types";
 
 export default function AssetManager({ assets = [], setAssets }) {
   
@@ -67,3 +68,8 @@ export default function AssetManager({ assets = [], setAssets }) {
     </div>
   );
 }
+
+AssetManager.propTypes = {
+  assets: PropTypes.array,
+  setAssets: PropTypes.func.isRequired,
+};
