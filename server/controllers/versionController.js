@@ -30,10 +30,10 @@ async (req,res)=>{
      component.version,
 
     code:
-     component.code,
+     req.body.code ?? component.code,
 
     props:
-     component.props,
+     req.body.props ?? component.props,
 
     changelog:
      req.body.changelog
