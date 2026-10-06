@@ -5,7 +5,11 @@ export default function registerCollaboration(
 
   socket.on(
     "editor:join",
-    ({ componentId }) => {
+    (payload = {}) => {
+
+      const { componentId } = payload;
+
+      if (!componentId) return;
 
       socket.join(
         componentId
@@ -16,7 +20,9 @@ export default function registerCollaboration(
 
   socket.on(
     "editor:update",
-    (payload) => {
+    (payload = {}) => {
+
+      if (!payload?.componentId) return;
 
       socket.to(
         payload.componentId
@@ -30,7 +36,9 @@ export default function registerCollaboration(
 
   socket.on(
     "cursor:update",
-    (payload) => {
+    (payload = {}) => {
+
+      if (!payload?.componentId) return;
 
       socket.to(
         payload.componentId

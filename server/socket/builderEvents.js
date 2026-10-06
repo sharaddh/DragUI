@@ -13,10 +13,14 @@ export default function registerBuilderEvents(
 
   socket.on(
     "project:join",
-    async ({
-      projectId,
-      user
-    }) => {
+    async (payload = {}) => {
+
+      const {
+        projectId,
+        user
+      } = payload;
+
+      if (!projectId) return;
 
       socket.join(
         projectId
@@ -53,7 +57,9 @@ export default function registerBuilderEvents(
 
   socket.on(
     "builder:add",
-    (payload) => {
+    (payload = {}) => {
+
+      if (!payload?.projectId) return;
 
       socket.to(
         payload.projectId
@@ -73,7 +79,9 @@ export default function registerBuilderEvents(
 
   socket.on(
     "builder:remove",
-    (payload) => {
+    (payload = {}) => {
+
+      if (!payload?.projectId) return;
 
       socket.to(
         payload.projectId
@@ -93,7 +101,9 @@ export default function registerBuilderEvents(
 
   socket.on(
     "builder:update",
-    (payload) => {
+    (payload = {}) => {
+
+      if (!payload?.projectId) return;
 
       socket.to(
         payload.projectId
@@ -113,7 +123,9 @@ export default function registerBuilderEvents(
 
   socket.on(
     "builder:tree",
-    (payload) => {
+    (payload = {}) => {
+
+      if (!payload?.projectId) return;
 
       socket.to(
         payload.projectId

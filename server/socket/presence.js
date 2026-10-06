@@ -28,10 +28,12 @@ export function registerPresence(
 
   socket.on(
     "presence:join",
-    ({
-      componentId,
-      user
-    }) => {
+    (payload = {}) => {
+
+      const {
+        componentId,
+        user
+      } = payload;
 
       if (!componentId || !user?.id) return;
 

@@ -6,7 +6,8 @@ export default function registerComments(
 
   socket.on(
     "comment:join",
-    ({ componentId }) => {
+    (payload = {}) => {
+      const { componentId } = payload;
       if (componentId) {
         socket.join(`comments:${componentId}`);
       }
