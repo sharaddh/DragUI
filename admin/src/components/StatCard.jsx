@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 export default function StatCard({ title, value, icon, trend }) {
   return (
     <div className="group relative overflow-hidden rounded-3xl bg-white/[0.03] backdrop-blur-3xl border border-white/[0.08] p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] hover:bg-white/[0.05] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_15px_40px_0_rgba(0,0,0,0.5)]">
@@ -29,3 +31,10 @@ export default function StatCard({ title, value, icon, trend }) {
     </div>
   );
 }
+
+StatCard.propTypes = {
+  title: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  icon: PropTypes.node,
+  trend: PropTypes.string,
+};

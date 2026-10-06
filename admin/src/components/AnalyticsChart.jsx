@@ -7,6 +7,7 @@ import {
   YAxis,
   CartesianGrid
 } from "recharts";
+import PropTypes from "prop-types";
 
 // Custom Tooltip for Glassmorphism
 const CustomTooltip = ({ active, payload, label }) => {
@@ -82,3 +83,13 @@ export default function AnalyticsChart({ data }) {
     </div>
   );
 }
+
+CustomTooltip.propTypes = {
+  active: PropTypes.bool,
+  payload: PropTypes.array,
+  label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+};
+
+AnalyticsChart.propTypes = {
+  data: PropTypes.array,
+};

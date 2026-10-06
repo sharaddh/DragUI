@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 export default function ActivityFeed({
  activities
 }){
@@ -58,3 +60,7 @@ export default function ActivityFeed({
  );
 
 }
+
+ActivityFeed.propTypes = {
+ activities: PropTypes.array
+};

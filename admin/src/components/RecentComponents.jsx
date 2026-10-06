@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MoreVertical, Box, Clock, Loader2 } from "lucide-react";
 import { getComponents } from "../api/componentApi";
+import PropTypes from "prop-types";
 
 // Quick helper to make timestamps look like "5m ago" or "2d ago"
 const timeAgo = (dateString) => {
@@ -140,3 +141,7 @@ export default function RecentComponents({ items }) {
     </div>
   );
 }
+
+RecentComponents.propTypes = {
+  items: PropTypes.array,
+};
