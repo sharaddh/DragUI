@@ -436,6 +436,55 @@ export const draft = async (
   }
 };
 
+export const archiveComponent =
+async (
+ req,
+ res
+) => {
+
+ try {
+
+  const component =
+   await Component.findByIdAndUpdate(
+    req.params.id,
+    {
+     status:
+      "archived"
+    },
+    {
+     new: true
+    }
+   );
+
+  if (!component) {
+
+   return res.status(404)
+   .json({
+    success:false,
+    message:
+    "Component not found"
+   });
+
+  }
+
+  res.json({
+   success:true,
+   component
+  });
+
+ } catch (error) {
+
+  res.status(500)
+  .json({
+   success:false,
+   message:
+   error.message
+  });
+
+ }
+
+};
+
 /*
 =====================================
 VERSIONS
@@ -492,50 +541,6 @@ async (
      success:false,
      message:error.message
    });
-
- }
-
-};
-
-export const publishComponent =
-async(
- req,
- res
-)=>{
-
- try{
-
-  const component =
-   await Component.findById(
-    req.params.id
-   );
-
-  if(!component){
-
-   return res.status(404)
-   .json({
-    message:
-    "Component not found"
-   });
-
-  }
-
-  component.status =
-   "published";
-
-  await component.save();
-
-  res.json({
-   success:true,
-   component
-  });
-
- }catch(error){
-
-  res.status(500).json({
-   message:
-   error.message
-  });
 
  }
 

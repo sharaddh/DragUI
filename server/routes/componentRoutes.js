@@ -87,11 +87,6 @@ router.get(
  componentController.getHealth
 );
 
-router.patch(
- "/:id/publish",
- adminAuth,
- componentController.publishComponent
-);
 router.post(
  "/:id/lock",
  adminAuth,
@@ -103,11 +98,11 @@ router.post(
  adminAuth,
  unlockComponent
 );
-// router.patch(
-//  "/:id/archive",
-//  adminAuth,
-//  componentController.archiveComponent
-// );
+router.patch(
+ "/:id/archive",
+ adminAuth,
+ componentController.archiveComponent
+);
 router.get(
  "/:id/manifest",
  async (
