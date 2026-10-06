@@ -1,4 +1,5 @@
 import { Plus, Trash2 } from "lucide-react";
+import PropTypes from "prop-types";
 
 export default function PropertyBuilder({
   propsData,
@@ -183,3 +184,8 @@ export default function PropertyBuilder({
   );
 
 }
+
+PropertyBuilder.propTypes = {
+  propsData: PropTypes.array,
+  setPropsData: PropTypes.func.isRequired,
+};

@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 export default function PresenceBar({
   users
 }) {
@@ -41,3 +43,7 @@ export default function PresenceBar({
   );
 
 }
+
+PresenceBar.propTypes = {
+  users: PropTypes.array
+};

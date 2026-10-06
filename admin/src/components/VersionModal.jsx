@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { GitCommit } from "lucide-react";
+import PropTypes from "prop-types";
 
 export default function VersionModal({ open, onClose, onSave }) {
   const [changelog, setChangelog] = useState("");
@@ -46,3 +47,9 @@ export default function VersionModal({ open, onClose, onSave }) {
     </div>
   );
 }
+
+VersionModal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
+};

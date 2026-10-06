@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Moon, Sun } from "lucide-react";
+import PropTypes from "prop-types";
 
 export default function PreviewPanel({ code, assets = [] }) {
   const [srcDoc, setSrcDoc] = useState("");
