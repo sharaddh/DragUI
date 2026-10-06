@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Monitor, Tablet, Smartphone } from "lucide-react";
@@ -73,9 +73,43 @@ export default function ComponentEditor() {
     [draft.activeFile, currentFile, draft.properties, draft.assets, draft.marketplace]
   );
 
+  const loadComponent = useCallback(async () => {
+    try {
+      const response = await getComponent(id);
+      const data = response?.component || response?.data?.component || response;
+
+      if (data && data.name) {
+        setDraft((prev) => ({
+          ...prev,
+          activeFile: `${data.name}.jsx`,
+          files: [{ name: `${data.name}.jsx`, code: data.code || DEFAULT_CODE }],
+          properties: data.props || [],
+          assets: data.assets || [],
+          marketplace: data.marketplace || prev.marketplace,
+        }));
+
+        setIsLocked(Boolean(data.isLocked));
+        setStatus(data.status || "draft");
+
+        savedSnapshotRef.current = JSON.stringify({
+          name: `${data.name}.jsx`,
+          code: data.code || DEFAULT_CODE,
+          props: data.props || [],
+          assets: data.assets || [],
+          marketplace: data.marketplace || {},
+        });
+      }
+    } catch (error) {
+      toast.error("Failed to load component");
+      console.error(error);
+    } finally {
+      setIsFetching(false);
+    }
+  }, [id]);
+
   useEffect(() => {
     if (id) loadComponent();
-  }, [id]);
+  }, [id, loadComponent]);
 
   useEffect(() => {
     if (!id) {
@@ -111,40 +145,6 @@ export default function ComponentEditor() {
   );
 
   const presenceUsers = usePresence(id, presenceUser);
-
-  const loadComponent = async () => {
-    try {
-      const response = await getComponent(id);
-      const data = response?.component || response?.data?.component || response;
-
-      if (data && data.name) {
-        setDraft((prev) => ({
-          ...prev,
-          activeFile: `${data.name}.jsx`,
-          files: [{ name: `${data.name}.jsx`, code: data.code || DEFAULT_CODE }],
-          properties: data.props || [],
-          assets: data.assets || [],
-          marketplace: data.marketplace || prev.marketplace,
-        }));
-
-        setIsLocked(Boolean(data.isLocked));
-        setStatus(data.status || "draft");
-
-        savedSnapshotRef.current = JSON.stringify({
-          name: `${data.name}.jsx`,
-          code: data.code || DEFAULT_CODE,
-          props: data.props || [],
-          assets: data.assets || [],
-          marketplace: data.marketplace || {},
-        });
-      }
-    } catch (error) {
-      toast.error("Failed to load component");
-      console.error(error);
-    } finally {
-      setIsFetching(false);
-    }
-  };
 
   const updateDraft = (key, value) => {
     setDraft((prev) => ({ ...prev, [key]: value }));

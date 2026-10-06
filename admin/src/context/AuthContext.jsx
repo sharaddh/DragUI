@@ -1,8 +1,12 @@
+/* eslint-disable react-refresh/only-export-components */
+// The context object and its useAuth hook intentionally live beside AuthProvider
+// so consumers import from a single auth surface.
 import {
   createContext,
   useContext,
   useState,
   useEffect,
+  useCallback,
 } from "react";
 
 import api from "../api/axios";
@@ -46,40 +50,44 @@ export const AuthProvider = ({
     return res.data;
   };
 
-  const logout = () => {
-
-    localStorage.removeItem(
-      "adminToken"
-    );
-
-    setUser(null);
-  };
+  const logout = useCallback(
+    () => {
+      localStorage.removeItem(
+        "adminToken"
+      );
+      setUser(null);
+    },
+    []
+  );
 
   const fetchProfile =
-    async () => {
+    useCallback(
+      async () => {
 
-      try {
+        try {
 
-        const res =
-          await api.get(
-            "/admin-auth/profile"
+          const res =
+            await api.get(
+              "/admin-auth/profile"
+            );
+
+          setUser(
+            res.data.admin
           );
 
-        setUser(
-          res.data.admin
-        );
+        } catch {
 
-      } catch {
+          logout();
 
-        logout();
+        } finally {
 
-      } finally {
+          setLoading(false);
 
-        setLoading(false);
+        }
 
-      }
-
-    };
+      },
+      [logout]
+    );
 
   useEffect(() => {
 
@@ -98,7 +106,7 @@ export const AuthProvider = ({
 
     }
 
-  }, []);
+  }, [fetchProfile]);
 
   return (
 

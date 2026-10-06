@@ -1,5 +1,6 @@
 import {
-  useEffect
+  useEffect,
+  useRef
 } from "react";
 
 export default function useAutoSave(
@@ -7,13 +8,25 @@ export default function useAutoSave(
   data
 ) {
 
+  const callbackRef =
+    useRef(
+      callback
+    );
+
+  useEffect(() => {
+
+    callbackRef.current =
+      callback;
+
+  });
+
   useEffect(() => {
 
     const interval =
       setInterval(
         () => {
 
-          callback(
+          callbackRef.current(
             data
           );
 

@@ -118,7 +118,7 @@ export default function PreviewPanel({ code, assets = [] }) {
     }, 600);
     
     return () => clearTimeout(timeout);
-  }, [code, assets]);
+  }, [code, assets, isDark]);
 
   return (
     <div className="w-full h-full relative group bg-black">
