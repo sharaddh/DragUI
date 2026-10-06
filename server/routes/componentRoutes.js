@@ -6,7 +6,7 @@ import {
 }
 from "../controllers/componentLockController.js";
 import * as componentController from "../controllers/componentController.js";
-import Component from "../models/component.js";
+import Component from "../models/Component.js";
 import ComponentManifest from "../models/ComponentManifest.js";
 
 const router = express.Router();
