@@ -1,16 +1,12 @@
-import OpenAI from "openai";
-
-const openai =
-new OpenAI({
- apiKey:
-  process.env.OPENAI_API_KEY
-});
+import getOpenAI from "./aiService.js";
 
 export const generateReactPage =
 async (
  pageName,
  description
 ) => {
+
+ const openai = getOpenAI();
 
  const response =
  await openai.chat.completions.create({

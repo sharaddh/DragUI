@@ -1,9 +1,11 @@
-import openai from "../services/aiService.js";
+import getOpenAI from "../services/aiService.js";
 
 export const generateComponent =
 async (req, res) => {
 
  try {
+
+  const openai = getOpenAI();
 
   const { prompt } = req.body;
 
@@ -80,6 +82,8 @@ async (req, res) => {
 
  try {
 
+  const openai = getOpenAI();
+
   const {
    code,
    instruction
@@ -146,6 +150,8 @@ export const generateDocs =
 async (req, res) => {
 
  try {
+
+  const openai = getOpenAI();
 
   const {
    componentName,

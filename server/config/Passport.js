@@ -30,8 +30,9 @@ passport.deserializeUser(
 );
 
 
-passport.use(
-  new GoogleStrategy(
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  passport.use(
+    new GoogleStrategy(
     {
       clientID:
         process.env.GOOGLE_CLIENT_ID,
@@ -79,10 +80,12 @@ passport.use(
     }
   )
 );
+}
 
 
-passport.use(
-  new GithubStrategy(
+if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
+  passport.use(
+    new GithubStrategy(
     {
       clientID:
         process.env.GITHUB_CLIENT_ID,
@@ -127,5 +130,6 @@ passport.use(
     }
   )
 );
+}
 
 export default passport;
