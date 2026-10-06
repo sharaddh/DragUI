@@ -132,3 +132,8 @@ export default function PreviewPanel({ code, assets = [] }) {
     </div>
   );
 }
+
+PreviewPanel.propTypes = {
+  code: PropTypes.string,
+  assets: PropTypes.array,
+};
