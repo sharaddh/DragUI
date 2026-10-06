@@ -48,13 +48,13 @@ router.post(
 );
 
 router.get(
- "/:id",
- analyticsController.getAnalytics
+ "/trending/list",
+ analyticsController.trending
 );
 
 router.get(
- "/trending/list",
- analyticsController.trending
+ "/:id",
+ analyticsController.getAnalytics
 );
 
 export default router;
