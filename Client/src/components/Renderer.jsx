@@ -330,12 +330,11 @@ export default function Renderer({ node, depth = 0 }) {
   const [hovered, setHovered] = useState(false);
 
   const isSelected = selectedIds.includes(node.id);
-  const isRoot = node.id === "root";
   const children = node.children || [];
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: node.id,
-    disabled: isRoot || node.locked,
+    disabled: node.locked,
   });
 
   const style = {
@@ -346,16 +345,6 @@ export default function Renderer({ node, depth = 0 }) {
   };
 
   const label = componentLabels[node.type] || node.type;
-
-  if (isRoot) {
-    return (
-      <div ref={setNodeRef} style={style}>
-        {children.map((child) => (
-          <Renderer key={child.id} node={child} depth={depth + 1} />
-        ))}
-      </div>
-    );
-  }
 
   return (
     <div
