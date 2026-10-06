@@ -7,6 +7,8 @@ import {
 
 import api from "../api/axios";
 
+import PropTypes from "prop-types";
+
 const AuthContext =
   createContext();
 
@@ -119,3 +121,7 @@ export const AuthProvider = ({
 export const useAuth =
 () =>
   useContext(AuthContext);
+
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};

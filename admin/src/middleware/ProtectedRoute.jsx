@@ -6,6 +6,8 @@ import {
   useAuth,
 } from "../context/AuthContext";
 
+import PropTypes from "prop-types";
+
 export default function ProtectedRoute({
   children,
 }) {
@@ -33,3 +35,7 @@ export default function ProtectedRoute({
       />
     );
 }
+
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+};
