@@ -47,7 +47,7 @@ export default function Dashboard() {
             Dashboard
           </h1>
           <p className="text-white/40 font-light">
-            Overview of your platform's performance
+            Overview of your platform&apos;s performance
           </p>
         </header>
 
